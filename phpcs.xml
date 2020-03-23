@@ -17,12 +17,12 @@
     <exclude-pattern>*/src/*</exclude-pattern>
     <exclude-pattern>*/tests/phpunit/classes/*</exclude-pattern>
     <exclude-pattern>*/vendor/*</exclude-pattern>
-    <exclude-pattern>*.js</exclude-pattern>
-    <exclude-pattern>*.mo</exclude-pattern>
-    <exclude-pattern>*.po</exclude-pattern>
-    <exclude-pattern>*.twig</exclude-pattern>
-    <exclude-pattern>*.css</exclude-pattern>
-    <exclude-pattern>*.scss</exclude-pattern>
+    <exclude-pattern>*\.js</exclude-pattern>
+    <exclude-pattern>*\.mo</exclude-pattern>
+    <exclude-pattern>*\.po</exclude-pattern>
+    <exclude-pattern>*\.twig</exclude-pattern>
+    <exclude-pattern>*\.css</exclude-pattern>
+    <exclude-pattern>*\.scss</exclude-pattern>
 
     <rule ref="WordPress.PHP.DisallowShortTernary.Found">
         <severity>0</severity>

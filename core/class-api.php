@@ -190,10 +190,4 @@ class API {
 		return $internet_document['success'] ? $internet_document['data'][0]['IntDocNumber'] : '';
 	}
 
-	public function invoices() {
-//		$krya = $this->np->documentsTracking( '20450215778593' );
-//		$krya = $this->np->getDocumentList();
-//		var_dump( $krya );
-	}
-
 }

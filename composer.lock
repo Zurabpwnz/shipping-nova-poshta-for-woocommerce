@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ec01b435fbd72de1416607006539c751",
+    "content-hash": "0611cfd3561c7558d62973d8489d8947",
     "packages": [
         {
             "name": "lis-dev/nova-poshta-api-2",
@@ -113,7 +113,7 @@
         },
         {
             "name": "wp-coding-standards/wpcs",
-            "version": "2.2.1",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/WordPress-Coding-Standards.git",
@@ -159,7 +159,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "wp-coding-standards/wpcs": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

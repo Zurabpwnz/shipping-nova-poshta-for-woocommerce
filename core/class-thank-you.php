@@ -1,17 +1,50 @@
 <?php
+/**
+ * Thank you page customize
+ *
+ * @package   Woo-Nova-Poshta
+ * @author    Maksym Denysenko
+ * @link      https://github.com/mdenisenko/woo-nova-poshta
+ * @copyright Copyright (c) 2020
+ * @license   GPL-2.0+
+ * @wordpress-plugin
+ */
 
 namespace Nova_Poshta\Core;
 
 use WC_Order;
 
+/**
+ * Class Thank_You
+ *
+ * @package Nova_Poshta\Core
+ */
 class Thank_You {
 
+	/**
+	 * API for Nova Poshta
+	 *
+	 * @var API
+	 */
 	private $api;
 
+	/**
+	 * Thank_You constructor.
+	 *
+	 * @param API $api API for Nova Poshta.
+	 */
 	public function __construct( API $api ) {
 		$this->api = $api;
 	}
 
+	/**
+	 * Modify shipping information on thank you page
+	 *
+	 * @param array    $total_rows Total rows on thank you page.
+	 * @param WC_Order $order      Current order.
+	 *
+	 * @return array
+	 */
 	public function shipping( array $total_rows, WC_Order $order ) {
 		$shipping_methods = $order->get_shipping_methods();
 		if ( ! empty( $shipping_methods ) ) {

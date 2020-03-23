@@ -3,7 +3,7 @@
     "lis-dev/nova-poshta-api-2": "^0.1.1"
   },
   "require-dev": {
-    "wp-coding-standards/wpcs": "^2.2"
+    "wp-coding-standards/wpcs": "dev-master"
   },
   "autoload": {
     "classmap": [

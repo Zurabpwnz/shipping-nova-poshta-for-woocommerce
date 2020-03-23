@@ -55,30 +55,31 @@ class Main {
 		add_action( 'admin_menu', [ $admin, 'add_menu' ] );
 		add_action( 'admin_init', [ $admin, 'register_setting' ] );
 
-		$shipping = new Shipping( $api );
+		$shipping = new Shipping();
 		add_action( 'woocommerce_shipping_init', [ $shipping, 'require_methods' ] );
 		add_filter( 'woocommerce_shipping_methods', [ $shipping, 'register_methods' ] );
 
-		add_action( 'woocommerce_after_shipping_rate', [ $shipping, 'add_fields' ] );
-		add_action( 'woocommerce_checkout_process', [ $shipping, 'validate' ] );
-
-		add_filter( 'woo_nova_poshta_default_city_id', [ $shipping, 'default_city' ], 10, 2 );
-		add_filter( 'woo_nova_poshta_default_warehouse', [ $shipping, 'default_warehouse' ] );
+		$checkout = new Checkout();
+		add_action( 'woocommerce_after_shipping_rate', [ $checkout, 'fields' ] );
+		add_action( 'woocommerce_checkout_process', [ $checkout, 'validate' ] );
 
 		$front = new Front();
 		add_action( 'wp_enqueue_scripts', [ $front, 'styles' ] );
 		add_action( 'wp_enqueue_scripts', [ $front, 'scripts' ] );
 
 		$order = new Order( $api );
-		add_action( 'woocommerce_checkout_create_order_shipping_item', [ $order, 'save_fields' ], 10, 4 );
-		add_filter( 'woocommerce_order_item_display_meta_key', [ $order, 'modify_labels' ], 10, 2 );
-		add_filter( 'woocommerce_order_item_display_meta_value', [ $order, 'modify_values' ], 10, 2 );
+		add_action( 'woocommerce_checkout_create_order_shipping_item', [ $order, 'save' ], 10, 4 );
+		add_filter( 'woocommerce_order_item_display_meta_key', [ $order, 'labels' ], 10, 2 );
+		add_filter( 'woocommerce_order_item_display_meta_value', [ $order, 'values' ], 10, 2 );
 
 		$thank_you = new Thank_You( $api );
 		add_filter( 'woocommerce_get_order_item_totals', [ $thank_you, 'shipping' ], 10, 2 );
 
 		$user = new User( $api );
 		add_action( 'woo_nova_poshta_user_fields', [ $user, 'fields' ] );
+		add_filter( 'woo_nova_poshta_default_city_id', [ $user, 'city' ] );
+		add_filter( 'woo_nova_poshta_default_warehouse_id', [ $user, 'warehouse' ] );
+		add_action( 'woocommerce_checkout_create_order_shipping_item', [ $user, 'checkout' ], 10, 4 );
 	}
 
 }
