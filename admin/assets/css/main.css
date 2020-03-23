@@ -1,0 +1,12 @@
+.woo-nova-poshta-form {
+    max-width: 500px;
+}
+.woo-nova-poshta-form input[type=text],
+.woo-nova-poshta-form input[type=tel],
+.woo-nova-poshta-form input[type=number],
+.woo-nova-poshta-form select,
+.woo-nova-poshta-form .select2-container{
+    display: block;
+    width: 100%;
+    max-width: 100%;
+}
