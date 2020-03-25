@@ -14,6 +14,7 @@ namespace Nova_Poshta\Admin;
 
 use Nova_Poshta\Core\API;
 use Nova_Poshta\Core\Main;
+use Nova_Poshta\Core\Settings;
 
 /**
  * Class Admin
@@ -27,7 +28,7 @@ class Admin {
 	 *
 	 * @var array
 	 */
-	private $options;
+	private $settings;
 	/**
 	 * API for Nova Poshta API
 	 *
@@ -38,11 +39,12 @@ class Admin {
 	/**
 	 * Admin constructor.
 	 *
-	 * @param API $api API for Nova Poshta API.
+	 * @param API      $api      API for Nova Poshta API.
+	 * @param Settings $settings Plugin settings.
 	 */
-	public function __construct( API $api ) {
-		$this->options = get_option( Main::PLUGIN_SLUG, [] );
-		$this->api     = $api;
+	public function __construct( API $api, Settings $settings ) {
+		$this->settings = $settings;
+		$this->api      = $api;
 	}
 
 	/**
@@ -130,21 +132,6 @@ class Admin {
 	 */
 	public function page_options() {
 		require_once plugin_dir_path( __FILE__ ) . 'partials/page-options.php';
-	}
-
-	/**
-	 * Show notices
-	 */
-	public function notices() {
-		if ( ! empty( $this->options['api_key'] ) ) {
-			return;
-		}
-		$message = sprintf(
-			'Для работы плагина неоходимо ввести API ключ на <a href="%s">странице настроек плагина</a>',
-			get_admin_url( null, 'admin.php?page=' . Main::PLUGIN_SLUG )
-		);
-		$type    = 'error';
-		require_once plugin_dir_path( __FILE__ ) . 'partials/notice.php';
 	}
 
 	/**

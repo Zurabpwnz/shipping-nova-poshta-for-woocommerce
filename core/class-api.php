@@ -26,7 +26,7 @@ class API {
 	 *
 	 * @var array
 	 */
-	private $options;
+	private $settings;
 	/**
 	 * API for Nova Poshta
 	 *
@@ -43,12 +43,13 @@ class API {
 	/**
 	 * API constructor.
 	 *
-	 * @param DB $db Database.
+	 * @param DB       $db       Database.
+	 * @param Settings $settings Plugin settings.
 	 */
-	public function __construct( DB $db ) {
-		$this->options = get_option( Main::PLUGIN_SLUG, [] );
-		$this->np      = new NovaPoshtaApi2( '' );
-		$this->db      = $db;
+	public function __construct( DB $db, Settings $settings ) {
+		$this->settings = $settings;
+		$this->np       = new NovaPoshtaApi2( '' );
+		$this->db       = $db;
 	}
 
 	/**
@@ -144,13 +145,13 @@ class API {
 		string $city_id, string $warehouse_id, float $price,
 		int $count, int $redelivery = 0
 	): string {
-		if ( empty( $this->options['api_key'] ) ) {
+		if ( empty( $this->settings->api_key() ) ) {
 			return '';
 		}
-		$this->np->setKey( $this->options['api_key'] );
-		$admin_phone        = $this->options['phone'] ?? '';
-		$admin_city_id      = $this->options['city'] ?? '';
-		$admin_warehouse_id = $this->options['warehouse'] ?? '';
+		$this->np->setKey( $this->settings->api_key() );
+		$admin_phone        = $this->settings->phone() ?? '';
+		$admin_city_id      = $this->settings->city_id() ?? '';
+		$admin_warehouse_id = $this->settings->warehouse_id() ?? '';
 		if ( ! $admin_phone || ! $admin_city_id || ! $admin_warehouse_id ) {
 			return '';
 		}

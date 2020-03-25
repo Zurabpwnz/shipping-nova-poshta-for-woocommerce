@@ -13,6 +13,7 @@
 namespace Nova_Poshta\Core;
 
 use Nova_Poshta\Admin\Admin;
+use Nova_Poshta\Admin\Notice;
 use Nova_Poshta\Admin\User;
 use Nova_Poshta\Front\Front;
 
@@ -41,25 +42,29 @@ class Main {
 	 */
 	public function init() {
 
+		$settings = new Settings();
+		add_filter( 'pre_update_option_woo-nova-poshta', [ $settings, 'validate' ], 10, 2 );
+
 		$db   = new DB();
-		$api  = new API( $db );
+		$api  = new API( $db, $settings );
 		$ajax = new AJAX( $api );
 		add_action( 'wp_ajax_woo_nova_poshta_city', [ $ajax, 'cities' ] );
 		add_action( 'wp_ajax_nopriv_woo_nova_poshta_city', [ $ajax, 'cities' ] );
 		add_action( 'wp_ajax_woo_nova_poshta_warehouse', [ $ajax, 'warehouses' ] );
 		add_action( 'wp_ajax_nopriv_woo_nova_poshta_warehouse', [ $ajax, 'warehouses' ] );
 
-		$admin = new Admin( $api );
+		$admin = new Admin( $api, $settings );
 		add_action( 'admin_enqueue_scripts', [ $admin, 'styles' ] );
 		add_action( 'admin_enqueue_scripts', [ $admin, 'scripts' ] );
 		add_action( 'admin_menu', [ $admin, 'add_menu' ] );
 		add_action( 'admin_init', [ $admin, 'register_setting' ] );
-		add_action( 'admin_notices', [ $admin, 'notices' ] );
-		add_filter( 'pre_update_option_woo-nova-poshta', [ $admin, 'validate' ], 10, 2 );
 
 		$shipping = new Shipping();
-		add_action( 'woocommerce_shipping_init', [ $shipping, 'require_methods' ] );
 		add_filter( 'woocommerce_shipping_methods', [ $shipping, 'register_methods' ] );
+		add_action( 'woocommerce_shipping_init', [ $shipping, 'require_methods' ] );
+
+		$notice = new Notice( $settings, $shipping );
+		add_action( 'admin_notices', [ $notice, 'notices' ] );
 
 		$checkout = new Checkout();
 		add_action( 'woocommerce_after_shipping_rate', [ $checkout, 'fields' ] );
