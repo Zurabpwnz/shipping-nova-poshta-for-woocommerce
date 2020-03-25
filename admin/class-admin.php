@@ -120,7 +120,8 @@ class Admin {
 			[
 				$this,
 				'page_options',
-			]
+			],
+			plugin_dir_url( __FILE__ ) . 'assets/img/nova-poshta.svg'
 		);
 	}
 
