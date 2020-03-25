@@ -45,7 +45,6 @@ class Admin {
 	public function __construct( API $api, Settings $settings ) {
 		$this->settings = $settings;
 		$this->api      = $api;
-		$krya = $this->api->warehouses( '8d5a980d-391c-11dd-90d9-001a92567626' );
 	}
 
 	/**
