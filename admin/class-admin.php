@@ -131,4 +131,34 @@ class Admin {
 		require_once plugin_dir_path( __FILE__ ) . 'partials/page-options.php';
 	}
 
+	/**
+	 * Show notices
+	 */
+	public function notices() {
+		if ( ! empty( $this->options['api_key'] ) ) {
+			return;
+		}
+		$message = sprintf(
+			'Для работы плагина неоходимо ввести API ключ на <a href="%s">странице настроек плагина</a>',
+			get_admin_url( null, 'admin.php?page=' . Main::PLUGIN_SLUG )
+		);
+		$type    = 'error';
+		require_once plugin_dir_path( __FILE__ ) . 'partials/notice.php';
+	}
+
+	/**
+	 * Validate api key
+	 *
+	 * @param array $value Option value.
+	 *
+	 * @return array
+	 */
+	public function validate( array $value ): array {
+		if ( isset( $value['api_key'] ) && ! $this->api->validate( $value['api_key'] ) ) {
+			add_settings_error( Main::PLUGIN_SLUG, '403', __( 'Invalid api key', 'woo-nova-poshta' ) );
+		}
+
+		return $value ?? [];
+	}
+
 }

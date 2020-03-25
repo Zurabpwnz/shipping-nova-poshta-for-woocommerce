@@ -47,10 +47,7 @@ class API {
 	 */
 	public function __construct( DB $db ) {
 		$this->options = get_option( Main::PLUGIN_SLUG, [] );
-		$this->np      = new NovaPoshtaApi2(
-			$this->options['api_key'],
-			'ru'
-		);
+		$this->np      = new NovaPoshtaApi2( '' );
 		$this->db      = $db;
 	}
 
@@ -147,6 +144,10 @@ class API {
 		string $city_id, string $warehouse_id, float $price,
 		int $count, int $redelivery = 0
 	): string {
+		if ( empty( $this->options['api_key'] ) ) {
+			return '';
+		}
+		$this->np->setKey( $this->options['api_key'] );
 		$admin_phone        = $this->options['phone'] ?? '';
 		$admin_city_id      = $this->options['city'] ?? '';
 		$admin_warehouse_id = $this->options['warehouse'] ?? '';
@@ -188,6 +189,20 @@ class API {
 		$internet_document = $this->np->newInternetDocument( $sender, $recipient, $info );
 
 		return $internet_document['success'] ? $internet_document['data'][0]['IntDocNumber'] : '';
+	}
+
+	/**
+	 * Validate api key
+	 *
+	 * @param string $api_key API key.
+	 *
+	 * @return bool
+	 */
+	public function validate( string $api_key ): bool {
+		$this->np->setKey( $api_key );
+		$sender = $this->np->getCounterparties( 'Sender', 1 );
+
+		return ! empty( $sender['success'] );
 	}
 
 }

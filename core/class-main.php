@@ -54,6 +54,8 @@ class Main {
 		add_action( 'admin_enqueue_scripts', [ $admin, 'scripts' ] );
 		add_action( 'admin_menu', [ $admin, 'add_menu' ] );
 		add_action( 'admin_init', [ $admin, 'register_setting' ] );
+		add_action( 'admin_notices', [ $admin, 'notices' ] );
+		add_filter( 'pre_update_option_woo-nova-poshta', [ $admin, 'validate' ], 10, 2 );
 
 		$shipping = new Shipping();
 		add_action( 'woocommerce_shipping_init', [ $shipping, 'require_methods' ] );
