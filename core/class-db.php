@@ -48,18 +48,22 @@ class DB {
 		global $wpdb;
 		$cities_sql = 'CREATE TABLE ' . $this->cities_table . '
 			(
-		        city_id            VARCHAR(36) NOT NULL UNIQUE,
+		        city_id            VARCHAR(36)  NOT NULL UNIQUE,
 		        description        VARCHAR(100) NOT NULL
 	        ) ' . $wpdb->get_charset_collate();
 
 		global $wpdb;
 		$warehouses_sql = 'CREATE TABLE ' . $this->warehouses_table . '
 			(
-		        warehouse_id       VARCHAR(36) NOT NULL UNIQUE,
-		        city_id            VARCHAR(36) NOT NULL,
-		        description        VARCHAR(100) NOT NULL
+		        `warehouse_id`       VARCHAR(36)  NOT NULL UNIQUE,
+		        `city_id`            VARCHAR(36)  NOT NULL,
+		        `description`        VARCHAR(100) NOT NULL,
+		        `order`              INT(4)       UNSIGNED NOT NULL,
+                  
+                CONSTRAINT `city_id` FOREIGN KEY( `city_id` ) REFERENCES ' . $this->cities_table . ' ( `city_id` )
+                    ON DELETE CASCADE
+                    ON UPDATE CASCADE
 	        ) ' . $wpdb->get_charset_collate();
-		// TODO: FOREIGN KEY.
 
 		maybe_create_table( $this->cities_table, $cities_sql );
 		maybe_create_table( $this->warehouses_table, $warehouses_sql );
@@ -106,6 +110,9 @@ class DB {
 		global $wpdb;
 		$sql = 'INSERT INTO ' . $this->cities_table . ' (`city_id`, `description`, `area`) VALUES ';
 		foreach ( $cities as $city ) {
+			if ( ! isset( $city['DescriptionRu'] ) ) {
+				continue;
+			}
 			$sql .= $wpdb->prepare(
 				'(%s, %s, %s),',
 				$city['Ref'],
@@ -181,7 +188,7 @@ class DB {
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		$sql = $wpdb->prepare(
 			'SELECT warehouse_id, description FROM ' . $this->warehouses_table .
-			' WHERE city_id = %s  ORDER BY LENGTH(`description`), `description`',
+			' WHERE city_id = %s  ORDER BY LENGTH(`order`), `order`',
 			$city_id
 		);
 
@@ -202,13 +209,14 @@ class DB {
 	 */
 	public function update_warehouses( array $warehouses ): void {
 		global $wpdb;
-		$sql = 'INSERT INTO ' . $this->warehouses_table . ' (`warehouse_id`,`city_id`, `description`) VALUES ';
-		foreach ( $warehouses as $warehouse ) {
+		$sql = 'INSERT INTO ' . $this->warehouses_table . ' (`warehouse_id`,`city_id`, `description`, `order`) VALUES ';
+		foreach ( $warehouses as $key => $warehouse ) {
 			$sql .= $wpdb->prepare(
-				'(%s, %s, %s),',
+				'(%s, %s, %s, %d),',
 				$warehouse['Ref'],
 				$warehouse['CityRef'],
-				$warehouse['DescriptionRu']
+				$warehouse['DescriptionRu'],
+				$key
 			);
 		}
 		$sql = rtrim( $sql, ',' );
