@@ -43,11 +43,9 @@ class Main {
 	public function init() {
 
 		$settings = new Settings();
-		add_filter( 'pre_update_option_woo-nova-poshta', [ $settings, 'validate' ], 10, 2 );
-
-		$db   = new DB();
-		$api  = new API( $db, $settings );
-		$ajax = new AJAX( $api );
+		$db       = new DB();
+		$api      = new API( $db, $settings );
+		$ajax     = new AJAX( $api );
 		add_action( 'wp_ajax_woo_nova_poshta_city', [ $ajax, 'cities' ] );
 		add_action( 'wp_ajax_nopriv_woo_nova_poshta_city', [ $ajax, 'cities' ] );
 		add_action( 'wp_ajax_woo_nova_poshta_warehouse', [ $ajax, 'warehouses' ] );
@@ -58,6 +56,7 @@ class Main {
 		add_action( 'admin_enqueue_scripts', [ $admin, 'scripts' ] );
 		add_action( 'admin_menu', [ $admin, 'add_menu' ] );
 		add_action( 'admin_init', [ $admin, 'register_setting' ] );
+		add_filter( 'pre_update_option_woo-nova-poshta', [ $admin, 'validate' ], 10, 2 );
 
 		$shipping = new Shipping();
 		add_filter( 'woocommerce_shipping_methods', [ $shipping, 'register_methods' ] );
