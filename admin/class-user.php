@@ -59,7 +59,7 @@ class User {
 		$fields = [
 			'woo_nova_poshta_city'      => [
 				'type'     => 'select',
-				'label'    => 'Выберите город доставки',
+				'label'    => __( 'Select delivery city', 'woo-nova-poshta' ),
 				'required' => true,
 				'options'  => $city,
 				'default'  => array_keys( $city )[0] ?? '',
@@ -67,7 +67,7 @@ class User {
 			],
 			'woo_nova_poshta_warehouse' => [
 				'type'     => 'select',
-				'label'    => 'Выберите отделение',
+				'label'    => __( 'Choose branch', 'woo-nova-poshta' ),
 				'required' => true,
 				'options'  => $warehouses,
 				'default'  => $warehouse_id,

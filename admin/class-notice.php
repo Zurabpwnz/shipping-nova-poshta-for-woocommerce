@@ -65,7 +65,11 @@ class Notice {
 		$this->show(
 			'error',
 			sprintf(
-				'Для работы плагина неоходимо ввести API ключ на <a href="%s">странице настроек плагина</a>',
+			/* translators: 1: link on page option */
+				__(
+					'For the plugin to work, you must enter the API key on the <a href="%s">plugin settings page</a>',
+					'woo-nova-poshta'
+				),
 				get_admin_url( null, 'admin.php?page=' . Main::PLUGIN_SLUG )
 			)
 		);
@@ -81,8 +85,11 @@ class Notice {
 		$this->show(
 			'error',
 			sprintf(
-				'Необходимо добавить метод доставки "Доставка Новой почты"
-				<a href="%s">в настройках WooCommerce</a>',
+			/* translators: 1: link on WooCommerce settings */
+				__(
+					'You must add the "New Delivery Method" delivery method <a href="%s">in the WooCommerce settings</a>',
+					'woo-nova-poshta',
+				),
 				get_admin_url( null, 'admin.php?page=wc-settings&tab=shipping' )
 			)
 		);

@@ -8,11 +8,11 @@
 use Nova_Poshta\Core\Main;
 
 ?>
-<h2>Создание накладной</h2>
+<h2><?php esc_attr_e( 'Create invoice', 'woo-nova-poshta' ); ?></h2>
 <form action="" method="POST" class="woo-nova-poshta-form">
 	<p>
 		<label>
-			Фамилия получателя:<br>
+			<?php esc_attr_e( 'Recipient\'s last name:', 'woo-nova-poshta' ); ?><br>
 			<input
 					type="text"
 					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[last_name]"
@@ -21,7 +21,7 @@ use Nova_Poshta\Core\Main;
 	</p>
 	<p>
 		<label>
-			Имя получателя:<br>
+			<?php esc_attr_e( 'Recipient\'s first name:', 'woo-nova-poshta' ); ?><br>
 			<input
 					type="text"
 					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[first_name]"
@@ -30,7 +30,7 @@ use Nova_Poshta\Core\Main;
 	</p>
 	<p>
 		<label>
-			Номер телефона<br>
+			<?php esc_attr_e( 'Recipient\'s phone:', 'woo-nova-poshta' ); ?><br>
 			<input
 					type="tel"
 					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[phone]"
@@ -48,7 +48,7 @@ use Nova_Poshta\Core\Main;
 		$current_city    = array_values( $city )[0] ?? '';
 		?>
 		<label>
-			Город<br>
+			<?php esc_attr_e( 'Recipient\'s city:', 'woo-nova-poshta' ); ?><br>
 			<select
 					id="woo_nova_poshta_city"
 					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[city]">
@@ -62,7 +62,7 @@ use Nova_Poshta\Core\Main;
 		$current_warehouse_id = array_keys( $warehouses )[0] ?? '';
 		?>
 		<label>
-			Отделение<br>
+			<?php esc_attr_e( 'Recipient\'s warehouse:', 'woo-nova-poshta' ); ?><br>
 			<select
 					id="woo_nova_poshta_warehouse"
 					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[warehouse]">
@@ -77,18 +77,21 @@ use Nova_Poshta\Core\Main;
 	</p>
 	<p>
 		<label>
-			Оценочная стоимость<br>
+			<?php esc_attr_e( 'Assessed value:', 'woo-nova-poshta' ); ?><br>
 			<input type="number" name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[price]">
 		</label>
 	</p>
 	<p>
 		<label>
-			<input type="checkbox" name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[backward]">Обрантная доставка
+			<input
+					type="checkbox"
+					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[backward]">
+			<?php esc_attr_e( 'Return shipping', 'woo-nova-poshta' ); ?>
 		</label>
 	</p>
 	<p>
 		<label>
-			Денежный перевод<br>
+			<?php esc_attr_e( 'Remittance', 'woo-nova-poshta' ); ?><br>
 			<input type="number" name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[redelivery]">
 		</label>
 	</p>

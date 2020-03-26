@@ -14,11 +14,14 @@ $active_tab = filter_input( INPUT_GET, 'tab', FILTER_SANITIZE_STRING );
 	<div class="nav-tab-wrapper" method="GET">
 		<a
 				href="<?php echo esc_url( $url ); ?>"
-				class="nav-tab<?php echo ! $active_tab ? ' nav-tab-active' : ''; ?>">Основные</a>
+				class="nav-tab<?php echo ! $active_tab ? ' nav-tab-active' : ''; ?>">
+			<?php esc_attr_e( 'General', 'woo-nova-poshta' ); ?>
+		</a>
 		<a
 				href="<?php echo esc_url( $url . '&tab=internet_document' ); ?>"
 				class="nav-tab<?php echo 'internet_document' === $active_tab ? ' nav-tab-active' : ''; ?>">
-			Создание накладной</a>
+			<?php esc_attr_e( 'Create invoice', 'woo-nova-poshta' ); ?>
+		</a>
 	</div>
 	<?php
 	if ( empty( $active_tab ) ) {

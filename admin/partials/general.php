@@ -8,12 +8,12 @@
 use Nova_Poshta\Core\Main;
 
 ?>
-<h2>Основые настройки</h2>
+<h2><?php esc_attr_e( 'General', 'woo-nova-poshta' ); ?></h2>
 <form action="options.php" method="POST" class="woo-nova-poshta-form">
 	<?php settings_errors( Main::PLUGIN_SLUG ); ?>
 	<?php settings_fields( Main::PLUGIN_SLUG ); ?>
 	<p>
-		<label>API ключ<br>
+		<label><?php esc_attr_e( 'API key', 'woo-nova-poshta' ); ?><br>
 			<input
 					type="text"
 					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[api_key]"
@@ -24,7 +24,7 @@ use Nova_Poshta\Core\Main;
 	</p>
 	<p>
 		<label>
-			Номер телефона<br>
+			<?php esc_attr_e( 'Phone', 'woo-nova-poshta' ); ?><br>
 			<input
 					type="tel"
 					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[phone]"
@@ -37,7 +37,7 @@ use Nova_Poshta\Core\Main;
 		$current_city    = $current_city_id ? $this->api->city( $current_city_id ) : '';
 		?>
 		<label>
-			Город<br>
+			<?php esc_attr_e( 'City', 'woo-nova-poshta' ); ?><br>
 			<select
 					id="woo_nova_poshta_city"
 					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[city_id]">
@@ -51,7 +51,7 @@ use Nova_Poshta\Core\Main;
 		$current_warehouse_id = $this->settings->warehouse_id();
 		?>
 		<label>
-			Отделение<br>
+			<?php esc_attr_e( 'Warehouse', 'woo-nova-poshta' ); ?><br>
 			<select
 					id="woo_nova_poshta_warehouse"
 					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[warehouse_id]">

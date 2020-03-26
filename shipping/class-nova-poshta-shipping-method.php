@@ -23,9 +23,9 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 		 */
 		public function __construct( $instance_id = 0 ) {
 			$this->id                 = 'woo_nova_poshta';
-			$this->title              = __( 'Доставка Новой почтой', 'woo-nova-poshta' );
-			$this->method_title       = __( 'Доставка Новой почтой', 'woo-nova-poshta' );
-			$this->method_description = __( 'Доставка Новой почтой', 'woo-nova-poshta' );
+			$this->title              = __( 'Nova Poshta delivery', 'woo-nova-poshta' );
+			$this->method_title       = __( 'Nova Poshta delivery', 'woo-nova-poshta' );
+			$this->method_description = __( 'Nova Poshta delivery', 'woo-nova-poshta' );
 			$this->enabled            = true;
 			$this->supports           = [
 				'shipping-zones',
@@ -52,9 +52,9 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 		public function init_form_fields() {
 			$this->instance_form_fields = [
 				'title' => [
-					'title'   => __( 'Заголовок метода', 'woo-nova-poshta' ),
+					'title'   => __( 'Method header', 'woo-nova-poshta' ),
 					'type'    => 'text',
-					'default' => __( 'Доставка Новой почты', 'woo-nova-poshta' ),
+					'default' => __( 'Nova Poshta delivery', 'woo-nova-poshta' ),
 				],
 			];
 		}

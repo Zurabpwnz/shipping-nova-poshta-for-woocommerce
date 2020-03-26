@@ -86,6 +86,9 @@ class Main {
 		add_filter( 'woo_nova_poshta_default_city_id', [ $user, 'city' ] );
 		add_filter( 'woo_nova_poshta_default_warehouse_id', [ $user, 'warehouse' ] );
 		add_action( 'woocommerce_checkout_create_order_shipping_item', [ $user, 'checkout' ], 10, 4 );
+
+		$language = new Language();
+		add_action( 'plugins_loaded', [ $language, 'load' ] );
 	}
 
 }

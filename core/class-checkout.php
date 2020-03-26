@@ -43,10 +43,10 @@ class Checkout {
 			return;
 		}
 		if ( isset( $_POST['woo_nova_poshta_city'] ) && empty( $_POST['woo_nova_poshta_city'] ) ) {
-			wc_add_notice( __( 'Select a city for delivery', 'woo-nova-poshta' ), 'error' );
+			wc_add_notice( __( 'Select delivery city', 'woo-nova-poshta' ), 'error' );
 		}
 		if ( isset( $_POST['woo_nova_poshta_warehouse'] ) && empty( $_POST['woo_nova_poshta_warehouse'] ) ) {
-			wc_add_notice( __( 'Choose a branch for delivery', 'woo-nova-poshta' ), 'error' );
+			wc_add_notice( __( 'Choose branch', 'woo-nova-poshta' ), 'error' );
 		}
 	}
 

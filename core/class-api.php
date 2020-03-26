@@ -175,8 +175,8 @@ class API {
 			'PayerType'     => 'Recipient',
 			'Cost'          => $price,
 			'SeatsAmount'   => '1',
-			'Description'   => 'Взуття',
-			'Weight'        => ( $count * .5 ) - .01,
+			'Description'   => 'Взуття', // TODO: Field with deliver.
+			'Weight'        => ( $count * .5 ) - .01, // TODO: Calculate weight.
 		];
 		if ( $redelivery ) {
 			$info['BackwardDeliveryData'] = [
