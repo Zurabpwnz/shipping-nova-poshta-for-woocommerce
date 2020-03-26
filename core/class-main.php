@@ -89,6 +89,11 @@ class Main {
 
 		$language = new Language();
 		add_action( 'plugins_loaded', [ $language, 'load' ] );
+
+		register_activation_hook(
+			plugin_dir_path( __DIR__ ) . dirname( plugin_basename( __DIR__ ) ) . '.php',
+			[ $db, 'create' ]
+		);
 	}
 
 }

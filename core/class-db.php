@@ -65,8 +65,21 @@ class DB {
                     ON UPDATE CASCADE
 	        ) ' . $wpdb->get_charset_collate();
 
-		maybe_create_table( $this->cities_table, $cities_sql );
-		maybe_create_table( $this->warehouses_table, $warehouses_sql );
+		$this->maybe_create_table( $this->cities_table, $cities_sql );
+		$this->maybe_create_table( $this->warehouses_table, $warehouses_sql );
+	}
+
+	/**
+	 * Maybe create table
+	 *
+	 * @param string $table_name Table name.
+	 * @param string $create_ddl Table create SQL.
+	 */
+	private function maybe_create_table( string $table_name, string $create_ddl ) {
+		if ( ! function_exists( 'maybe_create_table' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		}
+		maybe_create_table( $table_name, $create_ddl );
 	}
 
 	/**
