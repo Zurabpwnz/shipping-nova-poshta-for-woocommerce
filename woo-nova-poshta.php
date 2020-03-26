@@ -16,8 +16,3 @@ require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
 
 $main = new Main();
 $main->init();
-
-function krya() {
-	echo 'krya-activate';
-}
-register_activation_hook( __FILE__, 'krya' );
