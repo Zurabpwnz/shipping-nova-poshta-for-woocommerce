@@ -128,10 +128,32 @@ class Admin {
 	}
 
 	/**
+	 * Controller for creating invoices
+	 */
+	private function controller(): void {
+		$nonce = filter_input( INPUT_POST, Main::PLUGIN_SLUG . '_nonce', FILTER_SANITIZE_STRING );
+		if ( ! wp_verify_nonce( $nonce, Main::PLUGIN_SLUG . '-invoice' ) ) {
+			return;
+		}
+		$fields = filter_input( INPUT_POST, Main::PLUGIN_SLUG, FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
+		$this->api->internet_document(
+			$fields['first_name'],
+			$fields['last_name'],
+			$fields['phone'],
+			$fields['city_id'],
+			$fields['warehouse_id'],
+			$fields['price'],
+			1,
+			isset( $fields['backward'] ) && ! empty( $fields['redelivery'] ) ? $fields['redelivery'] : 0
+		);
+	}
+
+	/**
 	 * View for page options
 	 */
 	public function page_options() {
-		require_once plugin_dir_path( __FILE__ ) . 'partials/page-options.php';
+		$this->controller();
+		require plugin_dir_path( __FILE__ ) . 'partials/page-options.php';
 	}
 
 	/**
@@ -143,7 +165,7 @@ class Admin {
 	 */
 	public function validate( array $value ): array {
 		if ( isset( $value['api_key'] ) && ! $this->api->validate( $value['api_key'] ) ) {
-			add_settings_error( Main::PLUGIN_SLUG, '403', __( 'Invalid api key', 'woo-nova-poshta' ) );
+			add_settings_error( Main::PLUGIN_SLUG, 403, __( 'Invalid api key', 'woo-nova-poshta' ) );
 		}
 
 		return $value ?? [];

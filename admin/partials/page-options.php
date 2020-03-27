@@ -25,9 +25,9 @@ $active_tab = filter_input( INPUT_GET, 'tab', FILTER_SANITIZE_STRING );
 	</div>
 	<?php
 	if ( empty( $active_tab ) ) {
-		require_once plugin_dir_path( __FILE__ ) . 'general.php';
+		require plugin_dir_path( __FILE__ ) . 'general.php';
 	} elseif ( 'internet_document' === $active_tab ) {
-		require_once plugin_dir_path( __FILE__ ) . 'internet-document.php';
+		require plugin_dir_path( __FILE__ ) . 'internet-document.php';
 	}
 	?>
 </div>

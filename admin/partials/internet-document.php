@@ -10,13 +10,14 @@ use Nova_Poshta\Core\Main;
 ?>
 <h2><?php esc_attr_e( 'Create invoice', 'woo-nova-poshta' ); ?></h2>
 <form action="" method="POST" class="woo-nova-poshta-form">
+	<?php wp_nonce_field( Main::PLUGIN_SLUG . '-invoice', Main::PLUGIN_SLUG . '_nonce', false ); ?>
 	<p>
 		<label>
 			<?php esc_attr_e( 'Recipient\'s last name:', 'woo-nova-poshta' ); ?><br>
 			<input
 					type="text"
 					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[last_name]"
-					value=""/>
+					value="" required="required"/>
 		</label>
 	</p>
 	<p>
@@ -25,7 +26,7 @@ use Nova_Poshta\Core\Main;
 			<input
 					type="text"
 					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[first_name]"
-					value=""/>
+					value="" required="required"/>
 		</label>
 	</p>
 	<p>
@@ -34,7 +35,7 @@ use Nova_Poshta\Core\Main;
 			<input
 					type="tel"
 					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[phone]"
-					value=""/>
+					value="" required="required"/>
 		</label>
 	</p>
 	<p>
@@ -51,7 +52,8 @@ use Nova_Poshta\Core\Main;
 			<?php esc_attr_e( 'Recipient\'s city:', 'woo-nova-poshta' ); ?><br>
 			<select
 					id="woo_nova_poshta_city"
-					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[city]">
+					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[city_id]"
+					required="required">
 				<option value="<?php echo esc_attr( $current_city_id ); ?>"><?php echo esc_attr( $current_city ); ?></option>
 			</select>
 		</label>
@@ -65,7 +67,8 @@ use Nova_Poshta\Core\Main;
 			<?php esc_attr_e( 'Recipient\'s warehouse:', 'woo-nova-poshta' ); ?><br>
 			<select
 					id="woo_nova_poshta_warehouse"
-					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[warehouse]">
+					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[warehouse_id]"
+					required="required">
 				<?php foreach ( $warehouses as $warehouse_id => $name ) { ?>
 					<option
 						<?php selected( $warehouse_id, $current_warehouse_id, true ); ?>
@@ -78,7 +81,7 @@ use Nova_Poshta\Core\Main;
 	<p>
 		<label>
 			<?php esc_attr_e( 'Assessed value:', 'woo-nova-poshta' ); ?><br>
-			<input type="number" name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[price]">
+			<input type="number" name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[price]" required="required">
 		</label>
 	</p>
 	<p>
@@ -95,4 +98,5 @@ use Nova_Poshta\Core\Main;
 			<input type="number" name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[redelivery]">
 		</label>
 	</p>
+	<?php submit_button(); ?>
 </form>
