@@ -9,7 +9,7 @@ namespace Nova_Poshta\Admin;
 
 use Mockery;
 use Nova_Poshta\Core\Main;
-use PHPUnit\Framework\TestCase;
+use Nova_Poshta\Tests\Test_Case;
 use stdClass;
 use tad\FunctionMocker\FunctionMocker;
 use WP_Mock;
@@ -20,27 +20,7 @@ use WP_Mock\Functions;
  *
  * @package Nova_Poshta\Admin
  */
-class Test_Admin extends TestCase {
-
-	/**
-	 * Setup test
-	 */
-	public function setUp(): void {
-		FunctionMocker::setUp();
-		Mockery::resetContainer();
-		WP_Mock::setUp();
-		parent::setUp();
-	}
-
-	/**
-	 * End test
-	 */
-	public function tearDown(): void {
-		WP_Mock::tearDown();
-		Mockery::close();
-		parent::tearDown();
-		FunctionMocker::tearDown();
-	}
+class Test_Admin extends Test_Case {
 
 	/**
 	 * Get testing object
