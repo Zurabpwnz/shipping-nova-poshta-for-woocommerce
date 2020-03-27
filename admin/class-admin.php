@@ -153,7 +153,7 @@ class Admin {
 	 */
 	public function page_options() {
 		$this->controller();
-		require_once plugin_dir_path( __FILE__ ) . 'partials/page-options.php';
+		require plugin_dir_path( __FILE__ ) . 'partials/page-options.php';
 	}
 
 	/**
@@ -165,7 +165,7 @@ class Admin {
 	 */
 	public function validate( array $value ): array {
 		if ( isset( $value['api_key'] ) && ! $this->api->validate( $value['api_key'] ) ) {
-			add_settings_error( Main::PLUGIN_SLUG, '403', __( 'Invalid api key', 'woo-nova-poshta' ) );
+			add_settings_error( Main::PLUGIN_SLUG, 403, __( 'Invalid api key', 'woo-nova-poshta' ) );
 		}
 
 		return $value ?? [];

@@ -102,7 +102,7 @@ class Notice {
 	 * @param string $message Message of notice.
 	 */
 	private function show( string $type, string $message ) {
-		require_once plugin_dir_path( __FILE__ ) . 'partials/notice.php';
+		require plugin_dir_path( __FILE__ ) . 'partials/notice.php';
 	}
 
 }
