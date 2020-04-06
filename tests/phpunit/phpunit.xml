@@ -26,6 +26,7 @@
                 <directory>../../src</directory>
                 <directory>../../tests</directory>
                 <directory>../../vendor</directory>
+                <directory>../../woo-nova-poshta.php</directory>
             </exclude>
         </whitelist>
     </filter>
