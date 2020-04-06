@@ -85,6 +85,9 @@ class Test_User extends Test_Case {
 		$user->checkout();
 	}
 
+	/**
+	 * Test with empty city or warehouse in request
+	 */
 	public function test_not_valid_checkout_with_empty_city_or_warehouse() {
 		WP_Mock::userFunction( 'get_current_user_id' )->
 		once()->
@@ -99,6 +102,9 @@ class Test_User extends Test_Case {
 		$user->checkout();
 	}
 
+	/**
+	 * Test valid checkout update user meta fields
+	 */
 	public function test_valid_checkout() {
 		global $city_id, $warehouse_id;
 		$user_id      = 1;
@@ -150,6 +156,9 @@ class Test_User extends Test_Case {
 		$filter_input->wasCalledWithOnce( [ INPUT_POST, 'woo_nova_poshta_warehouse', FILTER_SANITIZE_STRING ] );
 	}
 
+	/**
+	 * Test city filter for not auth user
+	 */
 	public function test_city_id_not_auth_user() {
 		$city_id = 'city-id';
 
@@ -159,6 +168,9 @@ class Test_User extends Test_Case {
 		$this->assertSame( $city_id, $user->city( $city_id ) );
 	}
 
+	/**
+	 * Test city filter for auth user
+	 */
 	public function test_city_id_auth_user() {
 		$user_id      = 1;
 		$city_id      = 'city-id';
@@ -177,6 +189,9 @@ class Test_User extends Test_Case {
 		$this->assertSame( $user_city_id, $user->city( $city_id ) );
 	}
 
+	/**
+	 * Test warehouse filter for not auth user
+	 */
 	public function test_warehouse_id_not_auth_user() {
 		$warehouse_id = 'warehouse-id';
 
@@ -186,6 +201,9 @@ class Test_User extends Test_Case {
 		$this->assertSame( $warehouse_id, $user->warehouse( $warehouse_id ) );
 	}
 
+	/**
+	 * Test warehouse filter for auth user
+	 */
 	public function test_warehouse_id_auth_user() {
 		$user_id           = 1;
 		$warehouse_id      = 'warehouse-id';
