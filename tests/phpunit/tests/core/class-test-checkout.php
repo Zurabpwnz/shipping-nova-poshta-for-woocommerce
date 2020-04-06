@@ -1,6 +1,6 @@
 <?php
 /**
- * Ajax tests
+ * Checkout tests
  *
  * @package   Woo-Nova-Poshta
  */
@@ -9,75 +9,68 @@ namespace Nova_Poshta\Core;
 
 use Nova_Poshta\Tests\Test_Case;
 use tad\FunctionMocker\FunctionMocker;
+use WP_Mock;
+use WP_Mock\Functions;
 
 /**
- * Class Test_Notice
+ * Class Test_Checkout
  *
- * @package Nova_Poshta\Admin
+ * @package Nova_Poshta\Core
  */
-class Test_Ajax extends Test_Case {
+class Test_Checkout extends Test_Case {
 
-	public function test_cities() {
-		$city_id   = 'city_id';
-		$city_name = 'City Name';
-		\WP_Mock::userFunction( 'check_ajax_referer' )->
-		withArgs( [ Main::PLUGIN_SLUG, 'nonce' ] )->
-		once();
-		\WP_Mock::userFunction( 'wp_send_json' )->
-		withArgs(
-			[
-				[
-					[
-						'id'   => $city_id,
-						'text' => $city_name,
-					],
-				],
-			]
-		)->
-		once();
-		$filter_input = FunctionMocker::replace( 'filter_input', $city_name );
-		$api          = \Mockery::mock( 'Nova_Poshta\Core\API' );
-		$api
-			->shouldReceive( 'cities' )
+	/**
+	 * Test fields action
+	 */
+	public function test_fields() {
+		$filter_input  = FunctionMocker::replace( 'filter_input', [ 'woo_nova_poshta' ] );
+		$shipping_rate = \Mockery::mock( 'WC_Shipping_Rate' );
+		$shipping_rate
+			->shouldReceive( 'get_method_id' )
 			->once()
-			->withArgs( [ $city_name, 10 ] )
-			->andReturn( [ $city_id => $city_name ] );
-		$ajax = new AJAX( $api );
+			->andReturn( 'woo_nova_poshta' );
+		WP_Mock::expectAction( 'woo_nova_poshta_user_fields' );
 
-		$ajax->cities();
-		$filter_input->wasCalledWithOnce( [ INPUT_POST, 'search', FILTER_SANITIZE_STRING ] );
+		$checkout = new Checkout();
+		$checkout->fields( $shipping_rate );
+
+		$filter_input->wasCalledWithOnce(
+			[
+				INPUT_POST,
+				'shipping_method',
+				FILTER_SANITIZE_STRING,
+				FILTER_REQUIRE_ARRAY,
+			]
+		);
 	}
 
-	public function test_warehouses() {
-		$city_id        = 'city_id';
-		$warehouse_id   = 'warehouse_id';
-		$warehouse_name = 'City Name';
-		\WP_Mock::userFunction( 'check_ajax_referer' )->
-		withArgs( [ Main::PLUGIN_SLUG, 'nonce' ] )->
-		once();
-		\WP_Mock::userFunction( 'wp_send_json' )->
-		withArgs(
-			[
-				[
-					[
-						'id'   => $warehouse_id,
-						'text' => $warehouse_name,
-					],
-				],
-			]
-		)->
-		once();
-		$filter_input = FunctionMocker::replace( 'filter_input', $city_id );
-		$api          = \Mockery::mock( 'Nova_Poshta\Core\API' );
-		$api
-			->shouldReceive( 'warehouses' )
-			->once()
-			->withArgs( [ $city_id ] )
-			->andReturn( [ $warehouse_id => $warehouse_name ] );
-		$ajax = new AJAX( $api );
+	/**
+	 * Test validation with invalid nonce
+	 */
+	public function test_validation_invalid_nonce() {
+		WP_Mock::userFunction( 'wp_verify_nonce' )->
+		once()->
+		andReturn( false );
 
-		$ajax->warehouses();
-		$filter_input->wasCalledWithOnce( [ INPUT_POST, 'city', FILTER_SANITIZE_STRING ] );
+		$checkout = new Checkout();
+		$checkout->validate();
+	}
+
+	/**
+	 * Test validation show notices with empty city and warehouse
+	 */
+	public function test_validation() {
+		$_POST['woo_nova_poshta_city']      = '';
+		$_POST['woo_nova_poshta_warehouse'] = '';
+		WP_Mock::userFunction( 'wp_verify_nonce' )->
+		once()->
+		andReturn( true );
+		WP_Mock::userFunction( 'wc_add_notice' )->
+		twice()->
+		withArgs( [ Functions::type( 'string' ), 'error' ] );
+
+		$checkout = new Checkout();
+		$checkout->validate();
 	}
 
 }
