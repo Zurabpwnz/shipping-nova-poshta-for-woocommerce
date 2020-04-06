@@ -36,7 +36,7 @@ class Front {
 	 * Enqueue scripts
 	 */
 	public function scripts() {
-		if ( ! is_checkout() && ! is_account_page() ) {
+		if ( ! is_checkout() ) {
 			return;
 		}
 		wp_enqueue_script(
