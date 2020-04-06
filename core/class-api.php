@@ -143,7 +143,7 @@ class API {
 	public function internet_document(
 		string $first_name, string $last_name, string $phone,
 		string $city_id, string $warehouse_id, float $price,
-		int $count, int $redelivery = 0
+		int $count, float $redelivery = 0
 	): string {
 		if ( empty( $this->settings->api_key() ) ) {
 			return '';
