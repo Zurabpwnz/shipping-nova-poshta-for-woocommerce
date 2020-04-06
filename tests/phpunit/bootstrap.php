@@ -7,9 +7,9 @@
 
 use tad\FunctionMocker\FunctionMocker;
 
-WP_Mock::bootstrap();
-
 $plugin_path = __DIR__ . '/../../';
+
+require_once $plugin_path . 'vendor/autoload.php';
 
 FunctionMocker::init(
 	[
@@ -24,3 +24,5 @@ FunctionMocker::init(
 		'redefinable-internals' => [ 'filter_input' ],
 	]
 );
+
+WP_Mock::bootstrap();
