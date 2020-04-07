@@ -12,9 +12,9 @@ use Nova_Poshta\Tests\Test_Case;
 use WP_Mock;
 
 /**
- * Class Test_Notice
+ * Class Test_API
  *
- * @package Nova_Poshta\Admin
+ * @package Nova_Poshta\Core
  */
 class Test_API extends Test_Case {
 
