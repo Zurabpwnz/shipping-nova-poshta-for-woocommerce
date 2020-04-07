@@ -136,14 +136,14 @@ class API {
 	 * @param string $warehouse_id Customer warehouse ID.
 	 * @param float  $price        Order price.
 	 * @param int    $count        Order items count.
-	 * @param int    $redelivery   Cash on delivery price.
+	 * @param float  $redelivery   Cash on delivery price.
 	 *
 	 * @return string
 	 */
 	public function internet_document(
 		string $first_name, string $last_name, string $phone,
 		string $city_id, string $warehouse_id, float $price,
-		int $count, int $redelivery = 0
+		int $count, float $redelivery = 0
 	): string {
 		if ( empty( $this->settings->api_key() ) ) {
 			return '';
