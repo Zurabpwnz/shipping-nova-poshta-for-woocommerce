@@ -52,7 +52,6 @@ class DB {
 		        description        VARCHAR(100) NOT NULL
 	        ) ' . $wpdb->get_charset_collate();
 
-		global $wpdb;
 		$warehouses_sql = 'CREATE TABLE ' . $this->warehouses_table . '
 			(
 		        `warehouse_id`       VARCHAR(36)  NOT NULL UNIQUE,
@@ -77,7 +76,9 @@ class DB {
 	 */
 	private function maybe_create_table( string $table_name, string $create_ddl ) {
 		if ( ! function_exists( 'maybe_create_table' ) ) {
+			// @codeCoverageIgnoreStart
 			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+			// @codeCoverageIgnoreEnd
 		}
 		maybe_create_table( $table_name, $create_ddl );
 	}
@@ -234,7 +235,7 @@ class DB {
 		}
 		$sql = rtrim( $sql, ',' );
 
-		$sql .= ' ON DUPLICATE KEY UPDATE `city_id`=VALUES(`city_id`), `description`=VALUES(`description`)';
+		$sql .= ' ON DUPLICATE KEY UPDATE `city_id`=VALUES(`city_id`), `description`=VALUES(`description`), `order`=VALUES(`order`)';
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
