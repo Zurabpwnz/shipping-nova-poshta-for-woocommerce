@@ -136,7 +136,7 @@ class API {
 	 * @param string $warehouse_id Customer warehouse ID.
 	 * @param float  $price        Order price.
 	 * @param int    $count        Order items count.
-	 * @param int    $redelivery   Cash on delivery price.
+	 * @param float  $redelivery   Cash on delivery price.
 	 *
 	 * @return string
 	 */
