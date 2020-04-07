@@ -47,28 +47,30 @@ class Thank_You {
 	 */
 	public function shipping( array $total_rows, WC_Order $order ) {
 		$shipping_methods = $order->get_shipping_methods();
-		if ( ! empty( $shipping_methods ) ) {
-			$shipping_method = array_shift( $shipping_methods );
-			if ( 'woo_nova_poshta' === $shipping_method->get_method_id() ) {
-				$city      = $shipping_method->get_meta( 'city' );
-				$warehouse = $shipping_method->get_meta( 'warehouse' );
-				if ( ! $city || ! $warehouse ) {
-					return $total_rows;
-				}
-				$city      = $this->api->city( $city );
-				$warehouse = $this->api->warehouse( $warehouse );
-
-				$total_rows['shipping']['value'] .= '<br>';
-				$total_rows['shipping']['value'] .= $city . '<br>';
-				$total_rows['shipping']['value'] .= $warehouse;
-
-				$internet_document = $shipping_method->get_meta( 'internet_document' );
-				if ( ! $internet_document ) {
-					return $total_rows;
-				}
-				$total_rows['shipping']['value'] .= '<br>' . $internet_document;
-			}
+		if ( empty( $shipping_methods ) ) {
+			return $total_rows;
 		}
+
+		$shipping_method = array_shift( $shipping_methods );
+		if ( 'woo_nova_poshta' !== $shipping_method->get_method_id() ) {
+			return $total_rows;
+		}
+
+		$city_id      = $shipping_method->get_meta( 'city_id' );
+		$warehouse_id = $shipping_method->get_meta( 'warehouse_id' );
+		if ( ! $city_id || ! $warehouse_id ) {
+			return $total_rows;
+		}
+		$city      = $this->api->city( $city_id );
+		$warehouse = $this->api->warehouse( $warehouse_id );
+
+		$total_rows['shipping']['value'] .= sprintf( '<br>%s<br>%s', $city, $warehouse );
+
+		$internet_document = $shipping_method->get_meta( 'internet_document' );
+		if ( ! $internet_document ) {
+			return $total_rows;
+		}
+		$total_rows['shipping']['value'] .= sprintf( '<br>%s', $internet_document );
 
 		return $total_rows;
 	}

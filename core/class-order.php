@@ -42,18 +42,23 @@ class Order {
 	/**
 	 * Save shipping item
 	 *
+	 * Nonce is not needed because new users used during registration
+	 * receive a new idi session and the nonce ceases to be valid
+	 *
 	 * @param WC_Order_Item_Shipping $item        Order shipping item.
 	 * @param int                    $package_key Package key.
 	 * @param array                  $package     Package.
 	 * @param WC_Order               $order       Current order.
 	 */
 	public function save( WC_Order_Item_Shipping $item, int $package_key, array $package, WC_Order $order ) {
-		$nonce = filter_input( INPUT_POST, 'woo_nova_poshta_nonce', FILTER_SANITIZE_STRING );
-		if ( ! wp_verify_nonce( $nonce, Main::PLUGIN_SLUG . '-shipping' ) ) {
+		if ( 'woo_nova_poshta' !== $item->get_method_id() ) {
 			return;
 		}
 		$city_id      = filter_input( INPUT_POST, 'woo_nova_poshta_city', FILTER_SANITIZE_STRING );
 		$warehouse_id = filter_input( INPUT_POST, 'woo_nova_poshta_warehouse', FILTER_SANITIZE_STRING );
+		if ( ! $city_id || ! $warehouse_id ) {
+			return;
+		}
 		$item->add_meta_data( 'city_id', $city_id, true );
 		$item->add_meta_data( 'warehouse_id', $warehouse_id, true );
 		$this->create_internet_document( $item, $order );
