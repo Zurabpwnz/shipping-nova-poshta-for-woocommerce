@@ -11,9 +11,9 @@ use Nova_Poshta\Tests\Test_Case;
 use tad\FunctionMocker\FunctionMocker;
 
 /**
- * Class Test_Notice
+ * Class Test_Ajax
  *
- * @package Nova_Poshta\Admin
+ * @package Nova_Poshta\Core
  */
 class Test_Ajax extends Test_Case {
 
