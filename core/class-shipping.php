@@ -28,6 +28,8 @@ class Shipping {
 
 	/**
 	 * Require shipping methods
+	 *
+	 * @codeCoverageIgnore
 	 */
 	public function require_methods() {
 		require_once plugin_dir_path( __DIR__ ) . 'shipping/class-nova-poshta-shipping-method.php';
@@ -54,7 +56,7 @@ class Shipping {
 	public function is_active(): bool {
 		global $wpdb;
 		$is_active = wp_cache_get( $this->method_name . '_active' );
-		if ( null !== $is_active ) {
+		if ( ! $is_active ) {
 			//phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$is_active = (bool) $wpdb->get_var(
 				$wpdb->prepare(

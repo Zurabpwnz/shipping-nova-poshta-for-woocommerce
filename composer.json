@@ -4,7 +4,7 @@
   },
   "require-dev": {
     "wp-coding-standards/wpcs": "dev-master",
-    "10up/wp_mock": "^0.4.2",
+    "10up/wp_mock": "0.4.2",
     "php-coveralls/php-coveralls": "^2.2",
     "lucatume/function-mocker": "^1.3"
   },
