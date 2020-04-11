@@ -20,11 +20,89 @@ use WP_Mock;
 class Test_Order extends Test_Case {
 
 	/**
-	 * Test don't save other shipping method
+	 * End test
 	 */
-	public function test_dont_save() {
+	public function tearDown(): void {
+		parent::tearDown();
+		//phpcs:ignore WordPress.Security.NonceVerification.Missing
+		unset( $_POST );
+	}
+
+	/**
+	 * Test updating nonce after registration new user
+	 */
+	public function test_update_nonce_for_new_users() {
+		$nonce     = 'some-nonce';
+		$new_nonce = 'some-new-nonce';
+		FunctionMocker::replace( 'filter_input', $nonce );
+		WP_Mock::userFunction( 'wp_create_nonce' )->
+		withArgs( [ Main::PLUGIN_SLUG . '-shipping' ] )->
+		once()->
+		andReturn( $new_nonce );
+		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
+
+		$order = new Order( $api );
+
+		$order->update_nonce_for_new_users();
+		$this->assertSame( $new_nonce, $_POST['woo_nova_poshta_nonce'] );
+	}
+
+	/**
+	 * Test don't save with empty nonce
+	 */
+	public function test_dont_save_with_empty_nonce() {
+		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
+		$package_key   = 10;
+		$package       = [];
+		$wc_order      = Mockery::mock( 'WC_Order' );
+
+		$order = new Order( $api );
+
+		$order->save( $item_shipping, $package_key, $package, $wc_order );
+	}
+
+	/**
+	 * Test don't save with bad nonce
+	 */
+	public function test_dont_save_with_bad_nonce() {
+		$nonce                          = 'nonce';
+		$_POST['woo_nova_poshta_nonce'] = $nonce;
+		WP_Mock::userFunction( 'wp_unslash' )->
+		withArgs( [ $nonce ] )->
+		once()->
+		andReturn( $nonce );
 		WP_Mock::userFunction( 'wp_verify_nonce' )->
-		times( 0 );
+		withArgs( [ $nonce, Main::PLUGIN_SLUG . '-shipping' ] )->
+		once()->
+		andReturn( false );
+		FunctionMocker::replace( 'filter_var', $nonce );
+		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
+		$package_key   = 10;
+		$package       = [];
+		$wc_order      = Mockery::mock( 'WC_Order' );
+
+		$order = new Order( $api );
+
+		$order->save( $item_shipping, $package_key, $package, $wc_order );
+	}
+
+	/**
+	 * Test don't save for other shipping method
+	 */
+	public function test_dont_save_for_other_shipping_method() {
+		$nonce                          = 'nonce';
+		$_POST['woo_nova_poshta_nonce'] = $nonce;
+		WP_Mock::userFunction( 'wp_unslash' )->
+		withArgs( [ $nonce ] )->
+		once()->
+		andReturn( $nonce );
+		WP_Mock::userFunction( 'wp_verify_nonce' )->
+		withArgs( [ $nonce, Main::PLUGIN_SLUG . '-shipping' ] )->
+		once()->
+		andReturn( true );
+		FunctionMocker::replace( 'filter_var', $nonce );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
 		$item_shipping
@@ -44,8 +122,17 @@ class Test_Order extends Test_Case {
 	 * Test don't save with not enough dating
 	 */
 	public function test_dont_save_with_empty_city_or_warehouse() {
+		$nonce                          = 'nonce';
+		$_POST['woo_nova_poshta_nonce'] = $nonce;
+		WP_Mock::userFunction( 'wp_unslash' )->
+		withArgs( [ $nonce ] )->
+		once()->
+		andReturn( $nonce );
 		WP_Mock::userFunction( 'wp_verify_nonce' )->
-		times( 0 );
+		withArgs( [ $nonce, Main::PLUGIN_SLUG . '-shipping' ] )->
+		once()->
+		andReturn( true );
+		FunctionMocker::replace( 'filter_var', $nonce );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
 		$item_shipping
@@ -66,16 +153,25 @@ class Test_Order extends Test_Case {
 	 */
 	public function test_save() {
 		global $city_id, $warehouse_id;
-		$city_id            = 'city-id';
-		$warehouse_id       = 'warehouse-id';
-		$billing_first_name = 'billing_first_name';
-		$billing_last_name  = 'billing_last_name';
-		$billing_phone      = 'billing_phone';
-		$total              = 300;
-		$internet_document  = '1234 5678 9012 3456';
+		$city_id                        = 'city-id';
+		$warehouse_id                   = 'warehouse-id';
+		$billing_first_name             = 'billing_first_name';
+		$billing_last_name              = 'billing_last_name';
+		$billing_phone                  = 'billing_phone';
+		$total                          = 300;
+		$internet_document              = '1234 5678 9012 3456';
+		$nonce                          = 'nonce';
+		$_POST['woo_nova_poshta_nonce'] = $nonce;
+		WP_Mock::userFunction( 'wp_unslash' )->
+		withArgs( [ $nonce ] )->
+		once()->
+		andReturn( $nonce );
 		WP_Mock::userFunction( 'wp_verify_nonce' )->
-		times( 0 );
-		$filter_input = FunctionMocker::replace(
+		withArgs( [ $nonce, Main::PLUGIN_SLUG . '-shipping' ] )->
+		once()->
+		andReturn( true );
+		FunctionMocker::replace( 'filter_var', $nonce );
+		FunctionMocker::replace(
 			'filter_input',
 			function () {
 				global $city_id, $warehouse_id;
@@ -86,7 +182,7 @@ class Test_Order extends Test_Case {
 				return $answers[ $i ++ ];
 			}
 		);
-		$api          = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
 			->shouldReceive( 'internet_document' )
 			->withArgs(

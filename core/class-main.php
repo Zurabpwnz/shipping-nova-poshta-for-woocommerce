@@ -77,6 +77,7 @@ class Main {
 		add_action( 'woocommerce_checkout_create_order_shipping_item', [ $order, 'save' ], 10, 4 );
 		add_filter( 'woocommerce_order_item_display_meta_key', [ $order, 'labels' ], 10, 2 );
 		add_filter( 'woocommerce_order_item_display_meta_value', [ $order, 'values' ], 10, 2 );
+		add_action( 'woocommerce_checkout_update_customer', [ $order, 'update_nonce_for_new_users' ] );
 
 		$thank_you = new Thank_You( $api );
 		add_filter( 'woocommerce_get_order_item_totals', [ $thank_you, 'shipping' ], 10, 2 );

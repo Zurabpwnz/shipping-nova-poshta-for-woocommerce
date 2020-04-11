@@ -43,17 +43,21 @@ class User {
 	 * TODO: Move to other place.
 	 */
 	public function fields() {
-		$city         = $this->api->cities(
-			apply_filters( 'woo_nova_poshta_default_city', 'Киев' ),
-			1
-		);
-		$city_id      = apply_filters( 'woo_nova_poshta_default_city_id', array_keys( $city )[0] ?? '' );
-		$warehouses   = [ 0 => '' ];
-		$warehouse_id = '';
-		if ( $city_id ) {
-			$warehouses   = $this->api->warehouses( $city_id );
-			$warehouse_id = array_keys( $warehouses )[0] ?? '';
-			$warehouse_id = apply_filters( 'woo_nova_poshta_default_warehouse_id', $warehouse_id, $city );
+		$city_id      = filter_input( INPUT_POST, 'woo_nova_poshta_city', FILTER_SANITIZE_STRING );
+		$warehouse_id = filter_input( INPUT_POST, 'woo_nova_poshta_warehouse', FILTER_SANITIZE_STRING );
+		if ( empty( $city_id || $warehouse_id ) ) {
+			$city         = $this->api->cities(
+				apply_filters( 'woo_nova_poshta_default_city', 'Киев' ),
+				1
+			);
+			$city_id      = apply_filters( 'woo_nova_poshta_default_city_id', array_keys( $city )[0] ?? '' );
+			$warehouses   = [ 0 => '' ];
+			$warehouse_id = '';
+			if ( $city_id ) {
+				$warehouses   = $this->api->warehouses( $city_id );
+				$warehouse_id = array_keys( $warehouses )[0] ?? '';
+				$warehouse_id = apply_filters( 'woo_nova_poshta_default_warehouse_id', $warehouse_id, $city );
+			}
 		}
 
 		$fields = [
@@ -62,7 +66,7 @@ class User {
 				'label'    => __( 'Select delivery city', 'woo-nova-poshta' ),
 				'required' => true,
 				'options'  => $city,
-				'default'  => array_keys( $city )[0] ?? '',
+				'default'  => $city_id,
 				'priority' => 10,
 			],
 			'woo_nova_poshta_warehouse' => [

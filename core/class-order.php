@@ -40,10 +40,17 @@ class Order {
 	}
 
 	/**
+	 * Update nonce for new user after login
+	 */
+	public function update_nonce_for_new_users() {
+		$nonce = filter_input( INPUT_POST, 'woo_nova_poshta_nonce', FILTER_SANITIZE_STRING );
+		if ( $nonce ) {
+			$_POST['woo_nova_poshta_nonce'] = wp_create_nonce( Main::PLUGIN_SLUG . '-shipping' );
+		}
+	}
+
+	/**
 	 * Save shipping item
-	 *
-	 * Nonce is not needed because new users used during registration
-	 * receive a new idi session and the nonce ceases to be valid
 	 *
 	 * @param WC_Order_Item_Shipping $item        Order shipping item.
 	 * @param int                    $package_key Package key.
@@ -51,6 +58,13 @@ class Order {
 	 * @param WC_Order               $order       Current order.
 	 */
 	public function save( WC_Order_Item_Shipping $item, int $package_key, array $package, WC_Order $order ) {
+		if ( empty( $_POST['woo_nova_poshta_nonce'] ) ) {
+			return;
+		}
+		$nonce = filter_var( wp_unslash( $_POST['woo_nova_poshta_nonce'] ), FILTER_SANITIZE_STRING );
+		if ( ! wp_verify_nonce( $nonce, Main::PLUGIN_SLUG . '-shipping' ) ) {
+			return;
+		}
 		if ( 'woo_nova_poshta' !== $item->get_method_id() ) {
 			return;
 		}
