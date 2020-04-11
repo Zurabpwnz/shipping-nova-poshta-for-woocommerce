@@ -44,7 +44,15 @@ class Test_Order extends Test_Case {
 		$order = new Order( $api );
 
 		$order->update_nonce_for_new_users();
+		//phpcs:disable WordPress.Security.NonceVerification.Missing
+		//phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		//phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+		//phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 		$this->assertSame( $new_nonce, $_POST['woo_nova_poshta_nonce'] );
+		//phpcs:enable WordPress.Security.NonceVerification.Missing
+		//phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		//phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+		//phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 	}
 
 	/**
