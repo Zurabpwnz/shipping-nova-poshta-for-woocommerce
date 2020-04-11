@@ -75,26 +75,6 @@ class Order {
 		}
 		$item->add_meta_data( 'city_id', $city_id, true );
 		$item->add_meta_data( 'warehouse_id', $warehouse_id, true );
-		$this->create_internet_document( $item, $order );
-	}
-
-	/**
-	 * Create internet document
-	 *
-	 * @param WC_Order_Item_Shipping $item  Order shipping item.
-	 * @param WC_Order               $order Current order.
-	 */
-	private function create_internet_document( WC_Order_Item_Shipping $item, WC_Order $order ) {
-		$internet_document = $this->api->internet_document(
-			$order->get_billing_first_name(),
-			$order->get_billing_last_name(),
-			$order->get_billing_phone(),
-			$item->get_meta( 'city_id' ),
-			$item->get_meta( 'warehouse_id' ),
-			$order->get_total(),
-			$this->order_items_quantity( $order )
-		);
-		$item->add_meta_data( 'internet_document', $internet_document, true );
 	}
 
 	/**
@@ -133,23 +113,6 @@ class Order {
 		}
 
 		return $value;
-	}
-
-	/**
-	 * Order items quantity
-	 *
-	 * @param WC_Order $order Current order.
-	 *
-	 * @return int
-	 */
-	private function order_items_quantity( WC_Order $order ): int {
-		$items = $order->get_items();
-		$count = 0;
-		foreach ( $items as $item ) {
-			$count += $item->get_quantity();
-		}
-
-		return $count;
 	}
 
 }
