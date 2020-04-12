@@ -49,11 +49,7 @@ class Main {
 		$ajax->hooks();
 
 		$admin = new Admin( $api, $settings );
-		add_action( 'admin_enqueue_scripts', [ $admin, 'styles' ] );
-		add_action( 'admin_enqueue_scripts', [ $admin, 'scripts' ] );
-		add_action( 'admin_menu', [ $admin, 'add_menu' ] );
-		add_action( 'admin_init', [ $admin, 'register_setting' ] );
-		add_filter( 'pre_update_option_woo-nova-poshta', [ $admin, 'validate' ], 10, 2 );
+		$admin->hooks();
 
 		$shipping = new Shipping();
 		add_filter( 'woocommerce_shipping_methods', [ $shipping, 'register_methods' ] );

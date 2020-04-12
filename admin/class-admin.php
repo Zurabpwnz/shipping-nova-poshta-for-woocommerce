@@ -49,6 +49,17 @@ class Admin {
 	}
 
 	/**
+	 * Add hooks
+	 */
+	public function hooks() {
+		add_action( 'admin_enqueue_scripts', [ $this, 'styles' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'scripts' ] );
+		add_action( 'admin_menu', [ $this, 'add_menu' ] );
+		add_action( 'admin_init', [ $this, 'register_setting' ] );
+		add_filter( 'pre_update_option_woo-nova-poshta', [ $this, 'validate' ], 10, 2 );
+	}
+
+	/**
 	 * Enqueue styles
 	 */
 	public function styles() {
