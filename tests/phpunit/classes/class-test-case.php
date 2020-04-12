@@ -22,8 +22,8 @@ abstract class Test_Case extends TestCase {
 	 */
 	public function setUp(): void {
 		FunctionMocker::setUp();
-		WP_Mock::setUp();
 		parent::setUp();
+		WP_Mock::setUp(); // Must be the last one.
 	}
 
 	/**
