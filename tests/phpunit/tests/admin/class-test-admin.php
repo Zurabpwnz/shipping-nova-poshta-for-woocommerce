@@ -23,25 +23,24 @@ use WP_Mock\Functions;
 class Test_Admin extends Test_Case {
 
 	/**
-	 * Get testing object
-	 *
-	 * @return Admin
+	 * Tear down the test.
 	 */
-	private function instance(): Admin {
-		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+	public function tearDown(): void {
+		unset ( $GLOBALS['current_screen'] );
 
-		return new Admin( $api, $settings );
+		parent::tearDown();
 	}
 
 	/**
 	 * Test styles
 	 */
-	public function test_dont_enqueue_styles() {
+	public function test_do_NOT_enqueue_styles() {
+		// todo: Think on naming. We use NOT in uppercase for better readability.
 		global $current_screen;
+
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen       = new stdClass();
-		$current_screen->base = 'page';
+		$current_screen->base = 'something';
 
 		$admin = $this->instance();
 
@@ -53,23 +52,29 @@ class Test_Admin extends Test_Case {
 	 */
 	public function test_enqueue_styles() {
 		global $current_screen;
+
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen       = new stdClass();
 		$current_screen->base = 'toplevel_page_' . Main::PLUGIN_SLUG;
 		WP_Mock::userFunction( 'plugin_dir_url', [ 'times' => 2 ] );
-		WP_Mock::userFunction(
-			'wp_enqueue_style',
-			[
-				'args'  => [
-					'select2',
-					Functions::type( 'string' ),
-					[],
-					Main::VERSION,
-					'all',
-				],
-				'times' => 1,
-			]
-		);
+//		WP_Mock::userFunction(
+//			'wp_enqueue_style',
+//			[
+//				'args'  => [
+//					'select2',
+//					Functions::type( 'string' ),
+//					[],
+//					Main::VERSION,
+//					'all',
+//				],
+//				'times' => 1,
+//			]
+//		);
+
+		// Looks more readable as for me.
+		WP_Mock::userFunction( 'wp_enqueue_style' )->
+		with( 'select2', Functions::type( 'string' ), [], Main::VERSION, 'all' )->times( 1 );
+
 		WP_Mock::userFunction(
 			'wp_enqueue_style',
 			[
@@ -94,6 +99,7 @@ class Test_Admin extends Test_Case {
 	 */
 	public function test_dont_enqueue_scripts() {
 		global $current_screen;
+
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen       = new stdClass();
 		$current_screen->base = 'page';
@@ -197,7 +203,8 @@ class Test_Admin extends Test_Case {
 	 */
 	public function test_add_menu() {
 		$admin = $this->instance();
-		WP_Mock::userFunction( 'plugin_dir_url', [ 'times' => 1 ] );
+//		WP_Mock::userFunction( 'plugin_dir_url', [ 'times' => 1 ] );
+		WP_Mock::passthruFunction( 'plugin_dir_url' )->times( 1 );
 		WP_Mock::userFunction(
 			'add_menu_page',
 			[
@@ -281,15 +288,19 @@ class Test_Admin extends Test_Case {
 		ob_start();
 		$admin->page_options();
 
-		$this->assertTrue( ! empty( ob_get_clean() ) );
+//		$this->assertTrue( ! empty( ob_get_clean() ) );
+		$this->assertNotEmpty( ob_get_clean() );
+		// todo: if we will keep output here (not using check_admin_referer), then we have to compare real output with the expected one.
 	}
 
 	/**
 	 * Create invoice request
+	 * Data provider for test_controller().
 	 *
 	 * @return array
 	 */
 	public function provider_request() {
+		// todo: think on naming. We use prefix dp_ for data providers. and place then after test method.
 		return [
 			[
 				[
@@ -312,6 +323,7 @@ class Test_Admin extends Test_Case {
 	 * @param array $request Request example.
 	 */
 	public function test_controller( array $request ) {
+		// todo: No need to test a private function by itself. It is called by tested method.
 		WP_Mock::userFunction(
 			'wp_verify_nonce',
 			[
@@ -336,7 +348,8 @@ class Test_Admin extends Test_Case {
 
 		$admin->page_options();
 
-		$this->assertTrue( ! empty( ob_get_clean() ) );
+//		$this->assertTrue( ! empty( ob_get_clean() ) );
+		$this->assertnotEmpty( ob_get_clean() );
 	}
 
 	/**
@@ -380,7 +393,8 @@ class Test_Admin extends Test_Case {
 		ob_start();
 		$admin->page_options();
 
-		$this->assertTrue( ! empty( ob_get_clean() ) );
+		// $this->assertTrue( ! empty( ob_get_clean() ) );
+		$this->assertNotEmpty( ob_get_clean() );
 	}
 
 	/**
@@ -408,6 +422,19 @@ class Test_Admin extends Test_Case {
 		$admin = new Admin( $api, $settings );
 
 		$admin->validate( [ 'api_key' => $key ] );
+	}
+
+	/**
+	 * Get testing object
+	 *
+	 * @return Admin
+	 */
+	private function instance(): Admin {
+		// todo: Place private test methods to the bottom of the classes.
+		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+
+		return new Admin( $api, $settings );
 	}
 
 }

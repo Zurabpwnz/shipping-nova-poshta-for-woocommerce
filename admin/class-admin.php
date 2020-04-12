@@ -51,6 +51,7 @@ class Admin {
 	 * Enqueue styles
 	 */
 	public function styles() {
+		// todo: Think on naming. Function name should include verb. enqueue_styles() looks better for me.
 		if ( ! $this->is_plugin_page() ) {
 			return;
 		}
@@ -153,6 +154,8 @@ class Admin {
 	 */
 	public function page_options() {
 		$this->controller();
+		// todo: why to do anything if nonce check was not passed?
+		// todo: check_admin_referer() should be enough.
 		require plugin_dir_path( __FILE__ ) . 'partials/page-options.php';
 	}
 

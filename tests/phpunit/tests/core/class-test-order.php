@@ -23,6 +23,7 @@ class Test_Order extends Test_Case {
 	 * Test don't save other shipping method
 	 */
 	public function test_dont_save() {
+		// todo: why do we need this?
 		WP_Mock::userFunction( 'wp_verify_nonce' )->
 		times( 0 );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );

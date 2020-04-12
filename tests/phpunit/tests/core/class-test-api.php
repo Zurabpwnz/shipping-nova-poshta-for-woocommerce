@@ -25,9 +25,16 @@ class Test_API extends Test_Case {
 	 * @preserveGlobalState disabled
 	 */
 	public function test_cities() {
+		// todo: we don't need overload and slow tests here.
+		// todo: use Mockery::mock('API')->makePartial(), then call test method.
+		// todo: to provide $this->np? make it protected and set_protected_property(), as in Cyr_To_Lat_TestCase.
+
+
+		// todo: replace DAY_IN_SECONDS in the code by the `constant( 'DAY_IN_SECONDS' )`. Mock constant then.
 		if ( ! defined( 'DAY_IN_SECONDS' ) ) {
 			define( 'DAY_IN_SECONDS', 86400 );
 		}
+
 		$search  = 'search';
 		$limit   = 11;
 		$cities  = [ 'City 1', 'City 2' ];

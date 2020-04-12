@@ -65,7 +65,7 @@ class Notice {
 		$this->show(
 			'error',
 			sprintf(
-			/* translators: 1: link on page option */
+				/* translators: 1: link on page option */
 				__(
 					'For the plugin to work, you must enter the API key on the <a href="%s">plugin settings page</a>',
 					'woo-nova-poshta'
@@ -85,10 +85,10 @@ class Notice {
 		$this->show(
 			'error',
 			sprintf(
-			/* translators: 1: link on WooCommerce settings */
+				/* translators: 1: link on WooCommerce settings */
 				__(
 					'You must add the "New Delivery Method" delivery method <a href="%s">in the WooCommerce settings</a>',
-					'woo-nova-poshta',
+					'woo-nova-poshta' // Comma here produces fatal syntax error on php 7.1.
 				),
 				get_admin_url( null, 'admin.php?page=wc-settings&tab=shipping' )
 			)

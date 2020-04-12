@@ -165,6 +165,7 @@ class Test_User extends Test_Case {
 		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$user = new User( $api );
 
+		// todo: this tests seems impossible to run in isolation. WP functions are not mocked.
 		$this->assertSame( $city_id, $user->city( $city_id ) );
 	}
 
