@@ -193,8 +193,7 @@ class API {
 			];
 		}
 		$internet_document = $this->np->newInternetDocument( $sender, $recipient, $info );
-//		var_dump( $internet_document );
-//		die();
+
 		// TODO: Return WP_Error.
 
 		return $internet_document['success'] ? $internet_document['data'][0]['IntDocNumber'] : '';
