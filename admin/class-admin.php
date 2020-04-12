@@ -12,6 +12,7 @@
 
 namespace Nova_Poshta\Admin;
 
+use Exception;
 use Nova_Poshta\Core\API;
 use Nova_Poshta\Core\Main;
 use Nova_Poshta\Core\Settings;
@@ -74,7 +75,7 @@ class Admin {
 		);
 		wp_enqueue_script(
 			Main::PLUGIN_SLUG,
-			plugin_dir_url( __DIR__ ) . 'front/assets/js/main.js',
+			plugin_dir_url( __FILE__ ) . '/assets/js/main.js',
 			[
 				'jquery',
 				'select2',
@@ -105,9 +106,9 @@ class Admin {
 	 * @return bool
 	 */
 	private function is_plugin_page(): bool {
-		global $current_screen;
+		global $current_screen, $post_type;
 
-		return 0 === strpos( $current_screen->base, 'toplevel_page_' . Main::PLUGIN_SLUG );
+		return 0 === strpos( $current_screen->base, 'toplevel_page_' . Main::PLUGIN_SLUG ) || 'shop_order' === $post_type;
 	}
 
 	/**
@@ -129,6 +130,8 @@ class Admin {
 
 	/**
 	 * Controller for creating invoices
+	 *
+	 * @throws Exception Invalid DateTime.
 	 */
 	private function controller(): void {
 		$nonce = filter_input( INPUT_POST, Main::PLUGIN_SLUG . '_nonce', FILTER_SANITIZE_STRING );

@@ -162,7 +162,7 @@ class DB {
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		return $wpdb->get_var(
 			$wpdb->prepare( 'SELECT `description` FROM ' . $this->cities_table . ' WHERE city_id = %s', $city_id )
-		);
+		) ?: '';
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
@@ -183,7 +183,7 @@ class DB {
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		return $wpdb->get_var(
 			$wpdb->prepare( 'SELECT `area` FROM ' . $this->cities_table . ' WHERE city_id = %s', $city_id )
-		);
+		) ?: '';
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared

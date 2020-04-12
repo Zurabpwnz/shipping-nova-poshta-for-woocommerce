@@ -12,6 +12,7 @@
 
 namespace Nova_Poshta\Core;
 
+use Exception;
 use WC_Meta_Data;
 use WC_Order;
 use WC_Order_Item_Shipping;
@@ -37,6 +38,27 @@ class Order {
 	 */
 	public function __construct( API $api ) {
 		$this->api = $api;
+	}
+
+	/**
+	 * Add hooks
+	 */
+	public function hooks() {
+		add_action( 'woocommerce_checkout_create_order_shipping_item', [ $this, 'save' ], 10, 4 );
+		add_action( 'woocommerce_checkout_update_customer', [ $this, 'update_nonce_for_new_users' ] );
+		add_action( 'woocommerce_order_actions', [ $this, 'register_order_actions' ] );
+		add_action(
+			'woocommerce_order_action_nova_poshta_create_internet_document',
+			[
+				$this,
+				'create_internet_document',
+			]
+		);
+		add_action( 'woocommerce_order_status_processing', [ $this, 'processing_status' ], 10, 2 );
+		add_action( 'woocommerce_before_order_itemmeta', [ $this, 'default_fields_for_shipping_item' ], 10, 2 );
+
+		add_filter( 'woocommerce_order_item_display_meta_key', [ $this, 'labels' ], 10, 2 );
+		add_filter( 'woocommerce_order_item_display_meta_value', [ $this, 'values' ], 10, 2 );
 	}
 
 	/**
@@ -113,6 +135,127 @@ class Order {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Default fields for shipping item
+	 *
+	 * @param int            $item_id Item ID.
+	 * @param \WC_Order_Item $item    Item.
+	 */
+	public function default_fields_for_shipping_item( int $item_id, \WC_Order_Item $item ) {
+		if ( ! $item instanceof \WC_Order_Item_Shipping ) {
+			return;
+		}
+		if ( 'woo_nova_poshta' !== $item->get_method_id() ) {
+			return;
+		}
+		$save = false;
+		if ( ! $item->get_meta( 'city_id' ) ) {
+			$city = $this->api->cities( '', 1 );
+			$item->update_meta_data( 'city_id', array_keys( $city )[0] );
+			$save = true;
+		}
+		if ( ! $item->get_meta( 'warehouse_id' ) ) {
+			$city_id    = $item->get_meta( 'city_id' );
+			$warehouses = $this->api->warehouses( $city_id );
+			$item->update_meta_data( 'warehouse_id', array_keys( $warehouses )[0] );
+			$save = true;
+		}
+		if ( $save ) {
+			$item->save_meta_data();
+		}
+	}
+
+	/**
+	 * Register actions
+	 *
+	 * @param array $actions List of actions.
+	 *
+	 * @return array
+	 */
+	public function register_order_actions( array $actions ): array {
+		$actions['nova_poshta_create_internet_document'] = __( 'Create Nova Poshta Internet Document', 'woo-nova-poshta' );
+
+		return $actions;
+	}
+
+	/**
+	 * Change status to processing
+	 *
+	 * @param int      $order_id Current order ID.
+	 * @param WC_Order $order    Current order.
+	 *
+	 * @throws Exception Invalid DateTime.
+	 */
+	public function processing_status( int $order_id, WC_Order $order ): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$this->create_internet_document( $order );
+	}
+
+	/**
+	 * Create internet document
+	 *
+	 * @param WC_Order $order Current order.
+	 *
+	 * @throws Exception Invalid DateTime.
+	 */
+	public function create_internet_document( WC_Order $order ): void {
+		global $post;
+		$shipping_method = $this->find_shipping_method( $order->get_shipping_methods() );
+		if ( ! $shipping_method ) {
+			return;
+		}
+		$order_type_object = get_post_type_object( $post->post_type );
+
+		$internet_document = $this->api->internet_document(
+			$order->get_billing_first_name(),
+			$order->get_billing_last_name(),
+			$order->get_billing_phone(),
+			$shipping_method->get_meta( 'city_id' ),
+			$shipping_method->get_meta( 'warehouse_id' ),
+			$order->get_total(),
+			$this->order_items_quantity( $order )
+		);
+		$shipping_method->add_meta_data( 'internet_document', $internet_document, true );
+		$shipping_method->save_meta_data();
+	}
+
+	/**
+	 * Order items quantity
+	 *
+	 * @param WC_Order $order Current order.
+	 *
+	 * @return int
+	 */
+	private function order_items_quantity( WC_Order $order ): int {
+		$items = $order->get_items();
+		$count = 0;
+		foreach ( $items as $item ) {
+			$count += $item->get_quantity();
+		}
+
+		return $count;
+	}
+
+	/**
+	 * Find current shipping method
+	 *
+	 * @param array $shipping_methods List of shipping methods.
+	 *
+	 * @return WC_Order_Item_Shipping|null
+	 */
+	private function find_shipping_method( array $shipping_methods ): ?WC_Order_Item_Shipping {
+		foreach ( $shipping_methods as $shipping_method ) {
+			if ( 'woo_nova_poshta' === $shipping_method->get_method_id() ) {
+				return $shipping_method;
+			}
+		}
+
+		return null;
 	}
 
 }
