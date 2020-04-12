@@ -46,10 +46,7 @@ class Main {
 		$db       = new DB();
 		$api      = new API( $db, $settings );
 		$ajax     = new AJAX( $api );
-		add_action( 'wp_ajax_woo_nova_poshta_city', [ $ajax, 'cities' ] );
-		add_action( 'wp_ajax_nopriv_woo_nova_poshta_city', [ $ajax, 'cities' ] );
-		add_action( 'wp_ajax_woo_nova_poshta_warehouse', [ $ajax, 'warehouses' ] );
-		add_action( 'wp_ajax_nopriv_woo_nova_poshta_warehouse', [ $ajax, 'warehouses' ] );
+		$ajax->hooks();
 
 		$admin = new Admin( $api, $settings );
 		add_action( 'admin_enqueue_scripts', [ $admin, 'styles' ] );
