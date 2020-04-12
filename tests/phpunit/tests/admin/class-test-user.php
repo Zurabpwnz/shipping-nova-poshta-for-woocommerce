@@ -21,6 +21,21 @@ use WP_Mock;
 class Test_User extends Test_Case {
 
 	/**
+	 * Test adding hooks
+	 */
+	public function test_hooks() {
+		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$user = new User( $api );
+
+		WP_Mock::expectActionAdded( 'woo_nova_poshta_user_fields', [ $user, 'fields' ] );
+		WP_Mock::expectActionAdded( 'woocommerce_checkout_create_order_shipping_item', [ $user, 'checkout' ], 10, 4 );
+		WP_Mock::expectFilterAdded( 'woo_nova_poshta_default_city_id', [ $user, 'city' ] );
+		WP_Mock::expectFilterAdded( 'woo_nova_poshta_default_warehouse_id', [ $user, 'warehouse' ] );
+
+		$user->hooks();
+	}
+
+	/**
 	 * Test fields
 	 */
 	public function test_fields() {

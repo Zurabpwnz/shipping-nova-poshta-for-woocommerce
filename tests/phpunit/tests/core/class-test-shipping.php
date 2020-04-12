@@ -19,6 +19,18 @@ use WP_Mock;
 class Test_Shipping extends Test_Case {
 
 	/**
+	 * Test adding hooks
+	 */
+	public function test_hooks() {
+		$shipping = new Shipping();
+
+		WP_Mock::expectActionAdded( 'woocommerce_shipping_init', [ $shipping, 'require_methods' ] );
+		WP_Mock::expectFilterAdded( 'woocommerce_shipping_methods', [ $shipping, 'register_methods' ] );
+
+		$shipping->hooks();
+	}
+
+	/**
 	 * Test register_methods
 	 */
 	public function test_register_methods() {

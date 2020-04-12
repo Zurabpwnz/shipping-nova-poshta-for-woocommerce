@@ -59,21 +59,5 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 			];
 		}
 
-		/**
-		 * Calculate_shipping function.
-		 *
-		 * @param array $package Package.
-		 */
-		public function calculate_shipping( $package = [] ) {
-			$rate = [
-				'id'      => $this->id,
-				'label'   => $this->title,
-				'cost'    => '0',
-				'package' => $package,
-			];
-
-			$this->add_rate( $rate );
-		}
-
 	}
 }

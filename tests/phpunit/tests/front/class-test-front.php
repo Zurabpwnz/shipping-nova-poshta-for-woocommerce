@@ -1,6 +1,6 @@
 <?php
 /**
- * Thank you page tests
+ * Front tests
  *
  * @package   Woo-Nova-Poshta
  */
@@ -12,11 +12,23 @@ use Nova_Poshta\Tests\Test_Case;
 use WP_Mock;
 
 /**
- * Class Test_Thank_You
+ * Class Test_Front
  *
  * @package Nova_Poshta\Core
  */
 class Test_Front extends Test_Case {
+
+	/**
+	 * Test adding hooks
+	 */
+	public function test_hooks() {
+		$front = new Front();
+
+		WP_Mock::expectActionAdded( 'wp_enqueue_scripts', [ $front, 'styles' ] );
+		WP_Mock::expectActionAdded( 'wp_enqueue_scripts', [ $front, 'scripts' ] );
+
+		$front->hooks();
+	}
 
 	/**
 	 * Test styles on not checkout page

@@ -35,6 +35,20 @@ class Test_Admin extends Test_Case {
 	}
 
 	/**
+	 * Test adding hooks
+	 */
+	public function test_hooks() {
+		$admin = $this->instance();
+		WP_Mock::expectActionAdded( 'admin_enqueue_scripts', [ $admin, 'styles' ] );
+		WP_Mock::expectActionAdded( 'admin_enqueue_scripts', [ $admin, 'scripts' ] );
+		WP_Mock::expectActionAdded( 'admin_menu', [ $admin, 'add_menu' ] );
+		WP_Mock::expectActionAdded( 'admin_init', [ $admin, 'register_setting' ] );
+		WP_Mock::expectFilterAdded( 'pre_update_option_woo-nova-poshta', [ $admin, 'validate' ], 10, 2 );
+
+		$admin->hooks();
+	}
+
+	/**
 	 * Test styles
 	 */
 	public function test_dont_enqueue_styles() {

@@ -9,6 +9,7 @@ namespace Nova_Poshta\Admin;
 
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
+use WP_Mock;
 
 /**
  * Class Test_Notice
@@ -16,6 +17,19 @@ use Nova_Poshta\Tests\Test_Case;
  * @package Nova_Poshta\Admin
  */
 class Test_Notice extends Test_Case {
+
+	/**
+	 * Test adding hooks
+	 */
+	public function test_hooks() {
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$shipping = Mockery::mock( 'Nova_Poshta\Core\Shipping' );
+		$notice   = new Notice( $settings, $shipping );
+
+		WP_Mock::expectActionAdded( 'admin_notices', [ $notice, 'notices' ] );
+
+		$notice->hooks();
+	}
 
 	/**
 	 * Don't show notices

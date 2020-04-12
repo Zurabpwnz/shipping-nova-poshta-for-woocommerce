@@ -144,7 +144,7 @@ class Order {
 	 * @param \WC_Order_Item $item    Item.
 	 */
 	public function default_fields_for_shipping_item( int $item_id, \WC_Order_Item $item ) {
-		if ( ! $item instanceof \WC_Order_Item_Shipping ) {
+		if ( ! is_a( $item, 'WC_Order_Item_Shipping' ) ) {
 			return;
 		}
 		if ( 'woo_nova_poshta' !== $item->get_method_id() ) {
@@ -204,24 +204,23 @@ class Order {
 	 * @throws Exception Invalid DateTime.
 	 */
 	public function create_internet_document( WC_Order $order ): void {
-		global $post;
-		$shipping_method = $this->find_shipping_method( $order->get_shipping_methods() );
-		if ( ! $shipping_method ) {
+		$shipping_item = $this->find_shipping_method( $order->get_shipping_methods() );
+		if ( ! $shipping_item ) {
 			return;
 		}
-		$order_type_object = get_post_type_object( $post->post_type );
-
 		$internet_document = $this->api->internet_document(
 			$order->get_billing_first_name(),
 			$order->get_billing_last_name(),
 			$order->get_billing_phone(),
-			$shipping_method->get_meta( 'city_id' ),
-			$shipping_method->get_meta( 'warehouse_id' ),
+			$shipping_item->get_meta( 'city_id' ),
+			$shipping_item->get_meta( 'warehouse_id' ),
 			$order->get_total(),
 			$this->order_items_quantity( $order )
 		);
-		$shipping_method->add_meta_data( 'internet_document', $internet_document, true );
-		$shipping_method->save_meta_data();
+		if ( $internet_document ) {
+			$shipping_item->add_meta_data( 'internet_document', $internet_document, true );
+			$shipping_item->save_meta_data();
+		}
 	}
 
 	/**

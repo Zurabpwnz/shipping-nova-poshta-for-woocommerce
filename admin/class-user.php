@@ -43,9 +43,10 @@ class User {
 	 */
 	public function hooks() {
 		add_action( 'woo_nova_poshta_user_fields', [ $this, 'fields' ] );
+		add_action( 'woocommerce_checkout_create_order_shipping_item', [ $this, 'checkout' ], 10, 4 );
+
 		add_filter( 'woo_nova_poshta_default_city_id', [ $this, 'city' ] );
 		add_filter( 'woo_nova_poshta_default_warehouse_id', [ $this, 'warehouse' ] );
-		add_action( 'woocommerce_checkout_create_order_shipping_item', [ $this, 'checkout' ], 10, 4 );
 	}
 
 	/**

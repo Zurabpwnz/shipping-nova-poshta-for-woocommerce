@@ -20,6 +20,27 @@ use WP_Mock\Functions;
 class Test_DB extends Test_Case {
 
 	/**
+	 * Test including hooks
+	 */
+	public function test_hooks() {
+		WP_Mock::userFunction( 'plugin_dir_path' )->
+		once();
+		WP_Mock::userFunction( 'plugin_basename' )->
+		once()->
+		andReturn( 'path/to/main-file' );
+		WP_Mock::userFunction( 'register_activation_hook' )->
+		once();
+		global $wpdb;
+		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wpdb         = Mockery::mock( 'wpdb' );
+		$wpdb->prefix = 'prefix_';
+
+		$db = new DB();
+
+		$db->hooks();
+	}
+
+	/**
 	 * Test search cities
 	 */
 	public function test_create() {

@@ -7,6 +7,9 @@
 
 namespace Nova_Poshta\Core;
 
+use DateTime;
+use DateTimeZone;
+use Exception;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
 use WP_Mock;
@@ -256,6 +259,8 @@ class Test_API extends Test_Case {
 	 *
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
+	 *
+	 * @throws Exception Invalid DateTime.
 	 */
 	public function test_internet_document() {
 		$first_name         = 'First Name';
@@ -283,6 +288,7 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'setKey' )
 			->withArgs( [ $api_key ] )
 			->once();
+		$date = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
 		$np
 			->shouldReceive( 'newInternetDocument' )
 			->withArgs(
@@ -309,6 +315,7 @@ class Test_API extends Test_Case {
 						'SeatsAmount'   => '1',
 						'Description'   => 'Взуття',
 						'Weight'        => ( $count * .5 ) - .01,
+						'DateTime'      => $date->format( 'd.m.Y' ),
 					],
 				]
 			)
@@ -347,6 +354,8 @@ class Test_API extends Test_Case {
 	 *
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
+	 *
+	 * @throws Exception Invalid DateTime.
 	 */
 	public function test_internet_document_with_redelivery() {
 		$first_name         = 'First Name';
@@ -375,6 +384,7 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'setKey' )
 			->withArgs( [ $api_key ] )
 			->once();
+		$date = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
 		$np
 			->shouldReceive( 'newInternetDocument' )
 			->withArgs(
@@ -401,6 +411,7 @@ class Test_API extends Test_Case {
 						'SeatsAmount'          => '1',
 						'Description'          => 'Взуття',
 						'Weight'               => ( $count * .5 ) - .01,
+						'DateTime'             => $date->format( 'd.m.Y' ),
 						'BackwardDeliveryData' => [
 							[
 								'PayerType'        => 'Recipient',

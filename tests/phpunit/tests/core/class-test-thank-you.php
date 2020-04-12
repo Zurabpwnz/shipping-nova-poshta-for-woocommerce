@@ -9,6 +9,7 @@ namespace Nova_Poshta\Core;
 
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
+use WP_Mock;
 
 /**
  * Class Test_Thank_You
@@ -16,6 +17,18 @@ use Nova_Poshta\Tests\Test_Case;
  * @package Nova_Poshta\Core
  */
 class Test_Thank_You extends Test_Case {
+
+	/**
+	 * Test adding hooks
+	 */
+	public function test_hooks() {
+		$api       = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$thank_you = new Thank_You( $api );
+
+		WP_Mock::expectFilterAdded( 'woocommerce_get_order_item_totals', [ $thank_you, 'shipping' ], 10, 2 );
+
+		$thank_you->hooks();
+	}
 
 	/**
 	 * Test Thank you page without shipping
