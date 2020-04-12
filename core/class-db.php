@@ -42,6 +42,16 @@ class DB {
 	}
 
 	/**
+	 * Add hooks
+	 */
+	public function hooks() {
+		register_activation_hook(
+			plugin_dir_path( __DIR__ ) . dirname( plugin_basename( __DIR__ ) ) . '.php',
+			[ $this, 'create' ]
+		);
+	}
+
+	/**
 	 * Create tables
 	 */
 	public function create() {

@@ -20,6 +20,13 @@ namespace Nova_Poshta\Core;
 class Language {
 
 	/**
+	 * Add hooks
+	 */
+	public function hooks() {
+		add_action( 'plugins_loaded', [ $this, 'load' ] );
+	}
+
+	/**
 	 * Load translate
 	 */
 	public function load() {

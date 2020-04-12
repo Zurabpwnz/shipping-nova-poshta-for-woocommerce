@@ -38,6 +38,13 @@ class Thank_You {
 	}
 
 	/**
+	 * Add hooks
+	 */
+	public function hooks() {
+		add_filter( 'woocommerce_get_order_item_totals', [ $this, 'shipping' ], 10, 2 );
+	}
+
+	/**
 	 * Modify shipping information on thank you page
 	 *
 	 * @param array    $total_rows Total rows on thank you page.

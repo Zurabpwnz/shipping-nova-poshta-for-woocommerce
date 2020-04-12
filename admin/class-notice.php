@@ -48,6 +48,13 @@ class Notice {
 	}
 
 	/**
+	 * Add hooks
+	 */
+	public function hooks() {
+		add_action( 'admin_notices', [ $this, 'notices' ] );
+	}
+
+	/**
 	 * Show notices
 	 */
 	public function notices() {
