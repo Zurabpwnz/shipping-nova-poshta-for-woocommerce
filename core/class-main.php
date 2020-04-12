@@ -52,8 +52,7 @@ class Main {
 		$admin->hooks();
 
 		$shipping = new Shipping();
-		add_filter( 'woocommerce_shipping_methods', [ $shipping, 'register_methods' ] );
-		add_action( 'woocommerce_shipping_init', [ $shipping, 'require_methods' ] );
+		$shipping->hooks();
 
 		$notice = new Notice( $settings, $shipping );
 		add_action( 'admin_notices', [ $notice, 'notices' ] );

@@ -36,6 +36,15 @@ class Shipping {
 	}
 
 	/**
+	 * Add hooks
+	 */
+	public function hooks() {
+		add_action( 'woocommerce_shipping_init', [ $this, 'require_methods' ] );
+
+		add_filter( 'woocommerce_shipping_methods', [ $this, 'register_methods' ] );
+	}
+
+	/**
 	 * Register shipping method
 	 *
 	 * @param array $methods Shipping methods.
