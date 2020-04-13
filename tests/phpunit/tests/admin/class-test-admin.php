@@ -7,6 +7,7 @@
 
 namespace Nova_Poshta\Admin;
 
+use Exception;
 use Mockery;
 use Nova_Poshta\Core\Main;
 use Nova_Poshta\Tests\Test_Case;
@@ -26,16 +27,32 @@ class Test_Admin extends Test_Case {
 	 * Tear down the test.
 	 */
 	public function tearDown(): void {
+		//phpcs:ignore PEAR.Functions.FunctionCallSignature.SpaceBeforeOpenBracket
 		unset ( $GLOBALS['current_screen'] );
+		//phpcs:ignore WordPress.Security.NonceVerification.Missing
+		unset( $_POST );
 
 		parent::tearDown();
+	}
+
+	/**
+	 * Test adding hooks
+	 */
+	public function test_hooks() {
+		$admin = $this->instance();
+		WP_Mock::expectActionAdded( 'admin_enqueue_scripts', [ $admin, 'enqueue_styles' ] );
+		WP_Mock::expectActionAdded( 'admin_enqueue_scripts', [ $admin, 'enqueue_scripts' ] );
+		WP_Mock::expectActionAdded( 'admin_menu', [ $admin, 'add_menu' ] );
+		WP_Mock::expectActionAdded( 'admin_init', [ $admin, 'register_setting' ] );
+		WP_Mock::expectFilterAdded( 'pre_update_option_woo-nova-poshta', [ $admin, 'validate' ], 10, 2 );
+
+		$admin->hooks();
 	}
 
 	/**
 	 * Test styles
 	 */
 	public function test_do_NOT_enqueue_styles() {
-		// todo: Think on naming. We use NOT in uppercase for better readability.
 		global $current_screen;
 
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -44,7 +61,7 @@ class Test_Admin extends Test_Case {
 
 		$admin = $this->instance();
 
-		$admin->styles();
+		$admin->enqueue_styles();
 	}
 
 	/**
@@ -56,48 +73,24 @@ class Test_Admin extends Test_Case {
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen       = new stdClass();
 		$current_screen->base = 'toplevel_page_' . Main::PLUGIN_SLUG;
-		WP_Mock::userFunction( 'plugin_dir_url', [ 'times' => 2 ] );
-//		WP_Mock::userFunction(
-//			'wp_enqueue_style',
-//			[
-//				'args'  => [
-//					'select2',
-//					Functions::type( 'string' ),
-//					[],
-//					Main::VERSION,
-//					'all',
-//				],
-//				'times' => 1,
-//			]
-//		);
-
-		// Looks more readable as for me.
+		WP_Mock::userFunction( 'plugin_dir_url' )->
+		twice();
 		WP_Mock::userFunction( 'wp_enqueue_style' )->
-		with( 'select2', Functions::type( 'string' ), [], Main::VERSION, 'all' )->times( 1 );
-
-		WP_Mock::userFunction(
-			'wp_enqueue_style',
-			[
-				'args'  => [
-					Main::PLUGIN_SLUG,
-					Functions::type( 'string' ),
-					[ 'select2' ],
-					Main::VERSION,
-					'all',
-				],
-				'times' => 1,
-			]
-		);
+		with( 'select2', Functions::type( 'string' ), [], Main::VERSION, 'all' )->
+		once();
+		WP_Mock::userFunction( 'wp_enqueue_style' )->
+		with( Main::PLUGIN_SLUG, Functions::type( 'string' ), [ 'select2' ], Main::VERSION, 'all' )->
+		once();
 
 		$admin = $this->instance();
 
-		$admin->styles();
+		$admin->enqueue_styles();
 	}
 
 	/**
 	 * Test scripts
 	 */
-	public function test_dont_enqueue_scripts() {
+	public function test_do_NOT_enqueue_scripts() {
 		global $current_screen;
 
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -106,7 +99,7 @@ class Test_Admin extends Test_Case {
 
 		$admin = $this->instance();
 
-		$admin->scripts();
+		$admin->enqueue_scripts();
 	}
 
 	/**
@@ -119,47 +112,20 @@ class Test_Admin extends Test_Case {
 		$current_screen->base = 'toplevel_page_' . Main::PLUGIN_SLUG;
 		$admin_url            = '/admin-url/';
 		$nonce                = 'nonce123';
-		WP_Mock::userFunction( 'plugin_dir_url', [ 'times' => 2 ] );
-		WP_Mock::userFunction(
-			'admin_url',
-			[
-				'times'  => 1,
-				'return' => $admin_url,
-			]
-		);
-		WP_Mock::userFunction(
-			'wp_create_nonce',
-			[
-				'times'  => 1,
-				'return' => $nonce,
-			]
-		);
-		WP_Mock::userFunction(
-			'wp_enqueue_script',
-			[
-				'args'  => [
-					'select2',
-					Functions::type( 'string' ),
-					[ 'jquery' ],
-					Main::VERSION,
-					true,
-				],
-				'times' => 1,
-			]
-		);
-		WP_Mock::userFunction(
-			'wp_enqueue_script',
-			[
-				'args'  => [
-					Main::PLUGIN_SLUG,
-					Functions::type( 'string' ),
-					[ 'jquery', 'select2' ],
-					Main::VERSION,
-					true,
-				],
-				'times' => 1,
-			]
-		);
+		WP_Mock::userFunction( 'plugin_dir_url' )->
+		twice();
+		WP_Mock::userFunction( 'admin_url' )->
+		once()->
+		andReturn( $admin_url );
+		WP_Mock::userFunction( 'wp_create_nonce' )->
+		once()->
+		andReturn( $nonce );
+		WP_Mock::userFunction( 'wp_enqueue_script' )->
+		with( 'select2', Functions::type( 'string' ), [ 'jquery' ], Main::VERSION, true )->
+		once();
+		WP_Mock::userFunction( 'wp_enqueue_script' )->
+		with( Main::PLUGIN_SLUG, Functions::type( 'string' ), [ 'jquery', 'select2' ], Main::VERSION, true )->
+		once();
 		WP_Mock::userFunction(
 			'wp_localize_script',
 			[
@@ -176,23 +142,16 @@ class Test_Admin extends Test_Case {
 
 		$admin = $this->instance();
 
-		$admin->scripts();
+		$admin->enqueue_scripts();
 	}
 
 	/**
 	 * Test register settings
 	 */
 	public function test_register_settings() {
-		WP_Mock::userFunction(
-			'register_setting',
-			[
-				'args'  => [
-					Main::PLUGIN_SLUG,
-					Main::PLUGIN_SLUG,
-				],
-				'times' => 1,
-			]
-		);
+		WP_Mock::userFunction( 'register_setting' )->
+		with( Main::PLUGIN_SLUG, Main::PLUGIN_SLUG )->
+		once();
 
 		$admin = $this->instance();
 		$admin->register_setting();
@@ -203,25 +162,21 @@ class Test_Admin extends Test_Case {
 	 */
 	public function test_add_menu() {
 		$admin = $this->instance();
-//		WP_Mock::userFunction( 'plugin_dir_url', [ 'times' => 1 ] );
-		WP_Mock::passthruFunction( 'plugin_dir_url' )->times( 1 );
-		WP_Mock::userFunction(
-			'add_menu_page',
+		WP_Mock::passthruFunction( 'plugin_dir_url' )->
+		once();
+		WP_Mock::userFunction( 'add_menu_page' )->
+		with(
+			Main::PLUGIN_NAME,
+			Main::PLUGIN_NAME,
+			'manage_options',
+			Main::PLUGIN_SLUG,
 			[
-				'args'  => [
-					Main::PLUGIN_NAME,
-					Main::PLUGIN_NAME,
-					'manage_options',
-					Main::PLUGIN_SLUG,
-					[
-						$admin,
-						'page_options',
-					],
-					Functions::type( 'string' ),
-				],
-				'times' => 1,
-			]
-		);
+				$admin,
+				'page_options',
+			],
+			Functions::type( 'string' )
+		)->
+		once();
 
 		$admin->add_menu();
 	}
@@ -230,33 +185,16 @@ class Test_Admin extends Test_Case {
 	 * Test page option tab general
 	 */
 	public function test_page_options_general() {
-		WP_Mock::userFunction(
-			'wp_verify_nonce',
-			[
-				'times'  => 1,
-				'return' => false,
-			]
-		);
-		WP_Mock::userFunction( 'plugin_dir_path', [ 'times' => 2 ] );
-		WP_Mock::userFunction( 'get_admin_url', [ 'times' => 1 ] );
-		WP_Mock::userFunction(
-			'settings_errors',
-			[
-				'args'  => [
-					Main::PLUGIN_SLUG,
-				],
-				'times' => 1,
-			]
-		);
-		WP_Mock::userFunction(
-			'settings_fields',
-			[
-				'args'  => [
-					Main::PLUGIN_SLUG,
-				],
-				'times' => 1,
-			]
-		);
+		WP_Mock::userFunction( 'plugin_dir_path' )->
+		twice();
+		WP_Mock::userFunction( 'get_admin_url' )->
+		once();
+		WP_Mock::userFunction( 'settings_errors' )->
+		with( Main::PLUGIN_SLUG )->
+		once();
+		WP_Mock::userFunction( 'settings_fields' )->
+		with( Main::PLUGIN_SLUG )->
+		once();
 		WP_Mock::userFunction( 'submit_button', [ 'times' => 1 ] );
 		$city_id      = 'city-id';
 		$warehouse_id = 'warehouse-id';
@@ -271,7 +209,7 @@ class Test_Admin extends Test_Case {
 			->withArgs( [ $city_id ] )
 			->once()
 			->andReturn( [ 'Warehuse #1' ] );
-		WP_Mock::userFunction( 'selected', [ 'times' => 1 ] );
+		WP_Mock::userFunction( 'selected' )->once();
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 		$settings->shouldReceive( 'api_key' )->once();
 		$settings->shouldReceive( 'phone' )->once();
@@ -288,9 +226,42 @@ class Test_Admin extends Test_Case {
 		ob_start();
 		$admin->page_options();
 
-//		$this->assertTrue( ! empty( ob_get_clean() ) );
 		$this->assertNotEmpty( ob_get_clean() );
-		// todo: if we will keep output here (not using check_admin_referer), then we have to compare real output with the expected one.
+	}
+
+	/**
+	 * Test creating invoice
+	 *
+	 * @dataProvider dp_request
+	 *
+	 * @param array $request Request example.
+	 *
+	 * @throws Exception Invalid DateTime.
+	 */
+	public function test_page_create_invoice( array $request ) {
+		$_POST[ Main::PLUGIN_SLUG ] = $request;
+		WP_Mock::userFunction( 'check_admin_referer' )->
+		with( Main::PLUGIN_SLUG . '-invoice' )->
+		once()->
+		andReturn( false );
+		$request_to_api = array_values( $request );
+		array_push( $request_to_api, 1 );
+		array_push( $request_to_api, 0 );
+		FunctionMocker::replace( 'filter_input', $request );
+		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$api
+			->shouldReceive( 'internet_document' )
+			->between( 0, 1 )
+			->withArgs( $request_to_api );
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		WP_Mock::userFunction( 'plugin_dir_path' )->once();
+		WP_Mock::userFunction( 'get_admin_url' )->once();
+		$admin = new Admin( $api, $settings );
+		ob_start();
+
+		$admin->page_options();
+
+		$this->assertnotEmpty( ob_get_clean() );
 	}
 
 	/**
@@ -299,8 +270,7 @@ class Test_Admin extends Test_Case {
 	 *
 	 * @return array
 	 */
-	public function provider_request() {
-		// todo: think on naming. We use prefix dp_ for data providers. and place then after test method.
+	public function dp_request() {
 		return [
 			[
 				[
@@ -316,67 +286,15 @@ class Test_Admin extends Test_Case {
 	}
 
 	/**
-	 * Test creating invoice controller
-	 *
-	 * @dataProvider provider_request
-	 *
-	 * @param array $request Request example.
-	 */
-	public function test_controller( array $request ) {
-		// todo: No need to test a private function by itself. It is called by tested method.
-		WP_Mock::userFunction(
-			'wp_verify_nonce',
-			[
-				'times'  => 1,
-				'return' => true,
-			]
-		);
-		$request_to_api = array_values( $request );
-		array_push( $request_to_api, 1 );
-		array_push( $request_to_api, 0 );
-		FunctionMocker::replace( 'filter_input', $request );
-		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$api
-			->shouldReceive( 'internet_document' )
-			->once()
-			->withArgs( $request_to_api );
-		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		WP_Mock::userFunction( 'plugin_dir_path', [ 'times' => 1 ] );
-		WP_Mock::userFunction( 'get_admin_url', [ 'times' => 1 ] );
-		$admin = new Admin( $api, $settings );
-		ob_start();
-
-		$admin->page_options();
-
-//		$this->assertTrue( ! empty( ob_get_clean() ) );
-		$this->assertnotEmpty( ob_get_clean() );
-	}
-
-	/**
-	 * Test page option tab create invoce
+	 * Test page option tab create invoice
 	 */
 	public function test_page_options_create_invoice() {
-		WP_Mock::userFunction(
-			'wp_verify_nonce',
-			[
-				'times'  => 1,
-				'return' => false,
-			]
-		);
-		WP_Mock::userFunction( 'plugin_dir_path', [ 'times' => 2 ] );
-		WP_Mock::userFunction( 'get_admin_url', [ 'times' => 1 ] );
-		WP_Mock::userFunction( 'submit_button', [ 'times' => 1 ] );
-		WP_Mock::userFunction(
-			'wp_nonce_field',
-			[
-				'args'  => [
-					Main::PLUGIN_SLUG . '-invoice',
-					Main::PLUGIN_SLUG . '_nonce',
-					false,
-				],
-				'times' => 1,
-			]
-		);
+		WP_Mock::userFunction( 'plugin_dir_path' )->twice();
+		WP_Mock::userFunction( 'get_admin_url' )->once();
+		WP_Mock::userFunction( 'submit_button' )->once();
+		WP_Mock::userFunction( 'wp_nonce_field' )->
+		with( Main::PLUGIN_SLUG . '-invoice', Main::PLUGIN_SLUG . '_nonce', false )->
+		once();
 		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
 			->shouldReceive( 'cities' )
@@ -393,7 +311,6 @@ class Test_Admin extends Test_Case {
 		ob_start();
 		$admin->page_options();
 
-		// $this->assertTrue( ! empty( ob_get_clean() ) );
 		$this->assertNotEmpty( ob_get_clean() );
 	}
 
@@ -408,17 +325,9 @@ class Test_Admin extends Test_Case {
 			->once()
 			->withArgs( [ $key ] );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		WP_Mock::userFunction(
-			'add_settings_error',
-			[
-				'args'  => [
-					Main::PLUGIN_SLUG,
-					403,
-					Functions::type( 'string' ),
-				],
-				'times' => 1,
-			]
-		);
+		WP_Mock::userFunction( 'add_settings_error' )->
+		with( Main::PLUGIN_SLUG, 403, Functions::type( 'string' ) )->
+		once();
 		$admin = new Admin( $api, $settings );
 
 		$admin->validate( [ 'api_key' => $key ] );
@@ -430,7 +339,6 @@ class Test_Admin extends Test_Case {
 	 * @return Admin
 	 */
 	private function instance(): Admin {
-		// todo: Place private test methods to the bottom of the classes.
 		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 

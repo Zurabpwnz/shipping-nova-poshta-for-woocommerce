@@ -12,6 +12,8 @@
 
 namespace Nova_Poshta\Core;
 
+use DateTime;
+use Exception;
 use LisDev\Delivery\NovaPoshtaApi2;
 
 /**
@@ -32,7 +34,7 @@ class API {
 	 *
 	 * @var NovaPoshtaApi2
 	 */
-	private $np;
+	protected $np;
 	/**
 	 * Database
 	 *
@@ -65,7 +67,7 @@ class API {
 			$request = $this->np->getCities( 0 );
 			if ( $request['success'] ) {
 				$this->db->update_cities( $request['data'] );
-				set_transient( Main::PLUGIN_SLUG . '-cities', 1, DAY_IN_SECONDS );
+				set_transient( Main::PLUGIN_SLUG . '-cities', 1, constant( 'DAY_IN_SECONDS' ) );
 			}
 			unset( $request );
 		}
@@ -118,7 +120,7 @@ class API {
 			$request = $this->np->getWarehouses( $city_id );
 			if ( $request['success'] ) {
 				$this->db->update_warehouses( $request['data'] );
-				set_transient( Main::PLUGIN_SLUG . '-warehouse-' . $city_id, 1, DAY_IN_SECONDS );
+				set_transient( Main::PLUGIN_SLUG . '-warehouse-' . $city_id, 1, constant( 'DAY_IN_SECONDS' ) );
 			}
 			unset( $request );
 		}
@@ -127,7 +129,7 @@ class API {
 	}
 
 	/**
-	 * Create interneT document
+	 * Create internet document
 	 *
 	 * @param string $first_name   Customer first name.
 	 * @param string $last_name    Customer last name.
@@ -139,6 +141,7 @@ class API {
 	 * @param float  $redelivery   Cash on delivery price.
 	 *
 	 * @return string
+	 * @throws Exception Invalid DateTime.
 	 */
 	public function internet_document(
 		string $first_name, string $last_name, string $phone,
@@ -163,12 +166,13 @@ class API {
 		$recipient = [
 			'FirstName'        => $first_name,
 			'LastName'         => $last_name,
-			'Phone'            => $phone,
+			'Phone'            => preg_replace( '/[^0-9]/', '', $phone ),
 			'Region'           => $this->area( $city_id ),
 			'City'             => $city_id,
 			'CityRecipient'    => $city_id,
 			'RecipientAddress' => $warehouse_id,
 		];
+		$date      = new DateTime( '', new \DateTimeZone( 'Europe/Kiev' ) );
 		$info      = [
 			'ServiceType'   => 'WarehouseWarehouse',
 			'PaymentMethod' => 'Cash',
@@ -177,6 +181,7 @@ class API {
 			'SeatsAmount'   => '1',
 			'Description'   => 'Взуття', // TODO: Field with deliver.
 			'Weight'        => ( $count * .5 ) - .01, // TODO: Calculate weight.
+			'DateTime'      => $date->format( 'd.m.Y' ),
 		];
 		if ( $redelivery ) {
 			$info['BackwardDeliveryData'] = [
@@ -188,6 +193,8 @@ class API {
 			];
 		}
 		$internet_document = $this->np->newInternetDocument( $sender, $recipient, $info );
+
+		// TODO: Return WP_Error.
 
 		return $internet_document['success'] ? $internet_document['data'][0]['IntDocNumber'] : '';
 	}

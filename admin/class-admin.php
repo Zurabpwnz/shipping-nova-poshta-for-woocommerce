@@ -12,6 +12,7 @@
 
 namespace Nova_Poshta\Admin;
 
+use Exception;
 use Nova_Poshta\Core\API;
 use Nova_Poshta\Core\Main;
 use Nova_Poshta\Core\Settings;
@@ -48,10 +49,20 @@ class Admin {
 	}
 
 	/**
+	 * Add hooks
+	 */
+	public function hooks() {
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_styles' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
+		add_action( 'admin_menu', [ $this, 'add_menu' ] );
+		add_action( 'admin_init', [ $this, 'register_setting' ] );
+		add_filter( 'pre_update_option_woo-nova-poshta', [ $this, 'validate' ], 10, 2 );
+	}
+
+	/**
 	 * Enqueue styles
 	 */
-	public function styles() {
-		// todo: Think on naming. Function name should include verb. enqueue_styles() looks better for me.
+	public function enqueue_styles() {
 		if ( ! $this->is_plugin_page() ) {
 			return;
 		}
@@ -62,7 +73,7 @@ class Admin {
 	/**
 	 * Enqueue scripts
 	 */
-	public function scripts() {
+	public function enqueue_scripts() {
 		if ( ! $this->is_plugin_page() ) {
 			return;
 		}
@@ -75,7 +86,7 @@ class Admin {
 		);
 		wp_enqueue_script(
 			Main::PLUGIN_SLUG,
-			plugin_dir_url( __DIR__ ) . 'front/assets/js/main.js',
+			plugin_dir_url( __FILE__ ) . '/assets/js/main.js',
 			[
 				'jquery',
 				'select2',
@@ -106,9 +117,9 @@ class Admin {
 	 * @return bool
 	 */
 	private function is_plugin_page(): bool {
-		global $current_screen;
+		global $current_screen, $post_type;
 
-		return 0 === strpos( $current_screen->base, 'toplevel_page_' . Main::PLUGIN_SLUG );
+		return 0 === strpos( $current_screen->base, 'toplevel_page_' . Main::PLUGIN_SLUG ) || 'shop_order' === $post_type;
 	}
 
 	/**
@@ -130,12 +141,14 @@ class Admin {
 
 	/**
 	 * Controller for creating invoices
+	 *
+	 * @throws Exception Invalid DateTime.
 	 */
 	private function controller(): void {
-		$nonce = filter_input( INPUT_POST, Main::PLUGIN_SLUG . '_nonce', FILTER_SANITIZE_STRING );
-		if ( ! wp_verify_nonce( $nonce, Main::PLUGIN_SLUG . '-invoice' ) ) {
+		if ( ! isset( $_POST[ Main::PLUGIN_SLUG ] ) ) {
 			return;
 		}
+		check_admin_referer( Main::PLUGIN_SLUG . '-invoice' );
 		$fields = filter_input( INPUT_POST, Main::PLUGIN_SLUG, FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
 		$this->api->internet_document(
 			$fields['first_name'],
@@ -151,11 +164,12 @@ class Admin {
 
 	/**
 	 * View for page options
+	 *
+	 * @throws Exception Invalid DateTime.
 	 */
 	public function page_options() {
 		$this->controller();
-		// todo: why to do anything if nonce check was not passed?
-		// todo: check_admin_referer() should be enough.
+
 		require plugin_dir_path( __FILE__ ) . 'partials/page-options.php';
 	}
 

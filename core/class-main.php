@@ -44,56 +44,37 @@ class Main {
 
 		$settings = new Settings();
 		$db       = new DB();
-		$api      = new API( $db, $settings );
-		$ajax     = new AJAX( $api );
-		add_action( 'wp_ajax_woo_nova_poshta_city', [ $ajax, 'cities' ] );
-		add_action( 'wp_ajax_nopriv_woo_nova_poshta_city', [ $ajax, 'cities' ] );
-		add_action( 'wp_ajax_woo_nova_poshta_warehouse', [ $ajax, 'warehouses' ] );
-		add_action( 'wp_ajax_nopriv_woo_nova_poshta_warehouse', [ $ajax, 'warehouses' ] );
+		$db->hooks();
+		$api  = new API( $db, $settings );
+		$ajax = new AJAX( $api );
+		$ajax->hooks();
 
 		$admin = new Admin( $api, $settings );
-		add_action( 'admin_enqueue_scripts', [ $admin, 'styles' ] );
-		add_action( 'admin_enqueue_scripts', [ $admin, 'scripts' ] );
-		add_action( 'admin_menu', [ $admin, 'add_menu' ] );
-		add_action( 'admin_init', [ $admin, 'register_setting' ] );
-		add_filter( 'pre_update_option_woo-nova-poshta', [ $admin, 'validate' ], 10, 2 );
+		$admin->hooks();
 
 		$shipping = new Shipping();
-		add_filter( 'woocommerce_shipping_methods', [ $shipping, 'register_methods' ] );
-		add_action( 'woocommerce_shipping_init', [ $shipping, 'require_methods' ] );
+		$shipping->hooks();
 
 		$notice = new Notice( $settings, $shipping );
-		add_action( 'admin_notices', [ $notice, 'notices' ] );
+		$notice->hooks();
 
 		$checkout = new Checkout();
-		add_action( 'woocommerce_after_shipping_rate', [ $checkout, 'fields' ] );
-		add_action( 'woocommerce_checkout_process', [ $checkout, 'validate' ] );
+		$checkout->hooks();
 
 		$front = new Front();
-		add_action( 'wp_enqueue_scripts', [ $front, 'styles' ] );
-		add_action( 'wp_enqueue_scripts', [ $front, 'scripts' ] );
+		$front->hooks();
 
 		$order = new Order( $api );
-		add_action( 'woocommerce_checkout_create_order_shipping_item', [ $order, 'save' ], 10, 4 );
-		add_filter( 'woocommerce_order_item_display_meta_key', [ $order, 'labels' ], 10, 2 );
-		add_filter( 'woocommerce_order_item_display_meta_value', [ $order, 'values' ], 10, 2 );
+		$order->hooks();
 
 		$thank_you = new Thank_You( $api );
-		add_filter( 'woocommerce_get_order_item_totals', [ $thank_you, 'shipping' ], 10, 2 );
+		$thank_you->hooks();
 
 		$user = new User( $api );
-		add_action( 'woo_nova_poshta_user_fields', [ $user, 'fields' ] );
-		add_filter( 'woo_nova_poshta_default_city_id', [ $user, 'city' ] );
-		add_filter( 'woo_nova_poshta_default_warehouse_id', [ $user, 'warehouse' ] );
-		add_action( 'woocommerce_checkout_create_order_shipping_item', [ $user, 'checkout' ], 10, 4 );
+		$user->hooks();
 
 		$language = new Language();
-		add_action( 'plugins_loaded', [ $language, 'load' ] );
-
-		register_activation_hook(
-			plugin_dir_path( __DIR__ ) . dirname( plugin_basename( __DIR__ ) ) . '.php',
-			[ $db, 'create' ]
-		);
+		$language->hooks();
 	}
 
 }

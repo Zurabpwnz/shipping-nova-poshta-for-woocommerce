@@ -20,6 +20,18 @@ use WP_Mock\Functions;
 class Test_Checkout extends Test_Case {
 
 	/**
+	 * Test adding hooks
+	 */
+	public function test_hooks() {
+		$checkout = new Checkout();
+
+		WP_Mock::expectActionAdded( 'woocommerce_after_shipping_rate', [ $checkout, 'fields' ] );
+		WP_Mock::expectActionAdded( 'woocommerce_checkout_process', [ $checkout, 'validate' ] );
+
+		$checkout->hooks();
+	}
+
+	/**
 	 * Test fields action
 	 */
 	public function test_fields() {

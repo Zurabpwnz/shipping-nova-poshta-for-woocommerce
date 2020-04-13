@@ -21,6 +21,21 @@ use WP_Mock;
 class Test_User extends Test_Case {
 
 	/**
+	 * Test adding hooks
+	 */
+	public function test_hooks() {
+		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$user = new User( $api );
+
+		WP_Mock::expectActionAdded( 'woo_nova_poshta_user_fields', [ $user, 'fields' ] );
+		WP_Mock::expectActionAdded( 'woocommerce_checkout_create_order_shipping_item', [ $user, 'checkout' ], 10, 4 );
+		WP_Mock::expectFilterAdded( 'woo_nova_poshta_default_city_id', [ $user, 'city' ] );
+		WP_Mock::expectFilterAdded( 'woo_nova_poshta_default_warehouse_id', [ $user, 'warehouse' ] );
+
+		$user->hooks();
+	}
+
+	/**
 	 * Test fields
 	 */
 	public function test_fields() {
@@ -61,7 +76,7 @@ class Test_User extends Test_Case {
 	/**
 	 * Test don't save
 	 */
-	public function test_dont_save_on_checkout_for_not_auth_users() {
+	public function test_do_NOT_save_on_checkout_for_not_auth_users() {
 		WP_Mock::userFunction( 'get_current_user_id' )->
 		once();
 
@@ -74,7 +89,10 @@ class Test_User extends Test_Case {
 	/**
 	 * Test on not valid nonce
 	 */
-	public function test_not_valid_nonce_on_checkout_for_not_valid_nonce() {
+	public function test_not_valid_nonce_on_checkout_for_NOT_valid_nonce() {
+		WP_Mock::userFunction( 'wp_verify_nonce' )->
+		once()->
+		andReturn( false );
 		WP_Mock::userFunction( 'get_current_user_id' )->
 		once()->
 		andReturn( 1 );
@@ -160,12 +178,19 @@ class Test_User extends Test_Case {
 	 * Test city filter for not auth user
 	 */
 	public function test_city_id_not_auth_user() {
+		$user_id = 10;
 		$city_id = 'city-id';
+		WP_Mock::userFunction( 'get_current_user_id' )->
+		once()->
+		andReturn( $user_id );
+		WP_Mock::userFunction( 'get_user_meta' )->
+		withArgs( [ $user_id, 'woo_nova_poshta_city', true ] )->
+		once()->
+		andReturn( $city_id );
 
 		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$user = new User( $api );
 
-		// todo: this tests seems impossible to run in isolation. WP functions are not mocked.
 		$this->assertSame( $city_id, $user->city( $city_id ) );
 	}
 

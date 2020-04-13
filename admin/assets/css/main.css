@@ -1,12 +1,56 @@
 .woo-nova-poshta-form {
     max-width: 500px;
 }
+
 .woo-nova-poshta-form input[type=text],
 .woo-nova-poshta-form input[type=tel],
 .woo-nova-poshta-form input[type=number],
 .woo-nova-poshta-form select,
-.woo-nova-poshta-form .select2-container{
+.woo-nova-poshta-form .select2-container {
     display: block;
     width: 100%;
     max-width: 100%;
+}
+
+#order_shipping_line_items .select2-container {
+    width: 100% !important;
+}
+
+#order_shipping_line_items .select2-container .select2-selection--single {
+    height: 30px;
+}
+
+#order_shipping_line_items .select2-container .select2-selection {
+    font-size: 14px;
+    line-height: 2;
+    color: #32373c;
+    border-color: #7e8993;
+    box-shadow: none;
+    border-radius: 3px;
+    padding: 0 24px 0 8px;
+    min-height: 30px;
+    -webkit-appearance: none;
+    background: #fff
+}
+
+#order_shipping_line_items .select2-container .select2-selection--single .select2-selection__rendered {
+    line-height: 30px;
+}
+
+#order_shipping_line_items .select2-container .select2-selection--single .select2-selection__arrow {
+    height: 28px;
+}
+
+#woocommerce-order-items #order_shipping_line_items.woo-nova-poshta .thumb div {
+    margin: 0;
+    width: 100%;
+}
+
+#woocommerce-order-items #order_shipping_line_items.woo-nova-poshta .thumb div::before {
+    content: '';
+    display: block;
+    width: 42px;
+    height: 42px;
+    background-image: url('../img/nova-poshta.svg');
+    background-size: cover;
 }

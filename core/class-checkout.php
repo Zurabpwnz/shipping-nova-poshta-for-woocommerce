@@ -22,6 +22,14 @@ use WC_Shipping_Rate;
 class Checkout {
 
 	/**
+	 * Add hooks
+	 */
+	public function hooks() {
+		add_action( 'woocommerce_after_shipping_rate', [ $this, 'fields' ] );
+		add_action( 'woocommerce_checkout_process', [ $this, 'validate' ] );
+	}
+
+	/**
 	 * Fields
 	 *
 	 * @param WC_Shipping_Rate $shipping_rate Shipping rate.

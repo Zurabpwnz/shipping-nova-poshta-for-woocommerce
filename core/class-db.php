@@ -42,6 +42,16 @@ class DB {
 	}
 
 	/**
+	 * Add hooks
+	 */
+	public function hooks() {
+		register_activation_hook(
+			plugin_dir_path( __DIR__ ) . dirname( plugin_basename( __DIR__ ) ) . '.php',
+			[ $this, 'create' ]
+		);
+	}
+
+	/**
 	 * Create tables
 	 */
 	public function create() {
@@ -49,7 +59,8 @@ class DB {
 		$cities_sql = 'CREATE TABLE ' . $this->cities_table . '
 			(
 		        city_id            VARCHAR(36)  NOT NULL UNIQUE,
-		        description        VARCHAR(100) NOT NULL
+		        description        VARCHAR(100) NOT NULL,
+		        area               VARCHAR(100) NOT NULL
 	        ) ' . $wpdb->get_charset_collate();
 
 		$warehouses_sql = 'CREATE TABLE ' . $this->warehouses_table . '
@@ -162,7 +173,7 @@ class DB {
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		return $wpdb->get_var(
 			$wpdb->prepare( 'SELECT `description` FROM ' . $this->cities_table . ' WHERE city_id = %s', $city_id )
-		);
+		) ?: '';
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
@@ -183,7 +194,7 @@ class DB {
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		return $wpdb->get_var(
 			$wpdb->prepare( 'SELECT `area` FROM ' . $this->cities_table . ' WHERE city_id = %s', $city_id )
-		);
+		) ?: '';
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared

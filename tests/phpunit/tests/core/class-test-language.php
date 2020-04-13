@@ -18,6 +18,17 @@ use WP_Mock;
 class Test_Language extends Test_Case {
 
 	/**
+	 * Test adding hooks
+	 */
+	public function test_hooks() {
+		$language = new Language();
+
+		WP_Mock::expectActionAdded( 'plugins_loaded', [ $language, 'load' ] );
+
+		$language->hooks();
+	}
+
+	/**
 	 * Test search cities
 	 */
 	public function test_load() {

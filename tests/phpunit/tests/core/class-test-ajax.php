@@ -7,8 +7,10 @@
 
 namespace Nova_Poshta\Core;
 
+use Mockery;
 use Nova_Poshta\Tests\Test_Case;
 use tad\FunctionMocker\FunctionMocker;
+use WP_Mock;
 
 /**
  * Class Test_Ajax
@@ -16,6 +18,21 @@ use tad\FunctionMocker\FunctionMocker;
  * @package Nova_Poshta\Core
  */
 class Test_Ajax extends Test_Case {
+
+	/**
+	 * Test adding hooks
+	 */
+	public function test_hooks() {
+		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$ajax = new AJAX( $api );
+
+		WP_Mock::expectActionAdded( 'wp_ajax_woo_nova_poshta_city', [ $ajax, 'cities' ] );
+		WP_Mock::expectActionAdded( 'wp_ajax_nopriv_woo_nova_poshta_city', [ $ajax, 'cities' ] );
+		WP_Mock::expectActionAdded( 'wp_ajax_woo_nova_poshta_warehouse', [ $ajax, 'warehouses' ] );
+		WP_Mock::expectActionAdded( 'wp_ajax_nopriv_woo_nova_poshta_warehouse', [ $ajax, 'warehouses' ] );
+
+		$ajax->hooks();
+	}
 
 	/**
 	 * Test search cities
@@ -39,7 +56,7 @@ class Test_Ajax extends Test_Case {
 		)->
 		once();
 		$filter_input = FunctionMocker::replace( 'filter_input', $city_name );
-		$api          = \Mockery::mock( 'Nova_Poshta\Core\API' );
+		$api          = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
 			->shouldReceive( 'cities' )
 			->once()
@@ -74,7 +91,7 @@ class Test_Ajax extends Test_Case {
 		)->
 		once();
 		$filter_input = FunctionMocker::replace( 'filter_input', $city_id );
-		$api          = \Mockery::mock( 'Nova_Poshta\Core\API' );
+		$api          = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
 			->shouldReceive( 'warehouses' )
 			->once()

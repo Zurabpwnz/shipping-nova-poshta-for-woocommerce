@@ -36,6 +36,16 @@ class AJAX {
 	}
 
 	/**
+	 * Add hooks
+	 */
+	public function hooks() {
+		add_action( 'wp_ajax_woo_nova_poshta_city', [ $this, 'cities' ] );
+		add_action( 'wp_ajax_nopriv_woo_nova_poshta_city', [ $this, 'cities' ] );
+		add_action( 'wp_ajax_woo_nova_poshta_warehouse', [ $this, 'warehouses' ] );
+		add_action( 'wp_ajax_nopriv_woo_nova_poshta_warehouse', [ $this, 'warehouses' ] );
+	}
+
+	/**
 	 * List of the cities by search field
 	 */
 	public function cities() {

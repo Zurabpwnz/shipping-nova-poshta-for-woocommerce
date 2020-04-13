@@ -9,6 +9,7 @@ namespace Nova_Poshta\Admin;
 
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
+use WP_Mock;
 
 /**
  * Class Test_Notice
@@ -16,6 +17,19 @@ use Nova_Poshta\Tests\Test_Case;
  * @package Nova_Poshta\Admin
  */
 class Test_Notice extends Test_Case {
+
+	/**
+	 * Test adding hooks
+	 */
+	public function test_hooks() {
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$shipping = Mockery::mock( 'Nova_Poshta\Core\Shipping' );
+		$notice   = new Notice( $settings, $shipping );
+
+		WP_Mock::expectActionAdded( 'admin_notices', [ $notice, 'notices' ] );
+
+		$notice->hooks();
+	}
 
 	/**
 	 * Don't show notices
@@ -40,8 +54,6 @@ class Test_Notice extends Test_Case {
 	 * Show all notices
 	 */
 	public function test_show_all_notice() {
-		// todo: 3 tests (or via dataprovider) needed: show empty_api_key, show shipping_method_enable, show both.
-		// todo: Must check actual notice message.
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 		$settings
 			->shouldReceive( 'api_key' )
@@ -57,7 +69,7 @@ class Test_Notice extends Test_Case {
 
 		$notice->notices();
 
-		$this->assertTrue( ! empty( ob_get_clean() ) ); // todo: assertNotEmpty.
+		$this->assertNotEmpty( ob_get_clean() );
 	}
 
 }

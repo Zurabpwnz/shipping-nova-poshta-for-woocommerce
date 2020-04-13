@@ -10,10 +10,19 @@
   },
   "autoload": {
     "classmap": [
-      "tests/phpunit/classes",
       "core",
       "admin",
       "front"
+    ]
+  },
+  "autoload-dev": {
+    "classmap": [
+      "core",
+      "admin",
+      "front",
+      "shipping",
+      "tests/phpunit/classes",
+      "tests/phpunit/stubs"
     ]
   }
 }

@@ -22,9 +22,17 @@ use Nova_Poshta\Core\Main;
 class Front {
 
 	/**
+	 * Add hooks
+	 */
+	public function hooks() {
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_styles' ] );
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
+	}
+
+	/**
 	 * Enqueue styles
 	 */
-	public function styles() {
+	public function enqueue_styles() {
 		if ( ! is_checkout() ) {
 			return;
 		}
@@ -35,7 +43,7 @@ class Front {
 	/**
 	 * Enqueue scripts
 	 */
-	public function scripts() {
+	public function enqueue_scripts() {
 		if ( ! is_checkout() ) {
 			return;
 		}
