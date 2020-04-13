@@ -24,8 +24,8 @@ class Test_Front extends Test_Case {
 	public function test_hooks() {
 		$front = new Front();
 
-		WP_Mock::expectActionAdded( 'wp_enqueue_scripts', [ $front, 'styles' ] );
-		WP_Mock::expectActionAdded( 'wp_enqueue_scripts', [ $front, 'scripts' ] );
+		WP_Mock::expectActionAdded( 'wp_enqueue_scripts', [ $front, 'enqueue_styles' ] );
+		WP_Mock::expectActionAdded( 'wp_enqueue_scripts', [ $front, 'enqueue_scripts' ] );
 
 		$front->hooks();
 	}
@@ -39,7 +39,7 @@ class Test_Front extends Test_Case {
 		once();
 		$front = new Front();
 
-		$front->styles();
+		$front->enqueue_styles();
 	}
 
 	/**
@@ -61,7 +61,7 @@ class Test_Front extends Test_Case {
 		once();
 		$front = new Front();
 
-		$front->styles();
+		$front->enqueue_styles();
 	}
 
 	/**
@@ -73,7 +73,7 @@ class Test_Front extends Test_Case {
 		once();
 		$front = new Front();
 
-		$front->scripts();
+		$front->enqueue_scripts();
 	}
 
 	/**
@@ -126,7 +126,7 @@ class Test_Front extends Test_Case {
 
 		$front = new Front();
 
-		$front->scripts();
+		$front->enqueue_scripts();
 	}
 
 }

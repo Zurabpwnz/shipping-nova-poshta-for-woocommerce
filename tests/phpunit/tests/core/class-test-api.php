@@ -12,6 +12,8 @@ use DateTimeZone;
 use Exception;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
+use ReflectionException;
+use tad\FunctionMocker\FunctionMocker;
 use WP_Mock;
 
 /**
@@ -24,19 +26,13 @@ class Test_API extends Test_Case {
 	/**
 	 * Test search cities
 	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
+	 * @throws ReflectionException Invalid object or object property.
 	 */
 	public function test_cities() {
-		// todo: we don't need overload and slow tests here.
-		// todo: use Mockery::mock('API')->makePartial(), then call test method.
-		// todo: to provide $this->np? make it protected and set_protected_property(), as in Cyr_To_Lat_TestCase.
 
+		$day_in_seconds = 86400;
 
-		// todo: replace DAY_IN_SECONDS in the code by the `constant( 'DAY_IN_SECONDS' )`. Mock constant then.
-		if ( ! defined( 'DAY_IN_SECONDS' ) ) {
-			define( 'DAY_IN_SECONDS', 86400 );
-		}
+		FunctionMocker::replace( 'constant', $day_in_seconds );
 
 		$search  = 'search';
 		$limit   = 11;
@@ -50,9 +46,9 @@ class Test_API extends Test_Case {
 		once()->
 		andReturn( false );
 		WP_Mock::userFunction( 'set_transient' )->
-		withArgs( [ Main::PLUGIN_SLUG . '-cities', 1, DAY_IN_SECONDS ] )->
+		withArgs( [ Main::PLUGIN_SLUG . '-cities', 1, $day_in_seconds ] )->
 		once();
-		$np = Mockery::mock( 'overload:LisDev\Delivery\NovaPoshtaApi2' );
+		$np = Mockery::mock( 'LisDev\Delivery\NovaPoshtaApi2' );
 		$np
 			->shouldReceive( 'getCities' )
 			->withArgs( [ 0 ] )
@@ -70,22 +66,19 @@ class Test_API extends Test_Case {
 			->andReturn( $cities );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 
-		$api = new API( $db, $settings );
+		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+		$this->set_protected_property( $api, 'np', $np );
 
 		$this->assertSame( $cities, $api->cities( $search, $limit ) );
 	}
 
 	/**
 	 * Test city by city_id
-	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
 	 */
 	public function test_city() {
 		$city_id   = 'city_id';
 		$city_name = 'City Name';
-		Mockery::mock( 'overload:LisDev\Delivery\NovaPoshtaApi2' );
-		$db = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$db        = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'city' )
 			->withArgs( [ $city_id ] )
@@ -93,22 +86,18 @@ class Test_API extends Test_Case {
 			->andReturn( $city_name );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 
-		$api = new API( $db, $settings );
+		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
 
 		$this->assertSame( $city_name, $api->city( $city_id ) );
 	}
 
 	/**
 	 * Test area by city_id
-	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
 	 */
 	public function test_area() {
 		$city_id   = 'city_id';
 		$area_name = 'City Name';
-		Mockery::mock( 'overload:LisDev\Delivery\NovaPoshtaApi2' );
-		$db = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$db        = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'area' )
 			->withArgs( [ $city_id ] )
@@ -116,22 +105,18 @@ class Test_API extends Test_Case {
 			->andReturn( $area_name );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 
-		$api = new API( $db, $settings );
+		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
 
 		$this->assertSame( $area_name, $api->area( $city_id ) );
 	}
 
 	/**
 	 * Test warehouse by warehouse_id
-	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
 	 */
 	public function test_warehouse() {
 		$warehouse_id   = 'warehouse_id';
 		$warehouse_name = 'Warehouse Name';
-		Mockery::mock( 'overload:LisDev\Delivery\NovaPoshtaApi2' );
-		$db = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$db             = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'warehouse' )
 			->withArgs( [ $warehouse_id ] )
@@ -139,7 +124,7 @@ class Test_API extends Test_Case {
 			->andReturn( $warehouse_name );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 
-		$api = new API( $db, $settings );
+		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
 
 		$this->assertSame( $warehouse_name, $api->warehouse( $warehouse_id ) );
 	}
@@ -147,13 +132,12 @@ class Test_API extends Test_Case {
 	/**
 	 * Test warehouse by city_id
 	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
+	 * @throws ReflectionException Invalid object or object property.
 	 */
 	public function test_warehouses() {
-		if ( ! defined( 'DAY_IN_SECONDS' ) ) {
-			define( 'DAY_IN_SECONDS', 86400 );
-		}
+		$day_in_seconds = 86400;
+
+		FunctionMocker::replace( 'constant', $day_in_seconds );
 		$city_id    = 'city_id';
 		$warehouses = [ 'Warehouse 1', 'Warehouse 2' ];
 		$request    = [
@@ -165,9 +149,9 @@ class Test_API extends Test_Case {
 		once()->
 		andReturn( false );
 		WP_Mock::userFunction( 'set_transient' )->
-		withArgs( [ Main::PLUGIN_SLUG . '-warehouse-' . $city_id, 1, DAY_IN_SECONDS ] )->
+		withArgs( [ Main::PLUGIN_SLUG . '-warehouse-' . $city_id, 1, $day_in_seconds ] )->
 		once();
-		$np = Mockery::mock( 'overload:LisDev\Delivery\NovaPoshtaApi2' );
+		$np = Mockery::mock( 'LisDev\Delivery\NovaPoshtaApi2' );
 		$np
 			->shouldReceive( 'getWarehouses' )
 			->withArgs( [ $city_id ] )
@@ -188,16 +172,14 @@ class Test_API extends Test_Case {
 
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 
-		$api = new API( $db, $settings );
+		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+		$this->set_protected_property( $api, 'np', $np );
 
 		$this->assertSame( $warehouses, $api->warehouses( $city_id ) );
 	}
 
 	/**
 	 * Test create internet document
-	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
 	 */
 	public function test_internet_document_without_key() {
 		$first_name   = 'First Name';
@@ -207,15 +189,14 @@ class Test_API extends Test_Case {
 		$warehouse_id = 'warehouse_id';
 		$price        = '100.5';
 		$count        = '10';
-		Mockery::mock( 'overload:LisDev\Delivery\NovaPoshtaApi2' );
-		$db       = Mockery::mock( 'Nova_Poshta\Core\DB' );
-		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$db           = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$settings     = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 		$settings
 			->shouldReceive( 'api_key' )
 			->once()
 			->andReturn( false );
 
-		$api = new API( $db, $settings );
+		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
 
 		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count );
 	}
@@ -223,8 +204,7 @@ class Test_API extends Test_Case {
 	/**
 	 * Test create internet document
 	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
+	 * @throws ReflectionException Invalid object or object property.
 	 */
 	public function test_internet_document_without_admin_data() {
 		$first_name   = 'First Name';
@@ -235,7 +215,7 @@ class Test_API extends Test_Case {
 		$price        = '100.5';
 		$count        = '10';
 		$api_key      = 'api-key';
-		$np           = Mockery::mock( 'overload:LisDev\Delivery\NovaPoshtaApi2' );
+		$np           = Mockery::mock( 'LisDev\Delivery\NovaPoshtaApi2' );
 		$np
 			->shouldReceive( 'setKey' )
 			->withArgs( [ $api_key ] )
@@ -256,7 +236,8 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'warehouse_id' )
 			->once();
 
-		$api = new API( $db, $settings );
+		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+		$this->set_protected_property( $api, 'np', $np );
 
 		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count );
 	}
@@ -264,10 +245,8 @@ class Test_API extends Test_Case {
 	/**
 	 * Test create internet document
 	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 *
 	 * @throws Exception Invalid DateTime.
+	 * @throws ReflectionException Invalid object or object property.
 	 */
 	public function test_internet_document() {
 		$first_name         = 'First Name';
@@ -290,7 +269,7 @@ class Test_API extends Test_Case {
 				],
 			],
 		];
-		$np                 = Mockery::mock( 'overload:LisDev\Delivery\NovaPoshtaApi2' );
+		$np                 = Mockery::mock( 'LisDev\Delivery\NovaPoshtaApi2' );
 		$np
 			->shouldReceive( 'setKey' )
 			->withArgs( [ $api_key ] )
@@ -351,7 +330,8 @@ class Test_API extends Test_Case {
 			->once()
 			->andReturn( $admin_warehouse_id );
 
-		$api = new API( $db, $settings );
+		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+		$this->set_protected_property( $api, 'np', $np );
 
 		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count );
 	}
@@ -359,10 +339,8 @@ class Test_API extends Test_Case {
 	/**
 	 * Test create internet document with redelivery
 	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 *
 	 * @throws Exception Invalid DateTime.
+	 * @throws ReflectionException Invalid object or object property.
 	 */
 	public function test_internet_document_with_redelivery() {
 		$first_name         = 'First Name';
@@ -386,7 +364,7 @@ class Test_API extends Test_Case {
 				],
 			],
 		];
-		$np                 = Mockery::mock( 'overload:LisDev\Delivery\NovaPoshtaApi2' );
+		$np                 = Mockery::mock( 'LisDev\Delivery\NovaPoshtaApi2' );
 		$np
 			->shouldReceive( 'setKey' )
 			->withArgs( [ $api_key ] )
@@ -454,7 +432,8 @@ class Test_API extends Test_Case {
 			->once()
 			->andReturn( $admin_warehouse_id );
 
-		$api = new API( $db, $settings );
+		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+		$this->set_protected_property( $api, 'np', $np );
 
 		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count, $redelivery );
 	}
@@ -462,12 +441,11 @@ class Test_API extends Test_Case {
 	/**
 	 * Test fail validate API key
 	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
+	 * @throws ReflectionException Invalid object or object property.
 	 */
 	public function test_fail_validation() {
 		$api_key = 'api-key';
-		$np      = Mockery::mock( 'overload:LisDev\Delivery\NovaPoshtaApi2' );
+		$np      = Mockery::mock( 'LisDev\Delivery\NovaPoshtaApi2' );
 		$np
 			->shouldReceive( 'setKey' )
 			->withArgs( [ $api_key ] )
@@ -479,7 +457,8 @@ class Test_API extends Test_Case {
 		$db       = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 
-		$api = new API( $db, $settings );
+		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+		$this->set_protected_property( $api, 'np', $np );
 
 		$this->assertFalse( $api->validate( $api_key ) );
 	}
@@ -487,12 +466,11 @@ class Test_API extends Test_Case {
 	/**
 	 * Test success validate API key
 	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
+	 * @throws ReflectionException Invalid object or object property.
 	 */
 	public function test_success_validation() {
 		$api_key = 'api-key';
-		$np      = Mockery::mock( 'overload:LisDev\Delivery\NovaPoshtaApi2' );
+		$np      = Mockery::mock( 'LisDev\Delivery\NovaPoshtaApi2' );
 		$np
 			->shouldReceive( 'setKey' )
 			->withArgs( [ $api_key ] )
@@ -505,7 +483,8 @@ class Test_API extends Test_Case {
 		$db       = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 
-		$api = new API( $db, $settings );
+		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+		$this->set_protected_property( $api, 'np', $np );
 
 		$this->assertTrue( $api->validate( $api_key ) );
 	}

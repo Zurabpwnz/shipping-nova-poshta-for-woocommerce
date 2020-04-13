@@ -54,8 +54,6 @@ class Test_Notice extends Test_Case {
 	 * Show all notices
 	 */
 	public function test_show_all_notice() {
-		// todo: 3 tests (or via dataprovider) needed: show empty_api_key, show shipping_method_enable, show both.
-		// todo: Must check actual notice message.
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 		$settings
 			->shouldReceive( 'api_key' )
@@ -71,7 +69,7 @@ class Test_Notice extends Test_Case {
 
 		$notice->notices();
 
-		$this->assertTrue( ! empty( ob_get_clean() ) ); // todo: assertNotEmpty.
+		$this->assertNotEmpty( ob_get_clean() );
 	}
 
 }

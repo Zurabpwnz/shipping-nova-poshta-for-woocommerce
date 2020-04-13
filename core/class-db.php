@@ -59,7 +59,8 @@ class DB {
 		$cities_sql = 'CREATE TABLE ' . $this->cities_table . '
 			(
 		        city_id            VARCHAR(36)  NOT NULL UNIQUE,
-		        description        VARCHAR(100) NOT NULL
+		        description        VARCHAR(100) NOT NULL,
+		        area               VARCHAR(100) NOT NULL
 	        ) ' . $wpdb->get_charset_collate();
 
 		$warehouses_sql = 'CREATE TABLE ' . $this->warehouses_table . '

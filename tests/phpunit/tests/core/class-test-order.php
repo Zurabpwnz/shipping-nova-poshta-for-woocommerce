@@ -92,7 +92,7 @@ class Test_Order extends Test_Case {
 	/**
 	 * Test don't save with empty nonce
 	 */
-	public function test_dont_save_with_empty_nonce() {
+	public function test_do_NOT_save_with_empty_nonce() {
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
 		$package_key   = 10;
@@ -107,7 +107,7 @@ class Test_Order extends Test_Case {
 	/**
 	 * Test don't save with bad nonce
 	 */
-	public function test_dont_save_with_bad_nonce() {
+	public function test_do_NOT_save_with_bad_nonce() {
 		$nonce                          = 'nonce';
 		$_POST['woo_nova_poshta_nonce'] = $nonce;
 		WP_Mock::userFunction( 'wp_unslash' )->
@@ -133,7 +133,7 @@ class Test_Order extends Test_Case {
 	/**
 	 * Test don't save for other shipping method
 	 */
-	public function test_dont_save_for_other_shipping_method() {
+	public function test_do_NOT_save_for_other_shipping_method() {
 		$nonce                          = 'nonce';
 		$_POST['woo_nova_poshta_nonce'] = $nonce;
 		WP_Mock::userFunction( 'wp_unslash' )->
@@ -163,7 +163,7 @@ class Test_Order extends Test_Case {
 	/**
 	 * Test don't save with not enough dating
 	 */
-	public function test_dont_save_with_empty_city_or_warehouse() {
+	public function test_do_NOT_save_with_empty_city_or_warehouse() {
 		$nonce                          = 'nonce';
 		$_POST['woo_nova_poshta_nonce'] = $nonce;
 		WP_Mock::userFunction( 'wp_unslash' )->
@@ -247,7 +247,7 @@ class Test_Order extends Test_Case {
 	 *
 	 * @return array
 	 */
-	public function provider_labels() {
+	public function dp_labels() {
 		return [
 			[
 				'key',
@@ -271,7 +271,7 @@ class Test_Order extends Test_Case {
 	/**
 	 * Test correct names labels
 	 *
-	 * @dataProvider provider_labels
+	 * @dataProvider dp_labels
 	 *
 	 * @param string $key    Key name.
 	 * @param string $result Key result.
@@ -494,7 +494,7 @@ class Test_Order extends Test_Case {
 	 *
 	 * @throws Exception Invalid DateTime.
 	 */
-	public function test_dont_create_invoice_without_shipping_method() {
+	public function test_do_NOT_create_invoice_without_shipping_method() {
 		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$wc_order = Mockery::mock( 'WC_Order' );
 		$wc_order

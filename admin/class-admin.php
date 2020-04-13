@@ -52,8 +52,8 @@ class Admin {
 	 * Add hooks
 	 */
 	public function hooks() {
-		add_action( 'admin_enqueue_scripts', [ $this, 'styles' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'scripts' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_styles' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 		add_action( 'admin_menu', [ $this, 'add_menu' ] );
 		add_action( 'admin_init', [ $this, 'register_setting' ] );
 		add_filter( 'pre_update_option_woo-nova-poshta', [ $this, 'validate' ], 10, 2 );
@@ -62,8 +62,7 @@ class Admin {
 	/**
 	 * Enqueue styles
 	 */
-	public function styles() {
-		// todo: Think on naming. Function name should include verb. enqueue_styles() looks better for me.
+	public function enqueue_styles() {
 		if ( ! $this->is_plugin_page() ) {
 			return;
 		}
@@ -74,7 +73,7 @@ class Admin {
 	/**
 	 * Enqueue scripts
 	 */
-	public function scripts() {
+	public function enqueue_scripts() {
 		if ( ! $this->is_plugin_page() ) {
 			return;
 		}
@@ -146,10 +145,10 @@ class Admin {
 	 * @throws Exception Invalid DateTime.
 	 */
 	private function controller(): void {
-		$nonce = filter_input( INPUT_POST, Main::PLUGIN_SLUG . '_nonce', FILTER_SANITIZE_STRING );
-		if ( ! wp_verify_nonce( $nonce, Main::PLUGIN_SLUG . '-invoice' ) ) {
+		if ( ! isset( $_POST[ Main::PLUGIN_SLUG ] ) ) {
 			return;
 		}
+		check_admin_referer( Main::PLUGIN_SLUG . '-invoice' );
 		$fields = filter_input( INPUT_POST, Main::PLUGIN_SLUG, FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
 		$this->api->internet_document(
 			$fields['first_name'],
@@ -165,11 +164,12 @@ class Admin {
 
 	/**
 	 * View for page options
+	 *
+	 * @throws Exception Invalid DateTime.
 	 */
 	public function page_options() {
 		$this->controller();
-		// todo: why to do anything if nonce check was not passed?
-		// todo: check_admin_referer() should be enough.
+
 		require plugin_dir_path( __FILE__ ) . 'partials/page-options.php';
 	}
 

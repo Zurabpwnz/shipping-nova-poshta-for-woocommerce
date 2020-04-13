@@ -34,7 +34,7 @@ class API {
 	 *
 	 * @var NovaPoshtaApi2
 	 */
-	private $np;
+	protected $np;
 	/**
 	 * Database
 	 *
@@ -67,7 +67,7 @@ class API {
 			$request = $this->np->getCities( 0 );
 			if ( $request['success'] ) {
 				$this->db->update_cities( $request['data'] );
-				set_transient( Main::PLUGIN_SLUG . '-cities', 1, DAY_IN_SECONDS );
+				set_transient( Main::PLUGIN_SLUG . '-cities', 1, constant( 'DAY_IN_SECONDS' ) );
 			}
 			unset( $request );
 		}
@@ -120,7 +120,7 @@ class API {
 			$request = $this->np->getWarehouses( $city_id );
 			if ( $request['success'] ) {
 				$this->db->update_warehouses( $request['data'] );
-				set_transient( Main::PLUGIN_SLUG . '-warehouse-' . $city_id, 1, DAY_IN_SECONDS );
+				set_transient( Main::PLUGIN_SLUG . '-warehouse-' . $city_id, 1, constant( 'DAY_IN_SECONDS' ) );
 			}
 			unset( $request );
 		}
