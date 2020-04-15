@@ -7,12 +7,9 @@
 
 namespace Nova_Poshta\Core;
 
-use DateTime;
-use DateTimeZone;
 use Exception;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
-use ReflectionException;
 use tad\FunctionMocker\FunctionMocker;
 use WP_Mock;
 
@@ -25,22 +22,18 @@ class Test_API extends Test_Case {
 
 	/**
 	 * Test search cities
-	 *
-	 * @throws ReflectionException Invalid object or object property.
 	 */
 	public function test_cities() {
-
+		$api_key        = 'api-key';
 		$day_in_seconds = 86400;
-
-		FunctionMocker::replace( 'constant', $day_in_seconds );
-
-		$search  = 'search';
-		$limit   = 11;
-		$cities  = [ 'City 1', 'City 2' ];
-		$request = [
+		$search         = 'search';
+		$limit          = 11;
+		$cities         = [ 'City 1', 'City 2' ];
+		$request        = [
 			'success' => true,
 			'data'    => [ 'some-data' ],
 		];
+		$mock_constant  = FunctionMocker::replace( 'constant', $day_in_seconds );
 		WP_Mock::userFunction( 'get_transient' )->
 		withArgs( [ Main::PLUGIN_SLUG . '-cities' ] )->
 		once()->
@@ -48,16 +41,10 @@ class Test_API extends Test_Case {
 		WP_Mock::userFunction( 'set_transient' )->
 		withArgs( [ Main::PLUGIN_SLUG . '-cities', 1, $day_in_seconds ] )->
 		once();
-		$np = Mockery::mock( 'LisDev\Delivery\NovaPoshtaApi2' );
-		$np
-			->shouldReceive( 'getCities' )
-			->withArgs( [ 0 ] )
-			->once()
-			->andReturn( $request );
 		$db = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'update_cities' )
-			->withArgs( [ $request['data'] ] )
+			->with( $request['data'] )
 			->once();
 		$db
 			->shouldReceive( 'cities' )
@@ -65,11 +52,42 @@ class Test_API extends Test_Case {
 			->once()
 			->andReturn( $cities );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'api_key' )
+			->twice()
+			->andReturn( $api_key );
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'Address',
+				'calledMethod'     => 'getCities',
+				'methodProperties' => [],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn( [ 'body' => json_encode( $request ) ] );
+		WP_Mock::userFunction( 'is_wp_error' )->
+		once()->
+		andReturn( false );
 
-		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
-		$this->set_protected_property( $api, 'np', $np );
+		$api = new API( $db, $settings );
 
 		$this->assertSame( $cities, $api->cities( $search, $limit ) );
+
+		$mock_constant->wasCalledWithOnce( [ 'DAY_IN_SECONDS' ] );
 	}
 
 	/**
@@ -131,57 +149,78 @@ class Test_API extends Test_Case {
 
 	/**
 	 * Test warehouse by city_id
-	 *
-	 * @throws ReflectionException Invalid object or object property.
 	 */
 	public function test_warehouses() {
 		$day_in_seconds = 86400;
-
-		FunctionMocker::replace( 'constant', $day_in_seconds );
-		$city_id    = 'city_id';
-		$warehouses = [ 'Warehouse 1', 'Warehouse 2' ];
-		$request    = [
+		$api_key        = 'api-key';
+		$city_id        = 'city_id';
+		$warehouses     = [ 'Warehouse 1', 'Warehouse 2' ];
+		$request        = [
 			'success' => true,
 			'data'    => [ 'some-data' ],
 		];
-		WP_Mock::userFunction( 'get_transient' )->
-		withArgs( [ Main::PLUGIN_SLUG . '-warehouse-' . $city_id ] )->
+		$mock_constant  = FunctionMocker::replace( 'constant', $day_in_seconds );
+		WP_Mock::userFunction( 'wp_cache_get' )->
+		with( Main::PLUGIN_SLUG . '-warehouse-' . $city_id, Main::PLUGIN_SLUG )->
 		once()->
 		andReturn( false );
-		WP_Mock::userFunction( 'set_transient' )->
-		withArgs( [ Main::PLUGIN_SLUG . '-warehouse-' . $city_id, 1, $day_in_seconds ] )->
+		WP_Mock::userFunction( 'wp_cache_set' )->
+		withArgs( [ Main::PLUGIN_SLUG . '-warehouse-' . $city_id, 1, Main::PLUGIN_SLUG, $day_in_seconds ] )->
 		once();
-		$np = Mockery::mock( 'LisDev\Delivery\NovaPoshtaApi2' );
-		$np
-			->shouldReceive( 'getWarehouses' )
-			->withArgs( [ $city_id ] )
-			->once()
-			->andReturn( $request );
-
 		$db = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'update_warehouses' )
-			->withArgs( [ $request['data'] ] )
-			->once()
-			->andReturn( true );
+			->with( $request['data'] )
+			->once();
 		$db
 			->shouldReceive( 'warehouses' )
-			->withArgs( [ $city_id ] )
 			->once()
 			->andReturn( $warehouses );
-
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'api_key' )
+			->twice()
+			->andReturn( $api_key );
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'AddressGeneral',
+				'calledMethod'     => 'getWarehouses',
+				'methodProperties' => [
+					'CityRef' => $city_id,
+				],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn( [ 'body' => json_encode( $request ) ] );
+		WP_Mock::userFunction( 'is_wp_error' )->
+		once()->
+		andReturn( false );
 
-		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
-		$this->set_protected_property( $api, 'np', $np );
+		$api = new API( $db, $settings );
 
 		$this->assertSame( $warehouses, $api->warehouses( $city_id ) );
+
+		$mock_constant->wasCalledWithOnce( [ 'DAY_IN_SECONDS' ] );
 	}
 
 	/**
 	 * Test create internet document
 	 */
-	public function test_internet_document_without_key() {
+	public function test_internet_document_without_admin_data() {
 		$first_name   = 'First Name';
 		$last_name    = 'Last Name';
 		$phone        = '123456789';
@@ -191,6 +230,49 @@ class Test_API extends Test_Case {
 		$count        = '10';
 		$db           = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$settings     = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'phone' )
+			->once();
+		$settings
+			->shouldReceive( 'city_id' )
+			->once();
+		$settings
+			->shouldReceive( 'warehouse_id' )
+			->once();
+
+		$api = new API( $db, $settings );
+
+		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count );
+	}
+
+	/**
+	 * Test create internet document with bad sender
+	 */
+	public function test_internet_document_with_bad_sender() {
+		$first_name         = 'First Name';
+		$last_name          = 'Last Name';
+		$phone              = '123456789';
+		$city_id            = 'city_id';
+		$warehouse_id       = 'warehouse_id';
+		$price              = '100.5';
+		$count              = '10';
+		$admin_phone        = '987654321';
+		$admin_city_id      = 'admin_city_id';
+		$admin_warehouse_id = 'admin_warehouse_id';
+		$db                 = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$settings           = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'phone' )
+			->once()
+			->andReturn( $admin_phone );
+		$settings
+			->shouldReceive( 'city_id' )
+			->once()
+			->andReturn( $admin_city_id );
+		$settings
+			->shouldReceive( 'warehouse_id' )
+			->once()
+			->andReturn( $admin_warehouse_id );
 		$settings
 			->shouldReceive( 'api_key' )
 			->once()
@@ -202,121 +284,23 @@ class Test_API extends Test_Case {
 	}
 
 	/**
-	 * Test create internet document
-	 *
-	 * @throws ReflectionException Invalid object or object property.
+	 * Test create internet document with bad sender
 	 */
-	public function test_internet_document_without_admin_data() {
-		$first_name   = 'First Name';
-		$last_name    = 'Last Name';
-		$phone        = '123456789';
-		$city_id      = 'city_id';
-		$warehouse_id = 'warehouse_id';
-		$price        = '100.5';
-		$count        = '10';
-		$api_key      = 'api-key';
-		$np           = Mockery::mock( 'LisDev\Delivery\NovaPoshtaApi2' );
-		$np
-			->shouldReceive( 'setKey' )
-			->withArgs( [ $api_key ] )
-			->once();
-		$db       = Mockery::mock( 'Nova_Poshta\Core\DB' );
-		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$settings
-			->shouldReceive( 'api_key' )
-			->twice()
-			->andReturn( $api_key );
-		$settings
-			->shouldReceive( 'phone' )
-			->once();
-		$settings
-			->shouldReceive( 'city_id' )
-			->once();
-		$settings
-			->shouldReceive( 'warehouse_id' )
-			->once();
-
-		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
-		$this->set_protected_property( $api, 'np', $np );
-
-		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count );
-	}
-
-	/**
-	 * Test create internet document
-	 *
-	 * @throws Exception Invalid DateTime.
-	 * @throws ReflectionException Invalid object or object property.
-	 */
-	public function test_internet_document() {
+	public function test_internet_document_with_bad_sender_2() {
 		$first_name         = 'First Name';
 		$last_name          = 'Last Name';
 		$phone              = '123456789';
 		$city_id            = 'city_id';
-		$area               = 'area_name';
 		$warehouse_id       = 'warehouse_id';
-		$price              = 100.5;
-		$count              = 10;
-		$api_key            = 'api-key';
+		$price              = '100.5';
+		$count              = '10';
 		$admin_phone        = '987654321';
 		$admin_city_id      = 'admin_city_id';
 		$admin_warehouse_id = 'admin_warehouse_id';
-		$internet_document  = [
-			'success' => true,
-			'data'    => [
-				[
-					'IntDocNumber' => '1234 5678 9012 3456',
-				],
-			],
-		];
-		$np                 = Mockery::mock( 'LisDev\Delivery\NovaPoshtaApi2' );
-		$np
-			->shouldReceive( 'setKey' )
-			->withArgs( [ $api_key ] )
-			->once();
-		$date = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
-		$np
-			->shouldReceive( 'newInternetDocument' )
-			->withArgs(
-				[
-					[
-						'ContactSender' => $admin_phone,
-						'CitySender'    => $admin_city_id,
-						'SenderAddress' => $admin_warehouse_id,
-					],
-					[
-						'FirstName'        => $first_name,
-						'LastName'         => $last_name,
-						'Phone'            => $phone,
-						'Region'           => $area,
-						'City'             => $city_id,
-						'CityRecipient'    => $city_id,
-						'RecipientAddress' => $warehouse_id,
-					],
-					[
-						'ServiceType'   => 'WarehouseWarehouse',
-						'PaymentMethod' => 'Cash',
-						'PayerType'     => 'Recipient',
-						'Cost'          => $price,
-						'SeatsAmount'   => '1',
-						'Description'   => 'Взуття',
-						'Weight'        => ( $count * .5 ) - .01,
-						'DateTime'      => $date->format( 'd.m.Y' ),
-					],
-				]
-			)
-			->andReturn( $internet_document );
-		$db = Mockery::mock( 'Nova_Poshta\Core\DB' );
-		$db
-			->shouldReceive( 'area' )
-			->withArgs( [ $city_id ] )
-			->once()
-			->andReturn( $area );
-		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$settings
-			->shouldReceive( 'api_key' )
-			->twice()
-			->andReturn( $api_key );
+		$api_key            = 'api-key';
+		$sender             = 'sender';
+		$db                 = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$settings           = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 		$settings
 			->shouldReceive( 'phone' )
 			->once()
@@ -329,96 +313,537 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'warehouse_id' )
 			->once()
 			->andReturn( $admin_warehouse_id );
+		$settings
+			->shouldReceive( 'api_key' )
+			->times( 4 )
+			->andReturn( $api_key );
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'Counterparty',
+				'calledMethod'     => 'getCounterparties',
+				'methodProperties' => [
+					'City'                 => $admin_city_id,
+					'CounterpartyProperty' => 'Sender',
+					'Page'                 => 1,
+				],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn(
+			[
+				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				'body' => json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref' => $sender,
+							],
+						],
+					]
+				),
+			]
+		);
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'Counterparty',
+				'calledMethod'     => 'getCounterpartyContactPersons',
+				'methodProperties' => [
+					'Ref' => $sender,
+				],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn(
+			[
+				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				'body' => json_encode( [] ),
+			]
+		);
 
 		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
-		$this->set_protected_property( $api, 'np', $np );
 
 		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count );
+	}
+
+	/**
+	 * Test create internet document with bad recipient
+	 */
+	public function test_internet_document_with_bad_recipient() {
+		$first_name         = 'First Name';
+		$last_name          = 'Last Name';
+		$phone              = '123456789';
+		$city_id            = 'city-id';
+		$area_id            = 'area-id';
+		$warehouse_id       = 'warehouse_id';
+		$price              = '100.5';
+		$count              = '10';
+		$admin_phone        = '987654321';
+		$admin_city_id      = 'admin_city_id';
+		$admin_warehouse_id = 'admin_warehouse_id';
+		$api_key            = 'api-key';
+		$sender             = 'sender';
+		$contact_sender     = 'contact-sender';
+		$db                 = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$db
+			->shouldReceive( 'area' )
+			->once()
+			->andReturn( $area_id );
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'phone' )
+			->once()
+			->andReturn( $admin_phone );
+		$settings
+			->shouldReceive( 'city_id' )
+			->once()
+			->andReturn( $admin_city_id );
+		$settings
+			->shouldReceive( 'warehouse_id' )
+			->once()
+			->andReturn( $admin_warehouse_id );
+		$settings
+			->shouldReceive( 'api_key' )
+			->times( 6 )
+			->andReturn( $api_key );
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'Counterparty',
+				'calledMethod'     => 'getCounterparties',
+				'methodProperties' => [
+					'City'                 => $admin_city_id,
+					'CounterpartyProperty' => 'Sender',
+					'Page'                 => 1,
+				],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn(
+			[
+				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				'body' => json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref' => $sender,
+							],
+						],
+					]
+				),
+			]
+		);
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'Counterparty',
+				'calledMethod'     => 'getCounterpartyContactPersons',
+				'methodProperties' => [
+					'Ref' => $sender,
+				],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn(
+			[
+				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				'body' => json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref' => $contact_sender,
+							],
+						],
+					]
+				),
+			]
+		);
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'Counterparty',
+				'calledMethod'     => 'save',
+				'methodProperties' => [
+					'CounterpartyProperty' => 'Recipient',
+					'CounterpartyType'     => 'PrivatePerson',
+					'FirstName'            => $first_name,
+					'LastName'             => $last_name,
+					'Phone'                => '380' . $phone,
+					'RecipientsPhone'      => '380' . $phone,
+					'Region'               => $area_id,
+					'City'                 => $city_id,
+					'CityRecipient'        => $city_id,
+					'RecipientAddress'     => $warehouse_id,
+				],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn(
+			[
+				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				'body' => json_encode( [ 'success' => false ] ),
+			]
+		);
+
+		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+
+		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count );
+	}
+
+	/**
+	 * Test create internet document
+	 *
+	 * @throws Exception Invalid DateTime.
+	 */
+	public function test_internet_document() {
+		$api_key            = 'api-key';
+		$first_name         = 'First Name';
+		$last_name          = 'Last Name';
+		$phone              = '123456789';
+		$city_id            = 'city-id';
+		$warehouse_id       = 'warehouse-id';
+		$area_id            = 'area-id';
+		$price              = '100.5';
+		$count              = '10';
+		$admin_phone        = '987654321';
+		$admin_city_id      = 'admin-city-id';
+		$admin_warehouse_id = 'admin-warehouse-id';
+		$sender             = 'sender';
+		$contact_sender     = 'contact-sender';
+		$recipient          = 'recipient';
+		$contact_recipient  = 'contact-recipient';
+		$internet_document  = '1234567890123456';
+		$db                 = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$db
+			->shouldReceive( 'area' )
+			->once()
+			->andReturn( $area_id );
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'phone' )
+			->once()
+			->andReturn( $admin_phone );
+		$settings
+			->shouldReceive( 'city_id' )
+			->once()
+			->andReturn( $admin_city_id );
+		$settings
+			->shouldReceive( 'warehouse_id' )
+			->once()
+			->andReturn( $admin_warehouse_id );
+		$settings
+			->shouldReceive( 'api_key' )
+			->times( 8 )
+			->andReturn( $api_key );
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'Counterparty',
+				'calledMethod'     => 'getCounterparties',
+				'methodProperties' => [
+					'City'                 => $admin_city_id,
+					'CounterpartyProperty' => 'Sender',
+					'Page'                 => 1,
+				],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn(
+			[
+				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				'body' => json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref' => $sender,
+							],
+						],
+					]
+				),
+			]
+		);
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'Counterparty',
+				'calledMethod'     => 'getCounterpartyContactPersons',
+				'methodProperties' => [
+					'Ref' => $sender,
+				],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn(
+			[
+				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				'body' => json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref' => $contact_sender,
+							],
+						],
+					]
+				),
+			]
+		);
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'Counterparty',
+				'calledMethod'     => 'save',
+				'methodProperties' => [
+					'CounterpartyProperty' => 'Recipient',
+					'CounterpartyType'     => 'PrivatePerson',
+					'FirstName'            => $first_name,
+					'LastName'             => $last_name,
+					'Phone'                => '380' . $phone,
+					'RecipientsPhone'      => '380' . $phone,
+					'Region'               => $area_id,
+					'City'                 => $city_id,
+					'CityRecipient'        => $city_id,
+					'RecipientAddress'     => $warehouse_id,
+				],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn(
+			[
+				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				'body' => json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref'           => $recipient,
+								'ContactPerson' => [
+									'data' => [
+										[
+											'Ref' => $contact_recipient,
+										],
+									],
+								],
+							],
+						],
+					]
+				),
+			]
+		);
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'InternetDocument',
+				'calledMethod'     => 'save',
+				'methodProperties' => [
+					'ContactSender'    => $contact_sender,
+					'CitySender'       => $admin_city_id,
+					'SenderAddress'    => $admin_warehouse_id,
+					'SendersPhone'     => '380' . $admin_phone,
+					'Sender'           => $sender,
+					'FirstName'        => $first_name,
+					'LastName'         => $last_name,
+					'Phone'            => '380' . $phone,
+					'RecipientsPhone'  => '380' . $phone,
+					'Region'           => $area_id,
+					'City'             => $city_id,
+					'CityRecipient'    => $city_id,
+					'RecipientAddress' => $warehouse_id,
+					'Recipient'        => $recipient,
+					'ContactRecipient' => $contact_recipient,
+					'ServiceType'      => 'WarehouseWarehouse',
+					'PaymentMethod'    => 'Cash',
+					'PayerType'        => 'Recipient',
+					'Cost'             => $price,
+					'SeatsAmount'      => 1,
+					'Description'      => 'Взуття',
+					'Weight'           => ( $count * .5 ) - .01,
+					'CargoType'        => 'Parcel',
+					//phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+					'DateTime'         => date( 'd.m.Y' ),
+				],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn(
+			[
+				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				'body' => json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'IntDocNumber' => $internet_document,
+							],
+						],
+					]
+				),
+			]
+		);
+		WP_Mock::userFunction( 'is_wp_error' )->
+		times( 4 )->
+		andReturn( false );
+
+		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+
+		$this->assertSame(
+			$internet_document,
+			$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count )
+		);
 	}
 
 	/**
 	 * Test create internet document with redelivery
 	 *
 	 * @throws Exception Invalid DateTime.
-	 * @throws ReflectionException Invalid object or object property.
 	 */
 	public function test_internet_document_with_redelivery() {
+		$api_key            = 'api-key';
 		$first_name         = 'First Name';
 		$last_name          = 'Last Name';
 		$phone              = '123456789';
-		$city_id            = 'city_id';
-		$area               = 'area_name';
-		$warehouse_id       = 'warehouse_id';
+		$city_id            = 'city-id';
+		$warehouse_id       = 'warehouse-id';
+		$area_id            = 'area-id';
 		$price              = 100.5;
 		$count              = 10;
-		$redelivery         = 300.7;
-		$api_key            = 'api-key';
+		$redelivery         = 50;
 		$admin_phone        = '987654321';
-		$admin_city_id      = 'admin_city_id';
-		$admin_warehouse_id = 'admin_warehouse_id';
-		$internet_document  = [
-			'success' => true,
-			'data'    => [
-				[
-					'IntDocNumber' => '1234 5678 9012 3456',
-				],
-			],
-		];
-		$np                 = Mockery::mock( 'LisDev\Delivery\NovaPoshtaApi2' );
-		$np
-			->shouldReceive( 'setKey' )
-			->withArgs( [ $api_key ] )
-			->once();
-		$date = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
-		$np
-			->shouldReceive( 'newInternetDocument' )
-			->withArgs(
-				[
-					[
-						'ContactSender' => $admin_phone,
-						'CitySender'    => $admin_city_id,
-						'SenderAddress' => $admin_warehouse_id,
-					],
-					[
-						'FirstName'        => $first_name,
-						'LastName'         => $last_name,
-						'Phone'            => $phone,
-						'Region'           => $area,
-						'City'             => $city_id,
-						'CityRecipient'    => $city_id,
-						'RecipientAddress' => $warehouse_id,
-					],
-					[
-						'ServiceType'          => 'WarehouseWarehouse',
-						'PaymentMethod'        => 'Cash',
-						'PayerType'            => 'Recipient',
-						'Cost'                 => $price,
-						'SeatsAmount'          => '1',
-						'Description'          => 'Взуття',
-						'Weight'               => ( $count * .5 ) - .01,
-						'DateTime'             => $date->format( 'd.m.Y' ),
-						'BackwardDeliveryData' => [
-							[
-								'PayerType'        => 'Recipient',
-								'CargoType'        => 'Money',
-								'RedeliveryString' => $redelivery,
-							],
-						],
-					],
-				]
-			)
-			->andReturn( $internet_document );
-		$db = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$admin_city_id      = 'admin-city-id';
+		$admin_warehouse_id = 'admin-warehouse-id';
+		$sender             = 'sender';
+		$contact_sender     = 'contact-sender';
+		$recipient          = 'recipient';
+		$contact_recipient  = 'contact-recipient';
+		$internet_document  = '1234567890123456';
+		$db                 = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'area' )
-			->withArgs( [ $city_id ] )
 			->once()
-			->andReturn( $area );
+			->andReturn( $area_id );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$settings
-			->shouldReceive( 'api_key' )
-			->twice()
-			->andReturn( $api_key );
 		$settings
 			->shouldReceive( 'phone' )
 			->once()
@@ -431,60 +856,361 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'warehouse_id' )
 			->once()
 			->andReturn( $admin_warehouse_id );
+		$settings
+			->shouldReceive( 'api_key' )
+			->times( 8 )
+			->andReturn( $api_key );
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'Counterparty',
+				'calledMethod'     => 'getCounterparties',
+				'methodProperties' => [
+					'City'                 => $admin_city_id,
+					'CounterpartyProperty' => 'Sender',
+					'Page'                 => 1,
+				],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn(
+			[
+				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				'body' => json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref' => $sender,
+							],
+						],
+					]
+				),
+			]
+		);
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'Counterparty',
+				'calledMethod'     => 'getCounterpartyContactPersons',
+				'methodProperties' => [
+					'Ref' => $sender,
+				],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn(
+			[
+				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				'body' => json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref' => $contact_sender,
+							],
+						],
+					]
+				),
+			]
+		);
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'Counterparty',
+				'calledMethod'     => 'save',
+				'methodProperties' => [
+					'CounterpartyProperty' => 'Recipient',
+					'CounterpartyType'     => 'PrivatePerson',
+					'FirstName'            => $first_name,
+					'LastName'             => $last_name,
+					'Phone'                => '380' . $phone,
+					'RecipientsPhone'      => '380' . $phone,
+					'Region'               => $area_id,
+					'City'                 => $city_id,
+					'CityRecipient'        => $city_id,
+					'RecipientAddress'     => $warehouse_id,
+				],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn(
+			[
+				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				'body' => json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref'           => $recipient,
+								'ContactPerson' => [
+									'data' => [
+										[
+											'Ref' => $contact_recipient,
+										],
+									],
+								],
+							],
+						],
+					]
+				),
+			]
+		);
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'InternetDocument',
+				'calledMethod'     => 'save',
+				'methodProperties' => [
+					'ContactSender'        => $contact_sender,
+					'CitySender'           => $admin_city_id,
+					'SenderAddress'        => $admin_warehouse_id,
+					'SendersPhone'         => '380' . $admin_phone,
+					'Sender'               => $sender,
+					'FirstName'            => $first_name,
+					'LastName'             => $last_name,
+					'Phone'                => '380' . $phone,
+					'RecipientsPhone'      => '380' . $phone,
+					'Region'               => $area_id,
+					'City'                 => $city_id,
+					'CityRecipient'        => $city_id,
+					'RecipientAddress'     => $warehouse_id,
+					'Recipient'            => $recipient,
+					'ContactRecipient'     => $contact_recipient,
+					'ServiceType'          => 'WarehouseWarehouse',
+					'PaymentMethod'        => 'Cash',
+					'PayerType'            => 'Recipient',
+					'Cost'                 => $price,
+					'SeatsAmount'          => 1,
+					'Description'          => 'Взуття',
+					'Weight'               => ( $count * .5 ) - .01,
+					'CargoType'            => 'Parcel',
+					//phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+					'DateTime'             => date( 'd.m.Y' ),
+					'BackwardDeliveryData' => [
+						[
+							'PayerType'        => 'Recipient',
+							'CargoType'        => 'Money',
+							'RedeliveryString' => $redelivery,
+						],
+					],
+				],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn(
+			[
+				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				'body' => json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'IntDocNumber' => $internet_document,
+							],
+						],
+					]
+				),
+			]
+		);
+		WP_Mock::userFunction( 'is_wp_error' )->
+		times( 4 )->
+		andReturn( false );
 
 		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
-		$this->set_protected_property( $api, 'np', $np );
 
-		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count, $redelivery );
+		$this->assertSame(
+			$internet_document,
+			$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count, $redelivery )
+		);
 	}
 
 	/**
-	 * Test fail validate API key
-	 *
-	 * @throws ReflectionException Invalid object or object property.
+	 * Test validate bad request API key
 	 */
-	public function test_fail_validation() {
-		$api_key = 'api-key';
-		$np      = Mockery::mock( 'LisDev\Delivery\NovaPoshtaApi2' );
-		$np
-			->shouldReceive( 'setKey' )
-			->withArgs( [ $api_key ] )
-			->once();
-		$np
-			->shouldReceive( 'getCounterparties' )
-			->withArgs( [ 'Sender', 1 ] )
-			->once();
+	public function test_validation_bad_request() {
+		$api_key  = 'api-key';
 		$db       = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'Address',
+				'calledMethod'     => 'getCities',
+				'apiKey'           => $api_key,
+				'methodProperties' => [
+					'FindByString' => 'Киев',
+				],
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		andReturn( false );
+		WP_Mock::userFunction( 'is_wp_error' )->
+		once()->
+		andReturn( true );
 
-		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
-		$this->set_protected_property( $api, 'np', $np );
+		$api = new API( $db, $settings );
 
 		$this->assertFalse( $api->validate( $api_key ) );
 	}
 
 	/**
-	 * Test success validate API key
-	 *
-	 * @throws ReflectionException Invalid object or object property.
+	 * Test fail validation API key.
 	 */
-	public function test_success_validation() {
-		$api_key = 'api-key';
-		$np      = Mockery::mock( 'LisDev\Delivery\NovaPoshtaApi2' );
-		$np
-			->shouldReceive( 'setKey' )
-			->withArgs( [ $api_key ] )
-			->once();
-		$np
-			->shouldReceive( 'getCounterparties' )
-			->withArgs( [ 'Sender', 1 ] )
-			->once()
-			->andReturn( [ 'success' => true ] );
+	public function test_fail_validation() {
+		$api_key  = 'api-key';
 		$db       = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'Address',
+				'calledMethod'     => 'getCities',
+				'apiKey'           => $api_key,
+				'methodProperties' => [
+					'FindByString' => 'Киев',
+				],
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		andReturn(
+			[
+				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				'body' => json_encode(
+					[
+						'success' => false,
+					]
+				),
+			]
+		);
+		WP_Mock::userFunction( 'is_wp_error' )->
+		once()->
+		andReturn( false );
 
-		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
-		$this->set_protected_property( $api, 'np', $np );
+		$api = new API( $db, $settings );
+
+		$this->assertFalse( $api->validate( $api_key ) );
+	}
+
+	/**
+	 * Test validation API key.
+	 */
+	public function test_validation() {
+		$api_key  = 'api-key';
+		$db       = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'Address',
+				'calledMethod'     => 'getCities',
+				'apiKey'           => $api_key,
+				'methodProperties' => [
+					'FindByString' => 'Киев',
+				],
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+			]
+		)->
+		once()->
+		andReturn(
+			[
+				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				'body' => json_encode(
+					[
+						'success' => true,
+					]
+				),
+			]
+		);
+		WP_Mock::userFunction( 'is_wp_error' )->
+		once()->
+		andReturn( false );
+
+		$api = new API( $db, $settings );
 
 		$this->assertTrue( $api->validate( $api_key ) );
 	}

@@ -13,8 +13,8 @@
 namespace Nova_Poshta\Core;
 
 use DateTime;
+use DateTimeZone;
 use Exception;
-use LisDev\Delivery\NovaPoshtaApi2;
 
 /**
  * Class API
@@ -24,17 +24,15 @@ use LisDev\Delivery\NovaPoshtaApi2;
 class API {
 
 	/**
+	 * Nova Poshta API endpoint
+	 */
+	const ENDPOINT = 'https://api.novaposhta.ua/v2.0/json/';
+	/**
 	 * Plugin settings
 	 *
 	 * @var array
 	 */
 	private $settings;
-	/**
-	 * API for Nova Poshta
-	 *
-	 * @var NovaPoshtaApi2
-	 */
-	protected $np;
 	/**
 	 * Database
 	 *
@@ -50,7 +48,6 @@ class API {
 	 */
 	public function __construct( DB $db, Settings $settings ) {
 		$this->settings = $settings;
-		$this->np       = new NovaPoshtaApi2( '' );
 		$this->db       = $db;
 	}
 
@@ -64,12 +61,12 @@ class API {
 	 */
 	public function cities( string $search = '', int $limit = 10 ): array {
 		if ( ! get_transient( Main::PLUGIN_SLUG . '-cities' ) ) {
-			$request = $this->np->getCities( 0 );
-			if ( $request['success'] ) {
-				$this->db->update_cities( $request['data'] );
+			$response = $this->request( 'Address', 'getCities' );
+			if ( $response['success'] ) {
+				$this->db->update_cities( $response['data'] );
 				set_transient( Main::PLUGIN_SLUG . '-cities', 1, constant( 'DAY_IN_SECONDS' ) );
 			}
-			unset( $request );
+			unset( $response );
 		}
 
 		return $this->db->cities( $search, $limit );
@@ -116,13 +113,19 @@ class API {
 	 * @return array
 	 */
 	public function warehouses( string $city_id ): array {
-		if ( ! get_transient( Main::PLUGIN_SLUG . '-warehouse-' . $city_id ) ) {
-			$request = $this->np->getWarehouses( $city_id );
-			if ( $request['success'] ) {
-				$this->db->update_warehouses( $request['data'] );
-				set_transient( Main::PLUGIN_SLUG . '-warehouse-' . $city_id, 1, constant( 'DAY_IN_SECONDS' ) );
+		if ( ! wp_cache_get( Main::PLUGIN_SLUG . '-warehouse-' . $city_id, Main::PLUGIN_SLUG ) ) {
+			$response = $this->request(
+				'AddressGeneral',
+				'getWarehouses',
+				[
+					'CityRef' => $city_id,
+				]
+			);
+			if ( $response['success'] ) {
+				$this->db->update_warehouses( $response['data'] );
+				wp_cache_set( Main::PLUGIN_SLUG . '-warehouse-' . $city_id, 1, Main::PLUGIN_SLUG, constant( 'DAY_IN_SECONDS' ) );
 			}
-			unset( $request );
+			unset( $response );
 		}
 
 		return $this->db->warehouses( $city_id );
@@ -148,32 +151,16 @@ class API {
 		string $city_id, string $warehouse_id, float $price,
 		int $count, float $redelivery = 0
 	): string {
-		if ( empty( $this->settings->api_key() ) ) {
+		$sender = $this->sender();
+		if ( empty( $sender ) ) {
 			return '';
 		}
-		$this->np->setKey( $this->settings->api_key() );
-		$admin_phone        = $this->settings->phone() ?? '';
-		$admin_city_id      = $this->settings->city_id() ?? '';
-		$admin_warehouse_id = $this->settings->warehouse_id() ?? '';
-		if ( ! $admin_phone || ! $admin_city_id || ! $admin_warehouse_id ) {
+		$recipient = $this->recipient( $first_name, $last_name, $phone, $city_id, $warehouse_id );
+		if ( empty( $recipient ) ) {
 			return '';
 		}
-		$sender    = [
-			'ContactSender' => $admin_phone,
-			'CitySender'    => $admin_city_id,
-			'SenderAddress' => $admin_warehouse_id,
-		];
-		$recipient = [
-			'FirstName'        => $first_name,
-			'LastName'         => $last_name,
-			'Phone'            => preg_replace( '/[^0-9]/', '', $phone ),
-			'Region'           => $this->area( $city_id ),
-			'City'             => $city_id,
-			'CityRecipient'    => $city_id,
-			'RecipientAddress' => $warehouse_id,
-		];
-		$date      = new DateTime( '', new \DateTimeZone( 'Europe/Kiev' ) );
-		$info      = [
+		$date = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
+		$info = [
 			'ServiceType'   => 'WarehouseWarehouse',
 			'PaymentMethod' => 'Cash',
 			'PayerType'     => 'Recipient',
@@ -181,6 +168,7 @@ class API {
 			'SeatsAmount'   => '1',
 			'Description'   => 'Взуття', // TODO: Field with deliver.
 			'Weight'        => ( $count * .5 ) - .01, // TODO: Calculate weight.
+			'CargoType'     => 'Parcel',
 			'DateTime'      => $date->format( 'd.m.Y' ),
 		];
 		if ( $redelivery ) {
@@ -192,11 +180,149 @@ class API {
 				],
 			];
 		}
-		$internet_document = $this->np->newInternetDocument( $sender, $recipient, $info );
-
-		// TODO: Return WP_Error.
+		$internet_document = $this->request(
+			'InternetDocument',
+			'save',
+			array_merge( $sender, $recipient, $info )
+		);
 
 		return $internet_document['success'] ? $internet_document['data'][0]['IntDocNumber'] : '';
+	}
+
+	/**
+	 * Validate phone number
+	 *
+	 * @param string $phone Phone number.
+	 *
+	 * @return string
+	 */
+	private function validate_phone( string $phone ): string {
+		return '380' . substr( preg_replace( '/[^0-9]/', '', $phone ), - 9 );
+	}
+
+	/**
+	 * Create sender
+	 *
+	 * @return array
+	 */
+	private function sender(): array {
+		$phone        = $this->validate_phone( $this->settings->phone() ) ?? '';
+		$city_id      = $this->settings->city_id() ?? '';
+		$warehouse_id = $this->settings->warehouse_id() ?? '';
+		if ( ! $phone || ! $city_id || ! $warehouse_id ) {
+			return [];
+		}
+		$sender   = [
+			'ContactSender' => $phone,
+			'CitySender'    => $city_id,
+			'SenderAddress' => $warehouse_id,
+			'SendersPhone'  => $phone,
+		];
+		$response = $this->request(
+			'Counterparty',
+			'getCounterparties',
+			[
+				'City'                 => $sender['CitySender'],
+				'CounterpartyProperty' => 'Sender',
+				'Page'                 => 1,
+			],
+		);
+		if ( ! isset( $response['success'] ) || ! $response['success'] ) {
+			return [];
+		}
+		$sender['Sender'] = $response['data'][0]['Ref'];
+
+		$response = $this->request(
+			'Counterparty',
+			'getCounterpartyContactPersons',
+			[
+				'Ref' => $sender['Sender'],
+			]
+		);
+		if ( ! isset( $response['success'] ) || ! $response['success'] ) {
+			return [];
+		}
+		$sender['ContactSender'] = $response['data'][0]['Ref'];
+
+		return $sender;
+	}
+
+	/**
+	 * Create recipient
+	 *
+	 * @param string $first_name   First name.
+	 * @param string $last_name    Last name.
+	 * @param string $phone        Phone number.
+	 * @param string $city_id      City ID.
+	 * @param string $warehouse_id Warehouse ID.
+	 *
+	 * @return array
+	 */
+	private function recipient(
+		string $first_name, string $last_name, string $phone, string $city_id, string $warehouse_id
+	): array {
+		$phone     = $this->validate_phone( $phone );
+		$recipient = [
+			'FirstName'        => $first_name,
+			'LastName'         => $last_name,
+			'Phone'            => $phone,
+			'RecipientsPhone'  => $phone,
+			'Region'           => $this->area( $city_id ),
+			'City'             => $city_id,
+			'CityRecipient'    => $city_id,
+			'RecipientAddress' => $warehouse_id,
+		];
+		$response  = $this->request(
+			'Counterparty',
+			'save',
+			array_merge(
+				[
+					'CounterpartyProperty' => 'Recipient',
+					'CounterpartyType'     => 'PrivatePerson',
+				],
+				$recipient
+			)
+		);
+		if ( ! isset( $response['success'] ) || ! $response['success'] ) {
+			return [];
+		}
+		$recipient['Recipient']        = $response['data'][0]['Ref'];
+		$recipient['ContactRecipient'] = $response['data'][0]['ContactPerson']['data'][0]['Ref'];
+
+		return $recipient;
+	}
+
+	/**
+	 * Request to Nova Poshta API.
+	 *
+	 * @param string $model  Model name.
+	 * @param string $method Method name.
+	 * @param array  $args   Arguments for methods.
+	 *
+	 * @return array
+	 */
+	private function request( string $model, string $method, array $args = [] ): array {
+		if ( ! $this->settings->api_key() ) {
+			return [];
+		}
+
+		$response = wp_remote_post(
+			self::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => wp_json_encode(
+					[
+						'modelName'        => $model,
+						'calledMethod'     => $method,
+						'methodProperties' => $args,
+						'apiKey'           => $this->settings->api_key(),
+					]
+				),
+				'data_format' => 'body',
+			]
+		);
+
+		return ! is_wp_error( $response ) ? json_decode( $response['body'], true ) : [];
 	}
 
 	/**
@@ -207,10 +333,29 @@ class API {
 	 * @return bool
 	 */
 	public function validate( string $api_key ): bool {
-		$this->np->setKey( $api_key );
-		$sender = $this->np->getCounterparties( 'Sender', 1 );
+		$response = wp_remote_post(
+			self::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => wp_json_encode(
+					[
+						'modelName'        => 'Address',
+						'calledMethod'     => 'getCities',
+						'apiKey'           => $api_key,
+						'methodProperties' => [
+							'FindByString' => 'Киев',
+						],
+					]
+				),
+				'data_format' => 'body',
+			]
+		);
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+		$response = json_decode( $response['body'], true );
 
-		return ! empty( $sender['success'] );
+		return $response['success'];
 	}
 
 }

@@ -241,7 +241,7 @@ class Test_Admin extends Test_Case {
 	public function test_page_create_invoice( array $request ) {
 		$_POST[ Main::PLUGIN_SLUG ] = $request;
 		WP_Mock::userFunction( 'check_admin_referer' )->
-		with( Main::PLUGIN_SLUG . '-invoice' )->
+		with( Main::PLUGIN_SLUG . '-invoice', Main::PLUGIN_SLUG . '_nonce' )->
 		once()->
 		andReturn( false );
 		$request_to_api = array_values( $request );
