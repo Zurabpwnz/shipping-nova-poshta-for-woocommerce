@@ -1,6 +1,6 @@
 {
   "require": {
-    "lis-dev/nova-poshta-api-2": "^0.1.1"
+    "ext-json": "*"
   },
   "require-dev": {
     "wp-coding-standards/wpcs": "dev-master",

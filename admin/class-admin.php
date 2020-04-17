@@ -148,7 +148,7 @@ class Admin {
 		if ( ! isset( $_POST[ Main::PLUGIN_SLUG ] ) ) {
 			return;
 		}
-		check_admin_referer( Main::PLUGIN_SLUG . '-invoice' );
+		check_admin_referer( Main::PLUGIN_SLUG . '-invoice', Main::PLUGIN_SLUG . '_nonce' );
 		$fields = filter_input( INPUT_POST, Main::PLUGIN_SLUG, FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
 		$this->api->internet_document(
 			$fields['first_name'],
