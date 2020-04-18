@@ -314,11 +314,12 @@ class API {
 					[
 						'modelName'        => $model,
 						'calledMethod'     => $method,
-						'methodProperties' => $args,
+						'methodProperties' => (object) $args,
 						'apiKey'           => $this->settings->api_key(),
 					]
 				),
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		);
 
@@ -342,7 +343,7 @@ class API {
 						'modelName'        => 'Address',
 						'calledMethod'     => 'getCities',
 						'apiKey'           => $api_key,
-						'methodProperties' => [
+						'methodProperties' => (object) [
 							'FindByString' => 'Киев',
 						],
 					]

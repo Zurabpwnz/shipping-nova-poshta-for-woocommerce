@@ -7,9 +7,12 @@
 
 namespace Nova_Poshta\Core;
 
+use DateTime;
+use DateTimeZone;
 use Exception;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
+use stdClass;
 use tad\FunctionMocker\FunctionMocker;
 use WP_Mock;
 
@@ -61,7 +64,7 @@ class Test_API extends Test_Case {
 			[
 				'modelName'        => 'Address',
 				'calledMethod'     => 'getCities',
-				'methodProperties' => [],
+				'methodProperties' => new stdClass(),
 				'apiKey'           => $api_key,
 			]
 		)->
@@ -74,6 +77,7 @@ class Test_API extends Test_Case {
 				'headers'     => [ 'Content-Type' => 'application/json' ],
 				'body'        => 'json',
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		)->
 		once()->
@@ -186,7 +190,7 @@ class Test_API extends Test_Case {
 			[
 				'modelName'        => 'AddressGeneral',
 				'calledMethod'     => 'getWarehouses',
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'CityRef' => $city_id,
 				],
 				'apiKey'           => $api_key,
@@ -201,6 +205,7 @@ class Test_API extends Test_Case {
 				'headers'     => [ 'Content-Type' => 'application/json' ],
 				'body'        => 'json',
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		)->
 		once()->
@@ -322,7 +327,7 @@ class Test_API extends Test_Case {
 			[
 				'modelName'        => 'Counterparty',
 				'calledMethod'     => 'getCounterparties',
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'City'                 => $admin_city_id,
 					'CounterpartyProperty' => 'Sender',
 					'Page'                 => 1,
@@ -339,6 +344,7 @@ class Test_API extends Test_Case {
 				'headers'     => [ 'Content-Type' => 'application/json' ],
 				'body'        => 'json',
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		)->
 		once()->
@@ -363,7 +369,7 @@ class Test_API extends Test_Case {
 			[
 				'modelName'        => 'Counterparty',
 				'calledMethod'     => 'getCounterpartyContactPersons',
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'Ref' => $sender,
 				],
 				'apiKey'           => $api_key,
@@ -378,6 +384,7 @@ class Test_API extends Test_Case {
 				'headers'     => [ 'Content-Type' => 'application/json' ],
 				'body'        => 'json',
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		)->
 		once()->
@@ -439,7 +446,7 @@ class Test_API extends Test_Case {
 			[
 				'modelName'        => 'Counterparty',
 				'calledMethod'     => 'getCounterparties',
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'City'                 => $admin_city_id,
 					'CounterpartyProperty' => 'Sender',
 					'Page'                 => 1,
@@ -456,6 +463,7 @@ class Test_API extends Test_Case {
 				'headers'     => [ 'Content-Type' => 'application/json' ],
 				'body'        => 'json',
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		)->
 		once()->
@@ -480,7 +488,7 @@ class Test_API extends Test_Case {
 			[
 				'modelName'        => 'Counterparty',
 				'calledMethod'     => 'getCounterpartyContactPersons',
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'Ref' => $sender,
 				],
 				'apiKey'           => $api_key,
@@ -495,6 +503,7 @@ class Test_API extends Test_Case {
 				'headers'     => [ 'Content-Type' => 'application/json' ],
 				'body'        => 'json',
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		)->
 		once()->
@@ -519,7 +528,7 @@ class Test_API extends Test_Case {
 			[
 				'modelName'        => 'Counterparty',
 				'calledMethod'     => 'save',
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'CounterpartyProperty' => 'Recipient',
 					'CounterpartyType'     => 'PrivatePerson',
 					'FirstName'            => $first_name,
@@ -543,6 +552,7 @@ class Test_API extends Test_Case {
 				'headers'     => [ 'Content-Type' => 'application/json' ],
 				'body'        => 'json',
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		)->
 		once()->
@@ -609,7 +619,7 @@ class Test_API extends Test_Case {
 			[
 				'modelName'        => 'Counterparty',
 				'calledMethod'     => 'getCounterparties',
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'City'                 => $admin_city_id,
 					'CounterpartyProperty' => 'Sender',
 					'Page'                 => 1,
@@ -626,6 +636,7 @@ class Test_API extends Test_Case {
 				'headers'     => [ 'Content-Type' => 'application/json' ],
 				'body'        => 'json',
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		)->
 		once()->
@@ -650,7 +661,7 @@ class Test_API extends Test_Case {
 			[
 				'modelName'        => 'Counterparty',
 				'calledMethod'     => 'getCounterpartyContactPersons',
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'Ref' => $sender,
 				],
 				'apiKey'           => $api_key,
@@ -665,6 +676,7 @@ class Test_API extends Test_Case {
 				'headers'     => [ 'Content-Type' => 'application/json' ],
 				'body'        => 'json',
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		)->
 		once()->
@@ -689,7 +701,7 @@ class Test_API extends Test_Case {
 			[
 				'modelName'        => 'Counterparty',
 				'calledMethod'     => 'save',
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'CounterpartyProperty' => 'Recipient',
 					'CounterpartyType'     => 'PrivatePerson',
 					'FirstName'            => $first_name,
@@ -713,6 +725,7 @@ class Test_API extends Test_Case {
 				'headers'     => [ 'Content-Type' => 'application/json' ],
 				'body'        => 'json',
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		)->
 		once()->
@@ -739,12 +752,13 @@ class Test_API extends Test_Case {
 				),
 			]
 		);
+		$date = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
 		WP_Mock::userFunction( 'wp_json_encode' )->
 		with(
 			[
 				'modelName'        => 'InternetDocument',
 				'calledMethod'     => 'save',
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'ContactSender'    => $contact_sender,
 					'CitySender'       => $admin_city_id,
 					'SenderAddress'    => $admin_warehouse_id,
@@ -768,8 +782,7 @@ class Test_API extends Test_Case {
 					'Description'      => 'Взуття',
 					'Weight'           => ( $count * .5 ) - .01,
 					'CargoType'        => 'Parcel',
-					//phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-					'DateTime'         => date( 'd.m.Y' ),
+					'DateTime'         => $date->format( 'd.m.Y' ),
 				],
 				'apiKey'           => $api_key,
 			]
@@ -783,6 +796,7 @@ class Test_API extends Test_Case {
 				'headers'     => [ 'Content-Type' => 'application/json' ],
 				'body'        => 'json',
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		)->
 		once()->
@@ -865,7 +879,7 @@ class Test_API extends Test_Case {
 			[
 				'modelName'        => 'Counterparty',
 				'calledMethod'     => 'getCounterparties',
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'City'                 => $admin_city_id,
 					'CounterpartyProperty' => 'Sender',
 					'Page'                 => 1,
@@ -882,6 +896,7 @@ class Test_API extends Test_Case {
 				'headers'     => [ 'Content-Type' => 'application/json' ],
 				'body'        => 'json',
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		)->
 		once()->
@@ -906,7 +921,7 @@ class Test_API extends Test_Case {
 			[
 				'modelName'        => 'Counterparty',
 				'calledMethod'     => 'getCounterpartyContactPersons',
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'Ref' => $sender,
 				],
 				'apiKey'           => $api_key,
@@ -921,6 +936,7 @@ class Test_API extends Test_Case {
 				'headers'     => [ 'Content-Type' => 'application/json' ],
 				'body'        => 'json',
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		)->
 		once()->
@@ -945,7 +961,7 @@ class Test_API extends Test_Case {
 			[
 				'modelName'        => 'Counterparty',
 				'calledMethod'     => 'save',
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'CounterpartyProperty' => 'Recipient',
 					'CounterpartyType'     => 'PrivatePerson',
 					'FirstName'            => $first_name,
@@ -969,6 +985,7 @@ class Test_API extends Test_Case {
 				'headers'     => [ 'Content-Type' => 'application/json' ],
 				'body'        => 'json',
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		)->
 		once()->
@@ -995,12 +1012,13 @@ class Test_API extends Test_Case {
 				),
 			]
 		);
+		$date = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
 		WP_Mock::userFunction( 'wp_json_encode' )->
 		with(
 			[
 				'modelName'        => 'InternetDocument',
 				'calledMethod'     => 'save',
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'ContactSender'        => $contact_sender,
 					'CitySender'           => $admin_city_id,
 					'SenderAddress'        => $admin_warehouse_id,
@@ -1024,8 +1042,7 @@ class Test_API extends Test_Case {
 					'Description'          => 'Взуття',
 					'Weight'               => ( $count * .5 ) - .01,
 					'CargoType'            => 'Parcel',
-					//phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-					'DateTime'             => date( 'd.m.Y' ),
+					'DateTime'             => $date->format( 'd.m.Y' ),
 					'BackwardDeliveryData' => [
 						[
 							'PayerType'        => 'Recipient',
@@ -1046,6 +1063,7 @@ class Test_API extends Test_Case {
 				'headers'     => [ 'Content-Type' => 'application/json' ],
 				'body'        => 'json',
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		)->
 		once()->
@@ -1090,7 +1108,7 @@ class Test_API extends Test_Case {
 				'modelName'        => 'Address',
 				'calledMethod'     => 'getCities',
 				'apiKey'           => $api_key,
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'FindByString' => 'Киев',
 				],
 			]
@@ -1130,7 +1148,7 @@ class Test_API extends Test_Case {
 				'modelName'        => 'Address',
 				'calledMethod'     => 'getCities',
 				'apiKey'           => $api_key,
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'FindByString' => 'Киев',
 				],
 			]
@@ -1179,7 +1197,7 @@ class Test_API extends Test_Case {
 				'modelName'        => 'Address',
 				'calledMethod'     => 'getCities',
 				'apiKey'           => $api_key,
-				'methodProperties' => [
+				'methodProperties' => (object) [
 					'FindByString' => 'Киев',
 				],
 			]
