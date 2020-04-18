@@ -181,11 +181,14 @@ class Admin {
 	 * @return array
 	 */
 	public function validate( array $value ): array {
-		if ( isset( $value['api_key'] ) && ! $this->api->validate( $value['api_key'] ) ) {
+		if ( isset( $value['api_key'] ) && $this->api->validate( $value['api_key'] ) ) {
+			$this->api->cities();
+		} else {
 			add_settings_error( Main::PLUGIN_SLUG, 403, __( 'Invalid api key', 'woo-nova-poshta' ) );
+			unset( $value['api_key'] );
 		}
 
-		return $value ?? [];
+		return is_array( $value ) ? $value : [];
 	}
 
 }
