@@ -225,7 +225,7 @@ class API {
 				'City'                 => $sender['CitySender'],
 				'CounterpartyProperty' => 'Sender',
 				'Page'                 => 1,
-			],
+			]
 		);
 		if ( ! isset( $response['success'] ) || ! $response['success'] ) {
 			return [];

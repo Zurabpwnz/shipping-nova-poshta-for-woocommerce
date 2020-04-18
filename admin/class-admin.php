@@ -144,7 +144,7 @@ class Admin {
 	 *
 	 * @throws Exception Invalid DateTime.
 	 */
-	private function controller(): void {
+	private function controller() {
 		if ( ! isset( $_POST[ Main::PLUGIN_SLUG ] ) ) {
 			return;
 		}

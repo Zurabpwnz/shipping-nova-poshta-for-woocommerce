@@ -131,7 +131,7 @@ class User {
 	/**
 	 * Update user_meta after each order complete
 	 */
-	public function checkout(): void {
+	public function checkout() {
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
 			return;

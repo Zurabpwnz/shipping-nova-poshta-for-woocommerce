@@ -45,7 +45,7 @@ class Checkout {
 	/**
 	 * Validate fields
 	 */
-	public function validate(): void {
+	public function validate() {
 		$nonce = filter_input( INPUT_POST, 'woo_nova_poshta_nonce', FILTER_SANITIZE_STRING );
 		if ( ! wp_verify_nonce( $nonce, Main::PLUGIN_SLUG . '-shipping' ) ) {
 			return;

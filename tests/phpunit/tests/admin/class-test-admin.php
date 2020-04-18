@@ -26,7 +26,7 @@ class Test_Admin extends Test_Case {
 	/**
 	 * Tear down the test.
 	 */
-	public function tearDown(): void {
+	public function tearDown() {
 		//phpcs:ignore PEAR.Functions.FunctionCallSignature.SpaceBeforeOpenBracket
 		unset ( $GLOBALS['current_screen'] );
 		//phpcs:ignore WordPress.Security.NonceVerification.Missing
