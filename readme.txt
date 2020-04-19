@@ -1,6 +1,6 @@
 === Nova Poshta for WooCommerce ===
-Contributors:
-Tags:
+Contributors: wppunk
+Tags: Нова пошта, новая почта, nova poshta, novaposhta
 Requires at least: 5.1
 Tested up to: 5.4
 Stable tag: 1.0.0
@@ -8,13 +8,16 @@ Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Some short description
+Integration Nova Poshta API with WooCommerce.
 
 == Description ==
 
-= Features =
+Integration Nova Poshta API with WooCommerce. Add shipping method for WooCommerce. Creating invoice for orders.
 
-Add shipping method for WooCommerce. Creating internet documents for orders.
+= Features =
+* Add shipping method for WooCommerce.
+* Creating internet documents for orders.
+* Update user profile
 
 == Installation ==
 
