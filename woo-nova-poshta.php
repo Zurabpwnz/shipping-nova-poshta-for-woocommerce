@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Woo Nova Poshta
+ * Plugin Name: Nova Poshta for WooCommerce
  * Plugin URI:  https://github.com/mdenisenko/woo-nova-poshta
  * Description: Способ доставки Нова Пошта и генерация накладних Нова Пошта.
  * Version: 1.0.0
