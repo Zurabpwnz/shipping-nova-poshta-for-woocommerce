@@ -779,6 +779,15 @@ class Test_API extends Test_Case {
 					'PayerType'        => 'Recipient',
 					'Cost'             => $price,
 					'SeatsAmount'      => 1,
+					'OptionsSeat'      => [
+						[
+							'volumetricVolume' => 1,
+							'volumetricWidth'  => $count * 26,
+							'volumetricLength' => $count * 14.5,
+							'volumetricHeight' => $count * 10,
+							'weight'           => ( $count * .5 ) - .01,
+						],
+					],
 					'Description'      => 'Взуття',
 					'Weight'           => ( $count * .5 ) - .01,
 					'CargoType'        => 'Parcel',
@@ -1039,6 +1048,15 @@ class Test_API extends Test_Case {
 					'PayerType'            => 'Recipient',
 					'Cost'                 => $price,
 					'SeatsAmount'          => 1,
+					'OptionsSeat'          => [
+						[
+							'volumetricVolume' => 1,
+							'volumetricWidth'  => $count * 26,
+							'volumetricLength' => $count * 14.5,
+							'volumetricHeight' => $count * 10,
+							'weight'           => ( $count * .5 ) - .01,
+						],
+					],
 					'Description'          => 'Взуття',
 					'Weight'               => ( $count * .5 ) - .01,
 					'CargoType'            => 'Parcel',
