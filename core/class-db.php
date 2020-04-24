@@ -174,12 +174,13 @@ class DB {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		return $wpdb->get_var(
-			$wpdb->prepare( 'SELECT `description_ru` FROM ' . $this->cities_table . ' WHERE city_id = %s', $city_id )
-		) ?: '';
+		$description = $wpdb->get_var(
+			$wpdb->prepare( 'SELECT `description_ru` FROM ' . $this->cities_table . ' WHERE city_id = %s', $city_id ) );
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+		return (string) $description;
 	}
 
 	/**
@@ -195,12 +196,14 @@ class DB {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		return $wpdb->get_var(
+		$area = $wpdb->get_var(
 			$wpdb->prepare( 'SELECT `area` FROM ' . $this->cities_table . ' WHERE city_id = %s', $city_id )
-		) ?: '';
+		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+		return (string) $area;
 	}
 
 	/**
