@@ -2,7 +2,7 @@
 /**
  * Bootstrap file for Woo Nova Poshta phpunit tests.
  *
- * @package woo-nova-poshta
+ * @package shipping-nova-poshta-for-woocommerce
  */
 
 use tad\FunctionMocker\FunctionMocker;

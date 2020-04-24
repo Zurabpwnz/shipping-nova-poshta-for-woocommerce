@@ -1,18 +1,18 @@
 <?php
 /**
- * Nova Poshta for WooCommerce
+ * Shipping Nova Poshta for WooCommerce
  *
- * Plugin Name: Nova Poshta for WooCommerce
- * Plugin URI:  https://github.com/wppunk/woo-nova-poshta
+ * Plugin Name: Shipping Nova Poshta for WooCommerce
+ * Plugin URI:  https://github.com/wppunk/shipping-nova-poshta-for-woocommerce
  * Description: Shipping method for Nova Poshta. Creating internet documents for orders.
  * Version: 1.0.0
  * Author: Maksym Denysenko
  * Author URI: https://profiles.wordpress.org/wppunk/
  *
- * Text Domain: woo-nova-poshta
+ * Text Domain: shipping-nova-poshta-for-woocommerce
  * Domain Path: /languages/
  *
- * @package Nova Poshta
+ * @package Shipping Nova Poshta for WooCommerce
  * @author  Maksym Denysenko
  */
 

@@ -2,9 +2,9 @@
 /**
  * Bootstrap class
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  * @author    Maksym Denysenko
- * @link      https://github.com/wppunk/woo-nova-poshta
+ * @link      https://github.com/wppunk/shipping-nova-poshta-for-woocommerce
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -31,7 +31,7 @@ class Main {
 	/**
 	 * Plugin slug
 	 */
-	const PLUGIN_SLUG = 'woo-nova-poshta';
+	const PLUGIN_SLUG = 'shipping-nova-poshta-for-woocommerce';
 	/**
 	 * Plugin version
 	 */

@@ -2,7 +2,7 @@
 /**
  * Nova_Poshta_Shipping_Method tests
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
 use Nova_Poshta\Tests\Test_Case;
@@ -20,11 +20,11 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 	public function test___construct() {
 		$nova_poshta_shipping_method = new Nova_Poshta_Shipping_Method();
 
-		$this->assertSame( 'woo_nova_poshta', $nova_poshta_shipping_method->id );
+		$this->assertSame( 'shipping_nova_poshta_for_woocommerce', $nova_poshta_shipping_method->id );
 		$this->assertSame( 'Nova Poshta delivery', $nova_poshta_shipping_method->title );
 		$this->assertSame( 'Nova Poshta delivery', $nova_poshta_shipping_method->method_title );
 		$this->assertSame( 'Nova Poshta delivery', $nova_poshta_shipping_method->method_description );
-		$this->assertTrue( $nova_poshta_shipping_method->enabled );
+		$this->assertSame( 'yes', $nova_poshta_shipping_method->enabled );
 		$this->assertSame(
 			[
 				'shipping-zones',
@@ -50,9 +50,9 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 	 */
 	public function test_save_action() {
 		$stub     = Mockery::mock( 'Nova_Poshta_Shipping_Method' )->makePartial();
-		$stub->id = 'woo_nova_poshta';
+		$stub->id = 'shipping_nova_poshta_for_woocommerce';
 		WP_Mock::expectActionAdded(
-			'woocommerce_update_options_shipping_woo_nova_poshta',
+			'woocommerce_update_options_shipping_shipping_nova_poshta_for_woocommerce',
 			[
 				$stub,
 				'process_admin_options',
@@ -60,6 +60,28 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 		);
 
 		$stub->init();
+	}
+
+	/**
+	 * Test calculate shipping
+	 */
+	public function test_calculate_shipping() {
+		$stub        = Mockery::mock( 'Nova_Poshta_Shipping_Method' )->makePartial();
+		$stub->id    = 'shipping_nova_poshta_for_woocommerce';
+		$stub->title = 'shipping_nova_poshta_for_woocommerce';
+		$stub
+			->shouldReceive( 'add_rate' )
+			->once()
+			->with(
+				[
+					'id'       => $stub->id,
+					'label'    => $stub->title,
+					'cost'     => '0',
+					'calc_tax' => 'per_item',
+				]
+			);
+
+		$stub->calculate_shipping();
 	}
 
 }

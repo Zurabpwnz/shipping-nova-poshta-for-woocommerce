@@ -1,14 +1,14 @@
 jQuery(document).ready(function ($) {
     function init() {
-        $('#woo_nova_poshta_city').select2({
+        $('#shipping_nova_poshta_for_woocommerce_city').select2({
             minimumInputLength: 1,
             ajax: {
-                url: woo_nova_poshta.url,
+                url: shipping_nova_poshta_for_woocommerce.url,
                 type: 'POST',
                 data: function (params) {
                     return {
-                        'nonce': woo_nova_poshta.nonce,
-                        'action': 'woo_nova_poshta_city',
+                        'nonce': shipping_nova_poshta_for_woocommerce.nonce,
+                        'action': 'shipping_nova_poshta_for_woocommerce_city',
                         'search': params.term,
                     };
                 },
@@ -19,17 +19,17 @@ jQuery(document).ready(function ($) {
                 }
             }
         });
-        $('#woo_nova_poshta_city').on('select2:select', function (e) {
+        $('#shipping_nova_poshta_for_woocommerce_city').on('select2:select', function (e) {
             $.ajax({
-                url: woo_nova_poshta.url,
+                url: shipping_nova_poshta_for_woocommerce.url,
                 type: 'POST',
                 data: {
-                    'nonce': woo_nova_poshta.nonce,
-                    'action': 'woo_nova_poshta_warehouse',
-                    'city': $('#woo_nova_poshta_city').val(),
+                    'nonce': shipping_nova_poshta_for_woocommerce.nonce,
+                    'action': 'shipping_nova_poshta_for_woocommerce_warehouse',
+                    'city': $('#shipping_nova_poshta_for_woocommerce_city').val(),
                 },
                 success: function (data) {
-                    let select = $('#woo_nova_poshta_warehouse');
+                    let select = $('#shipping_nova_poshta_for_woocommerce_warehouse');
                     select.find('option').remove();
                     data.forEach(function (element) {
                         select.append(new Option(element.text, element.id, false, false));
@@ -38,10 +38,10 @@ jQuery(document).ready(function ($) {
                 }
             });
         });
-        $('#woo_nova_poshta_warehouse').select2();
+        $('#shipping_nova_poshta_for_woocommerce_warehouse').select2();
     }
 
-    if ( $('#woo_nova_poshta_city, #woo_nova_poshta_warehouse').length ) {
+    if ( $('#shipping_nova_poshta_for_woocommerce_city, #shipping_nova_poshta_for_woocommerce_warehouse').length ) {
         init();
     }
 

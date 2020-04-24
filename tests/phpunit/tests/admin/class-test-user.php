@@ -2,7 +2,7 @@
 /**
  * Admin user tests
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
 namespace Nova_Poshta\Admin;
@@ -27,10 +27,10 @@ class Test_User extends Test_Case {
 		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$user = new User( $api );
 
-		WP_Mock::expectActionAdded( 'woo_nova_poshta_user_fields', [ $user, 'fields' ] );
+		WP_Mock::expectActionAdded( 'shipping_nova_poshta_for_woocommerce_user_fields', [ $user, 'fields' ] );
 		WP_Mock::expectActionAdded( 'woocommerce_checkout_create_order_shipping_item', [ $user, 'checkout' ], 10, 4 );
-		WP_Mock::expectFilterAdded( 'woo_nova_poshta_default_city_id', [ $user, 'city' ] );
-		WP_Mock::expectFilterAdded( 'woo_nova_poshta_default_warehouse_id', [ $user, 'warehouse' ] );
+		WP_Mock::expectFilterAdded( 'shipping_nova_poshta_for_woocommerce_default_city_id', [ $user, 'city' ] );
+		WP_Mock::expectFilterAdded( 'shipping_nova_poshta_for_woocommerce_default_warehouse_id', [ $user, 'warehouse' ] );
 
 		$user->hooks();
 	}
@@ -60,7 +60,7 @@ class Test_User extends Test_Case {
 			[
 				'args'  => [
 					Main::PLUGIN_SLUG . '-shipping',
-					'woo_nova_poshta_nonce',
+					'shipping_nova_poshta_for_woocommerce_nonce',
 					false,
 				],
 				'times' => 1,
@@ -151,7 +151,7 @@ class Test_User extends Test_Case {
 		withArgs(
 			[
 				$user_id,
-				'woo_nova_poshta_city',
+				'shipping_nova_poshta_for_woocommerce_city',
 				$city_id,
 			]
 		);
@@ -160,7 +160,7 @@ class Test_User extends Test_Case {
 		withArgs(
 			[
 				$user_id,
-				'woo_nova_poshta_warehouse',
+				'shipping_nova_poshta_for_woocommerce_warehouse',
 				$warehouse_id,
 			]
 		);
@@ -170,8 +170,8 @@ class Test_User extends Test_Case {
 
 		$user->checkout();
 
-		$filter_input->wasCalledWithOnce( [ INPUT_POST, 'woo_nova_poshta_city', FILTER_SANITIZE_STRING ] );
-		$filter_input->wasCalledWithOnce( [ INPUT_POST, 'woo_nova_poshta_warehouse', FILTER_SANITIZE_STRING ] );
+		$filter_input->wasCalledWithOnce( [ INPUT_POST, 'shipping_nova_poshta_for_woocommerce_city', FILTER_SANITIZE_STRING ] );
+		$filter_input->wasCalledWithOnce( [ INPUT_POST, 'shipping_nova_poshta_for_woocommerce_warehouse', FILTER_SANITIZE_STRING ] );
 	}
 
 	/**
@@ -184,7 +184,7 @@ class Test_User extends Test_Case {
 		once()->
 		andReturn( $user_id );
 		WP_Mock::userFunction( 'get_user_meta' )->
-		withArgs( [ $user_id, 'woo_nova_poshta_city', true ] )->
+		withArgs( [ $user_id, 'shipping_nova_poshta_for_woocommerce_city', true ] )->
 		once()->
 		andReturn( $city_id );
 
@@ -205,7 +205,7 @@ class Test_User extends Test_Case {
 		once()->
 		andReturn( $user_id );
 		WP_Mock::userFunction( 'get_user_meta' )->
-		withArgs( [ $user_id, 'woo_nova_poshta_city', true ] )->
+		withArgs( [ $user_id, 'shipping_nova_poshta_for_woocommerce_city', true ] )->
 		once()->
 		andReturn( $user_city_id );
 
@@ -238,7 +238,7 @@ class Test_User extends Test_Case {
 		once()->
 		andReturn( $user_id );
 		WP_Mock::userFunction( 'get_user_meta' )->
-		withArgs( [ $user_id, 'woo_nova_poshta_warehouse', true ] )->
+		withArgs( [ $user_id, 'shipping_nova_poshta_for_woocommerce_warehouse', true ] )->
 		once()->
 		andReturn( $user_warehouse_id );
 

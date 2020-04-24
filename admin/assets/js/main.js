@@ -1,15 +1,15 @@
 jQuery(document).ready(function ($) {
     function update_warehouses(active = null) {
         $.ajax({
-            url: woo_nova_poshta.url,
+            url: shipping_nova_poshta_for_woocommerce.url,
             type: 'POST',
             data: {
-                'nonce': woo_nova_poshta.nonce,
-                'action': 'woo_nova_poshta_warehouse',
-                'city': $('#woo_nova_poshta_city').val(),
+                'nonce': shipping_nova_poshta_for_woocommerce.nonce,
+                'action': 'shipping_nova_poshta_for_woocommerce_warehouse',
+                'city': $('#shipping_nova_poshta_for_woocommerce_city').val(),
             },
             success: function (data) {
-                let select = $('#woo_nova_poshta_warehouse');
+                let select = $('#shipping_nova_poshta_for_woocommerce_warehouse');
                 select.find('option').remove();
                 data.forEach(function (element) {
                     select.append(new Option(element.text, element.id, false, active === element.id));
@@ -20,18 +20,18 @@ jQuery(document).ready(function ($) {
     }
 
     function init() {
-        if (!$('#woo_nova_poshta_city, #woo_nova_poshta_warehouse').length) {
+        if (!$('#shipping_nova_poshta_for_woocommerce_city, #shipping_nova_poshta_for_woocommerce_warehouse').length) {
             return;
         }
-        $('#woo_nova_poshta_city').select2({
+        $('#shipping_nova_poshta_for_woocommerce_city').select2({
             minimumInputLength: 1,
             ajax: {
-                url: woo_nova_poshta.url,
+                url: shipping_nova_poshta_for_woocommerce.url,
                 type: 'POST',
                 data: function (params) {
                     return {
-                        'nonce': woo_nova_poshta.nonce,
-                        'action': 'woo_nova_poshta_city',
+                        'nonce': shipping_nova_poshta_for_woocommerce.nonce,
+                        'action': 'shipping_nova_poshta_for_woocommerce_city',
                         'search': params.term,
                     };
                 },
@@ -42,10 +42,10 @@ jQuery(document).ready(function ($) {
                 }
             }
         });
-        $('#woo_nova_poshta_city').on('select2:select', function (e) {
+        $('#shipping_nova_poshta_for_woocommerce_city').on('select2:select', function (e) {
             update_warehouses();
         });
-        $('#woo_nova_poshta_warehouse').select2();
+        $('#shipping_nova_poshta_for_woocommerce_warehouse').select2();
     }
 
 
@@ -71,19 +71,19 @@ jQuery(document).ready(function ($) {
 
     function update_method_classes() {
         let method_field = $('#order_shipping_line_items .shipping_method');
-        if (method_field.length && 'woo_nova_poshta' === method_field.val()) {
-            $('#order_shipping_line_items').addClass('woo-nova-poshta');
+        if (method_field.length && 'shipping_nova_poshta_for_woocommerce' === method_field.val()) {
+            $('#order_shipping_line_items').addClass('shipping-nova-poshta-for-woocommerce');
         } else {
-            $('#order_shipping_line_items').removeClass('woo-nova-poshta');
+            $('#order_shipping_line_items').removeClass('shipping-nova-poshta-for-woocommerce');
         }
 
     }
 
     $('#woocommerce-order-items').on('click', '#order_shipping_line_items .edit-order-item', function () {
-        replace_input_on_select('city_id', 'woo_nova_poshta_city');
-        replace_input_on_select('warehouse_id', 'woo_nova_poshta_warehouse');
+        replace_input_on_select('city_id', 'shipping_nova_poshta_for_woocommerce_city');
+        replace_input_on_select('warehouse_id', 'shipping_nova_poshta_for_woocommerce_warehouse');
         init();
-        update_warehouses($('#woo_nova_poshta_warehouse').val());
+        update_warehouses($('#shipping_nova_poshta_for_woocommerce_warehouse').val());
 
         function replace_input_on_select(key, id) {
             let id_key = $('#order_shipping_line_items input[value=' + key + ']');

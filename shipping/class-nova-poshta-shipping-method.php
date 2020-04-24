@@ -2,9 +2,9 @@
 /**
  * Nova Poshta Shipping Method
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  * @author    Maksym Denysenko
- * @link      https://github.com/wppunk/woo-nova-poshta
+ * @link      https://github.com/wppunk/shipping-nova-poshta-for-woocommerce
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -17,16 +17,51 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 	class Nova_Poshta_Shipping_Method extends WC_Shipping_Method {
 
 		/**
+		 * Unique ID for the shipping method - must be set.
+		 *
+		 * @var string
+		 */
+		public $id;
+		/**
+		 * Shipping method title for the frontend.
+		 *
+		 * @var string
+		 */
+		public $title;
+		/**
+		 * Method title.
+		 *
+		 * @var string
+		 */
+		public $method_title;
+		/**
+		 * Method description.
+		 *
+		 * @var string
+		 */
+		public $method_description;
+		/**
+		 * Features this method supports. Possible features used by core:
+		 * - shipping-zones Shipping zone functionality + instances
+		 * - instance-settings Instance settings screens.
+		 * - settings Non-instance settings screens. Enabled by default for BW compatibility with methods before instances existed.
+		 * - instance-settings-modal Allows the instance settings to be loaded within a modal in the zones UI.
+		 *
+		 * @var array
+		 */
+		public $supports;
+
+		/**
 		 * Constructor for your shipping class
 		 *
 		 * @param int $instance_id Instance ID.
 		 */
 		public function __construct( $instance_id = 0 ) {
-			$this->id                 = 'woo_nova_poshta';
-			$this->title              = __( 'Nova Poshta delivery', 'woo-nova-poshta' );
-			$this->method_title       = __( 'Nova Poshta delivery', 'woo-nova-poshta' );
-			$this->method_description = __( 'Nova Poshta delivery', 'woo-nova-poshta' );
-			$this->enabled            = true;
+			$this->id                 = 'shipping_nova_poshta_for_woocommerce';
+			$this->title              = __( 'Nova Poshta delivery', 'shipping-nova-poshta-for-woocommerce' );
+			$this->method_title       = __( 'Nova Poshta delivery', 'shipping-nova-poshta-for-woocommerce' );
+			$this->method_description = __( 'Nova Poshta delivery', 'shipping-nova-poshta-for-woocommerce' );
+			$this->enabled            = 'yes';
 			$this->supports           = [
 				'shipping-zones',
 				'instance-settings',
@@ -52,11 +87,34 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 		public function init_form_fields() {
 			$this->instance_form_fields = [
 				'title' => [
-					'title'   => __( 'Method header', 'woo-nova-poshta' ),
+					'title'   => __( 'Method header', 'shipping-nova-poshta-for-woocommerce' ),
 					'type'    => 'text',
-					'default' => __( 'Nova Poshta delivery', 'woo-nova-poshta' ),
+					'default' => __( 'Nova Poshta delivery', 'shipping-nova-poshta-for-woocommerce' ),
 				],
 			];
+		}
+
+		/**
+		 * Calculate shipping method.
+		 *
+		 * Important method!
+		 *
+		 * @access public
+		 *
+		 * @param array $package Packages.
+		 *
+		 * @return void
+		 */
+		public function calculate_shipping( $package = [] ) {
+			$rate = array(
+				'id'       => $this->id,
+				'label'    => $this->title,
+				'cost'     => '0',
+				'calc_tax' => 'per_item',
+			);
+
+			// Register the rate.
+			$this->add_rate( $rate );
 		}
 
 	}

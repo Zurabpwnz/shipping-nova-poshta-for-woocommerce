@@ -2,9 +2,9 @@
 /**
  * Shipping
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  * @author    Maksym Denysenko
- * @link      https://github.com/wppunk/woo-nova-poshta
+ * @link      https://github.com/wppunk/shipping-nova-poshta-for-woocommerce
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -24,7 +24,7 @@ class Shipping {
 	 *
 	 * @var string
 	 */
-	private $method_name = 'woo_nova_poshta';
+	private $method_name = 'shipping_nova_poshta_for_woocommerce';
 
 	/**
 	 * Require shipping methods

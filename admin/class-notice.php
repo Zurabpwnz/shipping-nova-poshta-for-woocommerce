@@ -2,9 +2,9 @@
 /**
  * Admin area notices
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  * @author    Maksym Denysenko
- * @link      https://github.com/wppunk/woo-nova-poshta
+ * @link      https://github.com/wppunk/shipping-nova-poshta-for-woocommerce
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -75,7 +75,7 @@ class Notice {
 			/* translators: 1: link on page option */
 				__(
 					'For the plugin to work, you must enter the API key on the <a href="%s">plugin settings page</a>',
-					'woo-nova-poshta'
+					'shipping-nova-poshta-for-woocommerce'
 				),
 				get_admin_url( null, 'admin.php?page=' . Main::PLUGIN_SLUG )
 			)
@@ -95,7 +95,7 @@ class Notice {
 			/* translators: 1: link on WooCommerce settings */
 				__(
 					'You must add the "New Delivery Method" delivery method <a href="%s">in the WooCommerce settings</a>',
-					'woo-nova-poshta' // Comma here produces fatal syntax error on php 7.1.
+					'shipping-nova-poshta-for-woocommerce'
 				),
 				get_admin_url( null, 'admin.php?page=wc-settings&tab=shipping' )
 			)

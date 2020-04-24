@@ -2,7 +2,7 @@
 /**
  * Thank you page tests
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
 namespace Nova_Poshta\Core;
@@ -73,7 +73,7 @@ class Test_Thank_You extends Test_Case {
 		$shipping_method
 			->shouldReceive( 'get_method_id' )
 			->once()
-			->andReturn( 'woo_nova_poshta' );
+			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
 		$shipping_method
 			->shouldReceive( 'get_meta' )
 			->withArgs( [ 'city_id' ] )
@@ -115,7 +115,7 @@ class Test_Thank_You extends Test_Case {
 		$shipping_method
 			->shouldReceive( 'get_method_id' )
 			->once()
-			->andReturn( 'woo_nova_poshta' );
+			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
 		$shipping_method
 			->shouldReceive( 'get_meta' )
 			->withArgs( [ 'city_id' ] )
@@ -168,7 +168,7 @@ class Test_Thank_You extends Test_Case {
 		$shipping_method
 			->shouldReceive( 'get_method_id' )
 			->once()
-			->andReturn( 'woo_nova_poshta' );
+			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
 		$shipping_method
 			->shouldReceive( 'get_meta' )
 			->withArgs( [ 'city_id' ] )
