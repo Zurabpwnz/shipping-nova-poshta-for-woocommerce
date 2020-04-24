@@ -2,7 +2,7 @@
 /**
  * Shipping tests
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
 namespace Nova_Poshta\Core;
@@ -38,7 +38,7 @@ class Test_Shipping extends Test_Case {
 
 		$this->assertSame(
 			[
-				'woo_nova_poshta' => 'Nova_Poshta_Shipping_Method',
+				'shipping_nova_poshta_for_woocommerce' => 'Nova_Poshta_Shipping_Method',
 			],
 			$shipping->register_methods( [] )
 		);
@@ -54,14 +54,14 @@ class Test_Shipping extends Test_Case {
 		$wpdb         = Mockery::mock( 'wpdb' );
 		$wpdb->prefix = 'prefix_';
 		$sql          = 'SELECT `instance_id` FROM ' . $wpdb->prefix . 'woocommerce_shipping_zone_methods
-			WHERE `method_id` = "woo_nova_poshta" AND `is_enabled` = 1 LIMIT 1';
+			WHERE `method_id` = "shipping_nova_poshta_for_woocommerce" AND `is_enabled` = 1 LIMIT 1';
 		$wpdb
 			->shouldReceive( 'prepare' )
 			->withArgs(
 				[
 					'SELECT `instance_id` FROM ' . $wpdb->prefix . 'woocommerce_shipping_zone_methods
 			WHERE `method_id` = %s AND `is_enabled` = 1 LIMIT 1',
-					'woo_nova_poshta',
+					'shipping_nova_poshta_for_woocommerce',
 				]
 			)
 			->once()
@@ -73,11 +73,11 @@ class Test_Shipping extends Test_Case {
 			->andReturn( $request );
 
 		WP_Mock::userFunction( 'wp_cache_get' )->
-		withArgs( [ 'woo_nova_poshta_active' ] )->
+		withArgs( [ 'shipping_nova_poshta_for_woocommerce_active' ] )->
 		once()->
 		andReturn( null );
 		WP_Mock::userFunction( 'wp_cache_set' )->
-		withArgs( [ 'woo_nova_poshta_active', $request ] )->
+		withArgs( [ 'shipping_nova_poshta_for_woocommerce_active', $request ] )->
 		once();
 
 		$shipping = new Shipping();

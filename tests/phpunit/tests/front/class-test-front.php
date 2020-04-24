@@ -2,7 +2,7 @@
 /**
  * Front tests
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
 namespace Nova_Poshta\Front;
@@ -46,7 +46,7 @@ class Test_Front extends Test_Case {
 	 * Test styles on checkout page
 	 */
 	public function test_enqueue_styles() {
-		$plugin_url = 'https://site.com/wp-content/plugins/woo-nova-poshta/';
+		$plugin_url = 'https://site.com/wp-content/plugins/shipping-nova-poshta-for-woocommerce/';
 		WP_Mock::userFunction( 'is_checkout' )->
 		andReturn( true )->
 		once();
@@ -80,7 +80,7 @@ class Test_Front extends Test_Case {
 	 * Test scripts on checkout page
 	 */
 	public function test_enqueue_scripts() {
-		$plugin_url = 'https://site.com/wp-content/plugins/woo-nova-poshta/';
+		$plugin_url = 'https://site.com/wp-content/plugins/shipping-nova-poshta-for-woocommerce/';
 		$admin_ajax = 'https://site.com/admin-ajax.php';
 		$nonce      = 'nonce';
 		WP_Mock::userFunction( 'is_checkout' )->
@@ -115,7 +115,7 @@ class Test_Front extends Test_Case {
 		withArgs(
 			[
 				Main::PLUGIN_SLUG,
-				'woo_nova_poshta',
+				'shipping_nova_poshta_for_woocommerce',
 				[
 					'url'   => $admin_ajax,
 					'nonce' => $nonce,

@@ -2,7 +2,7 @@
 /**
  * Order tests
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
 namespace Nova_Poshta\Core;
@@ -82,7 +82,7 @@ class Test_Order extends Test_Case {
 		//phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		//phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 		//phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-		$this->assertSame( $new_nonce, $_POST['woo_nova_poshta_nonce'] );
+		$this->assertSame( $new_nonce, $_POST['shipping_nova_poshta_for_woocommerce_nonce'] );
 		//phpcs:enable WordPress.Security.NonceVerification.Missing
 		//phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		//phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
@@ -108,8 +108,8 @@ class Test_Order extends Test_Case {
 	 * Test don't save with bad nonce
 	 */
 	public function test_do_NOT_save_with_bad_nonce() {
-		$nonce                          = 'nonce';
-		$_POST['woo_nova_poshta_nonce'] = $nonce;
+		$nonce = 'nonce';
+		$_POST['shipping_nova_poshta_for_woocommerce_nonce'] = $nonce;
 		WP_Mock::userFunction( 'wp_unslash' )->
 		withArgs( [ $nonce ] )->
 		once()->
@@ -134,8 +134,8 @@ class Test_Order extends Test_Case {
 	 * Test don't save for other shipping method
 	 */
 	public function test_do_NOT_save_for_other_shipping_method() {
-		$nonce                          = 'nonce';
-		$_POST['woo_nova_poshta_nonce'] = $nonce;
+		$nonce = 'nonce';
+		$_POST['shipping_nova_poshta_for_woocommerce_nonce'] = $nonce;
 		WP_Mock::userFunction( 'wp_unslash' )->
 		withArgs( [ $nonce ] )->
 		once()->
@@ -150,7 +150,7 @@ class Test_Order extends Test_Case {
 		$item_shipping
 			->shouldReceive( 'get_method_id' )
 			->once()
-			->andReturn( 'no_woo_nova_poshta' );
+			->andReturn( 'no_shipping_nova_poshta_for_woocommerce' );
 		$package_key = 10;
 		$package     = [];
 		$wc_order    = Mockery::mock( 'WC_Order' );
@@ -164,8 +164,8 @@ class Test_Order extends Test_Case {
 	 * Test don't save with not enough dating
 	 */
 	public function test_do_NOT_save_with_empty_city_or_warehouse() {
-		$nonce                          = 'nonce';
-		$_POST['woo_nova_poshta_nonce'] = $nonce;
+		$nonce = 'nonce';
+		$_POST['shipping_nova_poshta_for_woocommerce_nonce'] = $nonce;
 		WP_Mock::userFunction( 'wp_unslash' )->
 		withArgs( [ $nonce ] )->
 		once()->
@@ -180,7 +180,7 @@ class Test_Order extends Test_Case {
 		$item_shipping
 			->shouldReceive( 'get_method_id' )
 			->once()
-			->andReturn( 'woo_nova_poshta' );
+			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
 		$package_key = 10;
 		$package     = [];
 		$wc_order    = Mockery::mock( 'WC_Order' );
@@ -195,10 +195,10 @@ class Test_Order extends Test_Case {
 	 */
 	public function test_save() {
 		global $city_id, $warehouse_id;
-		$city_id                        = 'city-id';
-		$warehouse_id                   = 'warehouse-id';
-		$nonce                          = 'nonce';
-		$_POST['woo_nova_poshta_nonce'] = $nonce;
+		$city_id      = 'city-id';
+		$warehouse_id = 'warehouse-id';
+		$nonce        = 'nonce';
+		$_POST['shipping_nova_poshta_for_woocommerce_nonce'] = $nonce;
 		WP_Mock::userFunction( 'wp_unslash' )->
 		withArgs( [ $nonce ] )->
 		once()->
@@ -208,13 +208,13 @@ class Test_Order extends Test_Case {
 		once()->
 		andReturn( true );
 		FunctionMocker::replace( 'filter_var', $nonce );
+		$answers = [ $city_id, $warehouse_id ];
+		$answers = array_values( $answers );
+
 		FunctionMocker::replace(
 			'filter_input',
-			function () {
-				global $city_id, $warehouse_id;
+			function () use ( $answers ) {
 				static $i = 0;
-
-				$answers = [ $city_id, $warehouse_id ];
 
 				return $answers[ $i ++ ];
 			}
@@ -224,7 +224,7 @@ class Test_Order extends Test_Case {
 		$item_shipping
 			->shouldReceive( 'get_method_id' )
 			->once()
-			->andReturn( 'woo_nova_poshta' );
+			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
 		$item_shipping
 			->shouldReceive( 'add_meta_data' )
 			->withArgs( [ 'city_id', $city_id, true ] )
@@ -385,7 +385,7 @@ class Test_Order extends Test_Case {
 		$item
 			->shouldReceive( 'get_method_id' )
 			->once()
-			->andReturn( 'other_woo_nova_poshta' );
+			->andReturn( 'other_shipping_nova_poshta_for_woocommerce' );
 		FunctionMocker::replace( 'is_a', true );
 		$order = new Order( $api );
 
@@ -413,7 +413,7 @@ class Test_Order extends Test_Case {
 		$item
 			->shouldReceive( 'get_method_id' )
 			->once()
-			->andReturn( 'woo_nova_poshta' );
+			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
 		$item
 			->shouldReceive( 'get_meta' )
 			->once()
@@ -539,7 +539,7 @@ class Test_Order extends Test_Case {
 		$wc_order_item_shipping
 			->shouldReceive( 'get_method_id' )
 			->once()
-			->andReturn( 'woo_nova_poshta' );
+			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
 		$wc_order_item_shipping
 			->shouldReceive( 'get_meta' )
 			->withArgs( [ 'city_id' ] )

@@ -1,5 +1,6 @@
-=== Nova Poshta for WooCommerce ===
+=== Shipping Nova Poshta for WooCommerce ===
 Contributors: wppunk
+Donate link: https://www.liqpay.ua/api/3/checkout?data=eyJ2ZXJzaW9uIjozLCJhY3Rpb24iOiJwYXlkb25hdGUiLCJwdWJsaWNfa2V5IjoiaTM0ODU5MzcyNjEwIiwiYW1vdW50IjoiMCIsImN1cnJlbmN5IjoiVUFIIiwiZGVzY3JpcHRpb24iOiLQodC%2F0LDRgdC40LHQviDQsNCy0YLQvtGA0YMg0LfQsCBTaGlwcGluZyBOb3ZhIFBvc2h0YSBmb3IgV29vQ29tbWVyY2UiLCJ0eXBlIjoiZG9uYXRlIiwibGFuZ3VhZ2UiOiJydSJ9&signature=rGy8tJ7N1bDPT8o0wxvI0G59vRw%3D
 Tags: Нова пошта, новая почта, nova poshta, novaposhta
 Requires at least: 5.1
 Tested up to: 5.4
@@ -21,7 +22,7 @@ Integration Nova Poshta API with WooCommerce. Add shipping method for WooCommerc
 
 == Installation ==
 
-1. Upload `woo-nova-poshta` folder to the `/wp-content/plugins/` directory.
+1. Upload `shipping-nova-poshta-for-woocommerce` folder to the `/wp-content/plugins/` directory.
 2. Activate the plugin through the 'Plugins' menu in WordPress.
 
 == Frequently Asked Questions ==
@@ -32,3 +33,12 @@ Integration Nova Poshta API with WooCommerce. Add shipping method for WooCommerc
 
 = 1.0.0 =
 * Initial release
+
+== Upgrade Notice ==
+
+= 1.0.0 =
+* Initial release
+
+== Screenshots ==
+
+1. /admin/assets/img/screenshot-1.png

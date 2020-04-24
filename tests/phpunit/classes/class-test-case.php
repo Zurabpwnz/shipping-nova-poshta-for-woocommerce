@@ -2,7 +2,7 @@
 /**
  * Test case
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
 namespace Nova_Poshta\Tests;

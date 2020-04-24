@@ -8,12 +8,12 @@
 use Nova_Poshta\Core\Main;
 
 ?>
-<h2><?php esc_attr_e( 'General', 'woo-nova-poshta' ); ?></h2>
-<form action="options.php" method="POST" class="woo-nova-poshta-form">
+<h2><?php esc_attr_e( 'General', 'shipping-nova-poshta-for-woocommerce' ); ?></h2>
+<form action="options.php" method="POST" class="shipping-nova-poshta-for-woocommerce-form">
 	<?php settings_errors( Main::PLUGIN_SLUG ); ?>
 	<?php settings_fields( Main::PLUGIN_SLUG ); ?>
 	<p>
-		<label><?php esc_attr_e( 'API key', 'woo-nova-poshta' ); ?><br>
+		<label><?php esc_attr_e( 'API key', 'shipping-nova-poshta-for-woocommerce' ); ?><br>
 			<input
 					type="text"
 					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[api_key]"
@@ -25,7 +25,7 @@ use Nova_Poshta\Core\Main;
 	<div<?php echo ! $this->settings->api_key() ? ' style="display: none;"' : ''; ?>>
 		<p>
 			<label>
-				<?php esc_attr_e( 'Phone', 'woo-nova-poshta' ); ?><br>
+				<?php esc_attr_e( 'Phone', 'shipping-nova-poshta-for-woocommerce' ); ?><br>
 				<input
 						type="tel"
 						name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[phone]"
@@ -38,9 +38,9 @@ use Nova_Poshta\Core\Main;
 			$current_city    = $current_city_id ? $this->api->city( $current_city_id ) : '';
 			?>
 			<label>
-				<?php esc_attr_e( 'City', 'woo-nova-poshta' ); ?><br>
+				<?php esc_attr_e( 'City', 'shipping-nova-poshta-for-woocommerce' ); ?><br>
 				<select
-						id="woo_nova_poshta_city"
+						id="shipping_nova_poshta_for_woocommerce_city"
 						name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[city_id]">
 					<option value="<?php echo esc_attr( $current_city_id ); ?>"><?php echo esc_attr( $current_city ); ?></option>
 				</select>
@@ -52,9 +52,9 @@ use Nova_Poshta\Core\Main;
 			$current_warehouse_id = $this->settings->warehouse_id();
 			?>
 			<label>
-				<?php esc_attr_e( 'Warehouse', 'woo-nova-poshta' ); ?><br>
+				<?php esc_attr_e( 'Warehouse', 'shipping-nova-poshta-for-woocommerce' ); ?><br>
 				<select
-						id="woo_nova_poshta_warehouse"
+						id="shipping_nova_poshta_for_woocommerce_warehouse"
 						name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[warehouse_id]">
 					<?php foreach ( $warehouses as $warehouse_id => $name ) { ?>
 						<option

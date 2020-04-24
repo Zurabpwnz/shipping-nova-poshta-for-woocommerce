@@ -2,9 +2,9 @@
 /**
  * Ajax callbacks
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  * @author    Maksym Denysenko
- * @link      https://github.com/wppunk/woo-nova-poshta
+ * @link      https://github.com/wppunk/shipping-nova-poshta-for-woocommerce
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -39,10 +39,10 @@ class AJAX {
 	 * Add hooks
 	 */
 	public function hooks() {
-		add_action( 'wp_ajax_woo_nova_poshta_city', [ $this, 'cities' ] );
-		add_action( 'wp_ajax_nopriv_woo_nova_poshta_city', [ $this, 'cities' ] );
-		add_action( 'wp_ajax_woo_nova_poshta_warehouse', [ $this, 'warehouses' ] );
-		add_action( 'wp_ajax_nopriv_woo_nova_poshta_warehouse', [ $this, 'warehouses' ] );
+		add_action( 'wp_ajax_shipping_nova_poshta_for_woocommerce_city', [ $this, 'cities' ] );
+		add_action( 'wp_ajax_nopriv_shipping_nova_poshta_for_woocommerce_city', [ $this, 'cities' ] );
+		add_action( 'wp_ajax_shipping_nova_poshta_for_woocommerce_warehouse', [ $this, 'warehouses' ] );
+		add_action( 'wp_ajax_nopriv_shipping_nova_poshta_for_woocommerce_warehouse', [ $this, 'warehouses' ] );
 	}
 
 	/**
