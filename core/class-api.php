@@ -4,7 +4,7 @@
  *
  * @package   Woo-Nova-Poshta
  * @author    Maksym Denysenko
- * @link      https://github.com/mdenisenko/woo-nova-poshta
+ * @link      https://github.com/wppunk/woo-nova-poshta
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -165,7 +165,16 @@ class API {
 			'PaymentMethod' => 'Cash',
 			'PayerType'     => 'Recipient',
 			'Cost'          => $price,
-			'SeatsAmount'   => '1',
+			'SeatsAmount'   => 1,
+			'OptionsSeat'   => [
+				[
+					'volumetricVolume' => 1,
+					'volumetricWidth'  => $count * 26, // TODO: Calculate width.
+					'volumetricLength' => $count * 14.5, // TODO: Calculate length.
+					'volumetricHeight' => $count * 10, // TODO: Calculate height.
+					'weight'           => ( $count * .5 ) - .01, // TODO: Calculate weight.
+				],
+			],
 			'Description'   => 'Взуття', // TODO: Field with deliver.
 			'Weight'        => ( $count * .5 ) - .01, // TODO: Calculate weight.
 			'CargoType'     => 'Parcel',
@@ -225,7 +234,7 @@ class API {
 				'City'                 => $sender['CitySender'],
 				'CounterpartyProperty' => 'Sender',
 				'Page'                 => 1,
-			],
+			]
 		);
 		if ( ! isset( $response['success'] ) || ! $response['success'] ) {
 			return [];
@@ -314,11 +323,12 @@ class API {
 					[
 						'modelName'        => $model,
 						'calledMethod'     => $method,
-						'methodProperties' => $args,
+						'methodProperties' => (object) $args,
 						'apiKey'           => $this->settings->api_key(),
 					]
 				),
 				'data_format' => 'body',
+				'timeout'     => 30,
 			]
 		);
 
@@ -342,7 +352,7 @@ class API {
 						'modelName'        => 'Address',
 						'calledMethod'     => 'getCities',
 						'apiKey'           => $api_key,
-						'methodProperties' => [
+						'methodProperties' => (object) [
 							'FindByString' => 'Киев',
 						],
 					]

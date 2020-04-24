@@ -4,7 +4,7 @@
  *
  * @package   Woo-Nova-Poshta
  * @author    Maksym Denysenko
- * @link      https://github.com/mdenisenko/woo-nova-poshta
+ * @link      https://github.com/wppunk/woo-nova-poshta
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -131,7 +131,7 @@ class DB {
 	 *
 	 * @param array $cities List of the cities.
 	 */
-	public function update_cities( array $cities ): void {
+	public function update_cities( array $cities ) {
 		global $wpdb;
 		$sql = 'INSERT INTO ' . $this->cities_table . ' (`city_id`, `description`, `area`) VALUES ';
 		foreach ( $cities as $city ) {
@@ -171,12 +171,14 @@ class DB {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		return $wpdb->get_var(
+		$description = $wpdb->get_var(
 			$wpdb->prepare( 'SELECT `description` FROM ' . $this->cities_table . ' WHERE city_id = %s', $city_id )
-		) ?: '';
+		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+		return (string) $description;
 	}
 
 	/**
@@ -192,12 +194,14 @@ class DB {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		return $wpdb->get_var(
+		$area = $wpdb->get_var(
 			$wpdb->prepare( 'SELECT `area` FROM ' . $this->cities_table . ' WHERE city_id = %s', $city_id )
-		) ?: '';
+		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+		return (string) $area;
 	}
 
 	/**
@@ -232,7 +236,7 @@ class DB {
 	 *
 	 * @param array $warehouses List of the warehouses.
 	 */
-	public function update_warehouses( array $warehouses ): void {
+	public function update_warehouses( array $warehouses ) {
 		global $wpdb;
 		$sql = 'INSERT INTO ' . $this->warehouses_table . ' (`warehouse_id`,`city_id`, `description`, `order`) VALUES ';
 		foreach ( $warehouses as $key => $warehouse ) {

@@ -22,7 +22,7 @@ abstract class Test_Case extends TestCase {
 	/**
 	 * Setup test
 	 */
-	public function setUp(): void {
+	public function setUp() {
 		FunctionMocker::setUp();
 		parent::setUp();
 		WP_Mock::setUp(); // Must be the last one.
@@ -31,7 +31,7 @@ abstract class Test_Case extends TestCase {
 	/**
 	 * End test
 	 */
-	public function tearDown(): void {
+	public function tearDown() {
 		WP_Mock::tearDown();
 		Mockery::close();
 		parent::tearDown();
@@ -47,7 +47,7 @@ abstract class Test_Case extends TestCase {
 	 *
 	 * @throws ReflectionException Reflection exception.
 	 */
-	protected function set_protected_property( object $object, string $property_name, $value ) {
+	protected function set_protected_property( $object, string $property_name, $value ) {
 		$reflection_class = new ReflectionClass( $object );
 
 		$property = $reflection_class->getProperty( $property_name );

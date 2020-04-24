@@ -26,7 +26,7 @@ class Test_Admin extends Test_Case {
 	/**
 	 * Tear down the test.
 	 */
-	public function tearDown(): void {
+	public function tearDown() {
 		//phpcs:ignore PEAR.Functions.FunctionCallSignature.SpaceBeforeOpenBracket
 		unset ( $GLOBALS['current_screen'] );
 		//phpcs:ignore WordPress.Security.NonceVerification.Missing
@@ -211,7 +211,7 @@ class Test_Admin extends Test_Case {
 			->andReturn( [ 'Warehuse #1' ] );
 		WP_Mock::userFunction( 'selected' )->once();
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$settings->shouldReceive( 'api_key' )->once();
+		$settings->shouldReceive( 'api_key' )->twice();
 		$settings->shouldReceive( 'phone' )->once();
 		$settings
 			->shouldReceive( 'city_id' )
@@ -329,6 +329,27 @@ class Test_Admin extends Test_Case {
 		with( Main::PLUGIN_SLUG, 403, Functions::type( 'string' ) )->
 		once();
 		$admin = new Admin( $api, $settings );
+
+		$admin->validate( [ 'api_key' => $key ] );
+	}
+
+	/**
+	 * Test validation API key and show notice
+	 */
+	public function test_validate_and_update_cities() {
+		$key = 'some-key';
+		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$api
+			->shouldReceive( 'validate' )
+			->once()
+			->withArgs( [ $key ] )
+			->andReturn( true );
+		$api
+			->shouldReceive( 'cities' )
+			->once()
+			->with();
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$admin    = new Admin( $api, $settings );
 
 		$admin->validate( [ 'api_key' => $key ] );
 	}

@@ -1,10 +1,17 @@
 {
+  "config": {
+    "platform": {
+      "php": "7.0"
+    }
+  },
   "require": {
     "ext-json": "*"
   },
   "require-dev": {
     "wp-coding-standards/wpcs": "dev-master",
-    "10up/wp_mock": "0.4.2",
+    "10up/wp_mock": "^0.3.0",
+    "phpcompatibility/php-compatibility": "^9.0",
+    "phpcompatibility/phpcompatibility-wp": "^2.1.0",
     "php-coveralls/php-coveralls": "^2.2",
     "lucatume/function-mocker": "^1.3"
   },

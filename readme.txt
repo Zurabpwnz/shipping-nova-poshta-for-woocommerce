@@ -1,24 +1,32 @@
-=== Woo Nova Poshta ===
-Contributors: 
-Tags: 
-Requires at least: 5.0
+=== Nova Poshta for WooCommerce ===
+Contributors: wppunk
+Tags: Нова пошта, новая почта, nova poshta, novaposhta
+Requires at least: 5.1
 Tested up to: 5.4
 Stable tag: 1.0.0
-Requires PHP: 7.1
+Requires PHP: 7.0
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Some short description
+Integration Nova Poshta API with WooCommerce.
 
 == Description ==
 
+Integration Nova Poshta API with WooCommerce. Add shipping method for WooCommerce. Creating invoice for orders.
+
 = Features =
+* Add shipping method for WooCommerce.
+* Creating internet documents for orders.
+* Update user profile
 
 == Installation ==
+
+1. Upload `woo-nova-poshta` folder to the `/wp-content/plugins/` directory.
+2. Activate the plugin through the 'Plugins' menu in WordPress.
 
 == Frequently Asked Questions ==
 
 = How can I define my own substitutions? =
-
-= How can I convert a large number of posts/terms using wp-cli? =
 
 == Changelog ==
 

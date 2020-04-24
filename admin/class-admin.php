@@ -4,7 +4,7 @@
  *
  * @package   Woo-Nova-Poshta
  * @author    Maksym Denysenko
- * @link      https://github.com/mdenisenko/woo-nova-poshta
+ * @link      https://github.com/wppunk/woo-nova-poshta
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -144,7 +144,7 @@ class Admin {
 	 *
 	 * @throws Exception Invalid DateTime.
 	 */
-	private function controller(): void {
+	private function controller() {
 		if ( ! isset( $_POST[ Main::PLUGIN_SLUG ] ) ) {
 			return;
 		}
@@ -181,11 +181,14 @@ class Admin {
 	 * @return array
 	 */
 	public function validate( array $value ): array {
-		if ( isset( $value['api_key'] ) && ! $this->api->validate( $value['api_key'] ) ) {
+		if ( isset( $value['api_key'] ) && $this->api->validate( $value['api_key'] ) ) {
+			$this->api->cities();
+		} else {
 			add_settings_error( Main::PLUGIN_SLUG, 403, __( 'Invalid api key', 'woo-nova-poshta' ) );
+			unset( $value['api_key'] );
 		}
 
-		return $value ?? [];
+		return is_array( $value ) ? $value : [];
 	}
 
 }

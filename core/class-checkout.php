@@ -4,7 +4,7 @@
  *
  * @package   Woo-Nova-Poshta
  * @author    Maksym Denysenko
- * @link      https://github.com/mdenisenko/woo-nova-poshta
+ * @link      https://github.com/wppunk/woo-nova-poshta
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -45,7 +45,7 @@ class Checkout {
 	/**
 	 * Validate fields
 	 */
-	public function validate(): void {
+	public function validate() {
 		$nonce = filter_input( INPUT_POST, 'woo_nova_poshta_nonce', FILTER_SANITIZE_STRING );
 		if ( ! wp_verify_nonce( $nonce, Main::PLUGIN_SLUG . '-shipping' ) ) {
 			return;

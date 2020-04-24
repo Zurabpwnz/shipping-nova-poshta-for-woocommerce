@@ -23,7 +23,7 @@ class Test_Order extends Test_Case {
 	/**
 	 * End test
 	 */
-	public function tearDown(): void {
+	public function tearDown() {
 		parent::tearDown();
 		//phpcs:ignore WordPress.Security.NonceVerification.Missing
 		unset( $_POST );

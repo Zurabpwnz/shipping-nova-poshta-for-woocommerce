@@ -4,7 +4,7 @@
  *
  * @package   Woo-Nova-Poshta
  * @author    Maksym Denysenko
- * @link      https://github.com/mdenisenko/woo-nova-poshta
+ * @link      https://github.com/wppunk/woo-nova-poshta
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -36,27 +36,61 @@ class Main {
 	 * Plugin version
 	 */
 	const VERSION = '1.0.0';
+	/**
+	 * Plugin settings
+	 *
+	 * @var Settings
+	 */
+	private $settings;
+	/**
+	 * Plugin API
+	 *
+	 * @var API
+	 */
+	private $api;
 
 	/**
 	 * Init plugin hooks
 	 */
 	public function init() {
 
-		$settings = new Settings();
-		$db       = new DB();
-		$db->hooks();
-		$api  = new API( $db, $settings );
-		$ajax = new AJAX( $api );
-		$ajax->hooks();
+		$this->settings = new Settings();
 
-		$admin = new Admin( $api, $settings );
+		$this->define_hooks_without_api_key();
+
+		if ( $this->settings->api_key() ) {
+			$this->define_hooks_with_api_key();
+		}
+	}
+
+	/**
+	 * Define hooks without API key
+	 */
+	private function define_hooks_without_api_key() {
+		$db = new DB();
+		$db->hooks();
+
+		$this->api = new API( $db, $this->settings );
+
+		$admin = new Admin( $this->api, $this->settings );
 		$admin->hooks();
 
 		$shipping = new Shipping();
 		$shipping->hooks();
 
-		$notice = new Notice( $settings, $shipping );
+		$notice = new Notice( $this->settings, $shipping );
 		$notice->hooks();
+
+		$language = new Language();
+		$language->hooks();
+	}
+
+	/**
+	 * Define hooks with API key
+	 */
+	private function define_hooks_with_api_key() {
+		$ajax = new AJAX( $this->api );
+		$ajax->hooks();
 
 		$checkout = new Checkout();
 		$checkout->hooks();
@@ -64,17 +98,14 @@ class Main {
 		$front = new Front();
 		$front->hooks();
 
-		$order = new Order( $api );
+		$order = new Order( $this->api );
 		$order->hooks();
 
-		$thank_you = new Thank_You( $api );
+		$thank_you = new Thank_You( $this->api );
 		$thank_you->hooks();
 
-		$user = new User( $api );
+		$user = new User( $this->api );
 		$user->hooks();
-
-		$language = new Language();
-		$language->hooks();
 	}
 
 }

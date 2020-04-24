@@ -4,7 +4,7 @@
  *
  * @package   Woo-Nova-Poshta
  * @author    Maksym Denysenko
- * @link      https://github.com/mdenisenko/woo-nova-poshta
+ * @link      https://github.com/wppunk/woo-nova-poshta
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -188,7 +188,7 @@ class Order {
 	 *
 	 * @throws Exception Invalid DateTime.
 	 */
-	public function processing_status( int $order_id, WC_Order $order ): void {
+	public function processing_status( int $order_id, WC_Order $order ) {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
@@ -203,7 +203,7 @@ class Order {
 	 *
 	 * @throws Exception Invalid DateTime.
 	 */
-	public function create_internet_document( WC_Order $order ): void {
+	public function create_internet_document( WC_Order $order ) {
 		$shipping_item = $this->find_shipping_method( $order->get_shipping_methods() );
 		if ( ! $shipping_item ) {
 			return;
@@ -247,7 +247,7 @@ class Order {
 	 *
 	 * @return WC_Order_Item_Shipping|null
 	 */
-	private function find_shipping_method( array $shipping_methods ): ?WC_Order_Item_Shipping {
+	private function find_shipping_method( array $shipping_methods ) {
 		foreach ( $shipping_methods as $shipping_method ) {
 			if ( 'woo_nova_poshta' === $shipping_method->get_method_id() ) {
 				return $shipping_method;

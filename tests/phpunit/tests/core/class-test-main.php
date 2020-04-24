@@ -24,7 +24,11 @@ class Test_Main extends Test_Case {
 	 * @preserveGlobalState disabled
 	 */
 	public function test_init() {
-		Mockery::mock( 'overload:Nova_Poshta\Core\Settings' );
+		$settings = Mockery::mock( 'overload:Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'api_key' )
+			->once()
+			->andReturn( 'api-key' );
 		$db = Mockery::mock( 'overload:Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'hooks' )

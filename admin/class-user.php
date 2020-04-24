@@ -4,7 +4,7 @@
  *
  * @package   Woo-Nova-Poshta
  * @author    Maksym Denysenko
- * @link      https://github.com/mdenisenko/woo-nova-poshta
+ * @link      https://github.com/wppunk/woo-nova-poshta
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -131,7 +131,7 @@ class User {
 	/**
 	 * Update user_meta after each order complete
 	 */
-	public function checkout(): void {
+	public function checkout() {
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
 			return;
