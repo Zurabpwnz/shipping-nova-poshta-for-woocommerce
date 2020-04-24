@@ -133,7 +133,7 @@ class DB {
 	 *
 	 * @param array $cities List of the cities.
 	 */
-	public function update_cities( array $cities ): void {
+	public function update_cities( array $cities ) {
 		global $wpdb;
 		$sql = 'INSERT INTO ' . $this->cities_table . ' (`city_id`, `description_ru`, `description_ua`, `area`) VALUES ';
 		foreach ( $cities as $city ) {
@@ -235,7 +235,7 @@ class DB {
 	 *
 	 * @param array $warehouses List of the warehouses.
 	 */
-	public function update_warehouses( array $warehouses ): void {
+	public function update_warehouses( array $warehouses ) {
 		global $wpdb;
 		$sql = 'INSERT INTO ' . $this->warehouses_table . ' (`warehouse_id`,`city_id`, `description_ru`, `description_ua`, `order`) VALUES ';
 		foreach ( $warehouses as $key => $warehouse ) {
