@@ -8,6 +8,7 @@
 namespace Nova_Poshta\Core;
 
 use Nova_Poshta\Tests\Test_Case;
+use WP_Mock;
 
 /**
  * Class Test_Settings
@@ -21,12 +22,13 @@ class Test_Settings extends Test_Case {
 	 */
 	public function test_api_key() {
 		$api_key = 'api-key';
-		\WP_Mock::userFunction( 'get_option' )->
+		WP_Mock::userFunction( 'get_option' )->
 		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
 		once()->
 		andReturn( [ 'api_key' => $api_key ] );
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
-		$settings = new Settings();
+		$settings = new Settings( $notice );
 
 		$this->assertSame( $api_key, $settings->api_key() );
 	}
@@ -35,12 +37,24 @@ class Test_Settings extends Test_Case {
 	 * Test get empty api key
 	 */
 	public function test_empty_api_key() {
-		\WP_Mock::userFunction( 'get_option' )->
+		WP_Mock::userFunction( 'get_option' )->
 		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
 		once()->
 		andReturn( [] );
+		WP_Mock::userFunction( 'get_admin_url' )->
+		with( null, 'admin.php?page=' . Main::PLUGIN_SLUG )->
+		once()->
+		andReturn( 'url' );
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice
+			->shouldReceive( 'add' )
+			->with(
+				'error',
+				'For the plugin to work, you must enter the API key on the <a href="url">plugin settings page</a>'
+			)->
+			once();
 
-		$settings = new Settings();
+		$settings = new Settings( $notice );
 
 		$this->assertSame( '', $settings->api_key() );
 	}
@@ -49,13 +63,20 @@ class Test_Settings extends Test_Case {
 	 * Test get phone
 	 */
 	public function test_phone() {
-		$phone = 'phone';
-		\WP_Mock::userFunction( 'get_option' )->
+		$api_key = 'api-key';
+		$phone   = 'phone';
+		WP_Mock::userFunction( 'get_option' )->
 		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
 		once()->
-		andReturn( [ 'phone' => $phone ] );
+		andReturn(
+			[
+				'api_key' => $api_key,
+				'phone'   => $phone,
+			]
+		);
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
-		$settings = new Settings();
+		$settings = new Settings( $notice );
 
 		$this->assertSame( $phone, $settings->phone() );
 	}
@@ -64,12 +85,14 @@ class Test_Settings extends Test_Case {
 	 * Test get empty phone
 	 */
 	public function test_empty_phone() {
-		\WP_Mock::userFunction( 'get_option' )->
+		$api_key = 'api-key';
+		WP_Mock::userFunction( 'get_option' )->
 		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
 		once()->
-		andReturn( [] );
+		andReturn( [ 'api_key' => $api_key ] );
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
-		$settings = new Settings();
+		$settings = new Settings( $notice );
 
 		$this->assertSame( '', $settings->phone() );
 	}
@@ -78,13 +101,20 @@ class Test_Settings extends Test_Case {
 	 * Test get city_id
 	 */
 	public function test_city_id() {
+		$api_key = 'api-key';
 		$city_id = 'city-id';
-		\WP_Mock::userFunction( 'get_option' )->
+		WP_Mock::userFunction( 'get_option' )->
 		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
 		once()->
-		andReturn( [ 'city_id' => $city_id ] );
+		andReturn(
+			[
+				'api_key' => $api_key,
+				'city_id' => $city_id,
+			]
+		);
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
-		$settings = new Settings();
+		$settings = new Settings( $notice );
 
 		$this->assertSame( $city_id, $settings->city_id() );
 	}
@@ -93,12 +123,14 @@ class Test_Settings extends Test_Case {
 	 * Test get empty city_id
 	 */
 	public function test_empty_city_id() {
-		\WP_Mock::userFunction( 'get_option' )->
+		$api_key = 'api-key';
+		WP_Mock::userFunction( 'get_option' )->
 		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
 		once()->
-		andReturn( [] );
+		andReturn( [ 'api_key' => $api_key ] );
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
-		$settings = new Settings();
+		$settings = new Settings( $notice );
 
 		$this->assertSame( '', $settings->city_id() );
 	}
@@ -107,13 +139,20 @@ class Test_Settings extends Test_Case {
 	 * Test get warehouse_id
 	 */
 	public function test_warehouse_id() {
+		$api_key      = 'api-key';
 		$warehouse_id = 'warehouse-id';
-		\WP_Mock::userFunction( 'get_option' )->
+		WP_Mock::userFunction( 'get_option' )->
 		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
 		once()->
-		andReturn( [ 'warehouse_id' => $warehouse_id ] );
+		andReturn(
+			[
+				'api_key'      => $api_key,
+				'warehouse_id' => $warehouse_id,
+			]
+		);
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
-		$settings = new Settings();
+		$settings = new Settings( $notice );
 
 		$this->assertSame( $warehouse_id, $settings->warehouse_id() );
 	}
@@ -122,12 +161,14 @@ class Test_Settings extends Test_Case {
 	 * Test get empty warehouse_id
 	 */
 	public function test_empty_warehouse_id() {
-		\WP_Mock::userFunction( 'get_option' )->
+		$api_key = 'api-key';
+		WP_Mock::userFunction( 'get_option' )->
 		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
 		once()->
-		andReturn( [] );
+		andReturn( [ 'api_key' => $api_key ] );
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
-		$settings = new Settings();
+		$settings = new Settings( $notice );
 
 		$this->assertSame( '', $settings->warehouse_id() );
 	}

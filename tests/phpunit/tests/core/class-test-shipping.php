@@ -22,7 +22,13 @@ class Test_Shipping extends Test_Case {
 	 * Test adding hooks
 	 */
 	public function test_hooks() {
-		$shipping = new Shipping();
+		WP_Mock::userFunction( 'wp_cache_get' )->
+		with( Shipping::METHOD_NAME . '_active' )->
+		once()->
+		andReturn( true );
+		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+
+		$shipping = new Shipping( $notice );
 
 		WP_Mock::expectActionAdded( 'woocommerce_shipping_init', [ $shipping, 'require_methods' ] );
 		WP_Mock::expectFilterAdded( 'woocommerce_shipping_methods', [ $shipping, 'register_methods' ] );
@@ -34,7 +40,13 @@ class Test_Shipping extends Test_Case {
 	 * Test register_methods
 	 */
 	public function test_register_methods() {
-		$shipping = new Shipping();
+		WP_Mock::userFunction( 'wp_cache_get' )->
+		with( Shipping::METHOD_NAME . '_active' )->
+		once()->
+		andReturn( true );
+		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+
+		$shipping = new Shipping( $notice );
 
 		$this->assertSame(
 			[
@@ -47,9 +59,13 @@ class Test_Shipping extends Test_Case {
 	/**
 	 * Check active nova poshta shipping method
 	 */
-	public function test_is_active() {
+	public function test_notices() {
+		WP_Mock::userFunction( 'wp_cache_get' )->
+		with( Shipping::METHOD_NAME . '_active' )->
+		once()->
+		andReturn( false );
 		global $wpdb;
-		$request = 7;
+		$request = false;
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wpdb         = Mockery::mock( 'wpdb' );
 		$wpdb->prefix = 'prefix_';
@@ -72,17 +88,23 @@ class Test_Shipping extends Test_Case {
 			->once()
 			->andReturn( $request );
 
-		WP_Mock::userFunction( 'wp_cache_get' )->
-		withArgs( [ 'shipping_nova_poshta_for_woocommerce_active' ] )->
-		once()->
-		andReturn( null );
 		WP_Mock::userFunction( 'wp_cache_set' )->
-		withArgs( [ 'shipping_nova_poshta_for_woocommerce_active', $request ] )->
+		with( 'shipping_nova_poshta_for_woocommerce_active', $request )->
 		once();
+		WP_Mock::userFunction( 'get_admin_url' )->
+		with( null, 'admin.php?page=wc-settings&tab=shipping' )->
+		once()->
+		andReturn( 'url' );
+		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice
+			->shouldReceive( 'add' )
+			->with(
+				'error',
+				'You must add the "New Delivery Method" delivery method <a href="url">in the WooCommerce settings</a>'
+			)
+			->once();
 
-		$shipping = new Shipping();
-
-		$this->assertTrue( $shipping->is_active() );
+		new Shipping( $notice );
 	}
 
 }

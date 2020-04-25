@@ -12,6 +12,8 @@
 
 namespace Nova_Poshta\Core;
 
+use Nova_Poshta\Admin\Notice;
+
 /**
  * Class Shipping
  *
@@ -24,7 +26,42 @@ class Shipping {
 	 *
 	 * @var string
 	 */
-	private $method_name = 'shipping_nova_poshta_for_woocommerce';
+	const METHOD_NAME = 'shipping_nova_poshta_for_woocommerce';
+	/**
+	 * Plugin notices
+	 *
+	 * @var Notice
+	 */
+	private $notice;
+
+	/**
+	 * Shipping constructor.
+	 *
+	 * @param Notice $notice Plugin notices.
+	 */
+	public function __construct( Notice $notice ) {
+		$this->notice = $notice;
+		$this->notices();
+	}
+
+	/**
+	 * Register notices.
+	 */
+	private function notices() {
+		if ( ! $this->is_active() ) {
+			$this->notice->add(
+				'error',
+				sprintf(
+				/* translators: 1: link on WooCommerce settings */
+					__(
+						'You must add the "New Delivery Method" delivery method <a href="%s">in the WooCommerce settings</a>',
+						'shipping-nova-poshta-for-woocommerce'
+					),
+					get_admin_url( null, 'admin.php?page=wc-settings&tab=shipping' )
+				)
+			);
+		}
+	}
 
 	/**
 	 * Require shipping methods
@@ -52,7 +89,7 @@ class Shipping {
 	 * @return array
 	 */
 	public function register_methods( array $methods ): array {
-		$methods[ $this->method_name ] = 'Nova_Poshta_Shipping_Method';
+		$methods[ self::METHOD_NAME ] = 'Nova_Poshta_Shipping_Method';
 
 		return $methods;
 	}
@@ -62,19 +99,19 @@ class Shipping {
 	 *
 	 * @return bool
 	 */
-	public function is_active(): bool {
+	private function is_active(): bool {
 		global $wpdb;
-		$is_active = wp_cache_get( $this->method_name . '_active' );
+		$is_active = wp_cache_get( self::METHOD_NAME . '_active' );
 		if ( ! $is_active ) {
 			//phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$is_active = (bool) $wpdb->get_var(
 				$wpdb->prepare(
 					'SELECT `instance_id` FROM ' . $wpdb->prefix . 'woocommerce_shipping_zone_methods
 			WHERE `method_id` = %s AND `is_enabled` = 1 LIMIT 1',
-					$this->method_name
+					self::METHOD_NAME
 				)
 			);
-			wp_cache_set( $this->method_name . '_active', $is_active );
+			wp_cache_set( self::METHOD_NAME . '_active', $is_active );
 		}
 
 		return $is_active;
