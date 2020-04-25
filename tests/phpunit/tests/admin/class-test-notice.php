@@ -2,7 +2,7 @@
 /**
  * Admin notices tests
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
 namespace Nova_Poshta\Admin;
@@ -35,41 +35,41 @@ class Test_Notice extends Test_Case {
 	 * Don't show notices
 	 */
 	public function test_without_notice() {
-		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$settings
-			->shouldReceive( 'api_key' )
-			->once()
-			->andReturn( 'key' );
-		$shipping = Mockery::mock( 'Nova_Poshta\Core\Shipping' );
-		$shipping
-			->shouldReceive( 'is_active' )
-			->once()
-			->andReturn( true );
-		$notice = new Notice( $settings, $shipping );
+		$notice = new Notice();
 
+		ob_start();
 		$notice->notices();
+
+		$this->assertEmpty( ob_get_clean() );
 	}
 
 	/**
-	 * Show all notices
+	 * Show notices
 	 */
-	public function test_show_all_notice() {
-		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$settings
-			->shouldReceive( 'api_key' )
-			->once();
-		$shipping = Mockery::mock( 'Nova_Poshta\Core\Shipping' );
-		$shipping
-			->shouldReceive( 'is_active' )
-			->once()
-			->andReturn( false );
-		\WP_Mock::userFunction( 'wp_kses', [ 'times' => 2 ] );
-		$notice = new Notice( $settings, $shipping );
+	public function test_show_notice() {
+
+		$type    = 'type';
+		$message = 'message';
+		WP_Mock::userFunction( 'wp_kses' )->
+		with(
+			$message,
+			[
+				'a'      => [ 'href' => true ],
+				'strong' => [],
+			]
+		)->
+		once()->
+		andReturn( $message );
+
+		$notice = new Notice();
+		$notice->add( $type, $message );
+
 		ob_start();
-
 		$notice->notices();
+		$html = ob_get_clean();
 
-		$this->assertNotEmpty( ob_get_clean() );
+		$this->assertTrue( ! ! strpos( $html, $type ) );
+		$this->assertTrue( ! ! strpos( $html, $message ) );
 	}
 
 }

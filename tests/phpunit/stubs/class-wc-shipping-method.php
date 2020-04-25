@@ -2,7 +2,7 @@
 /**
  * WC_Shipping_Method Stub
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
 /**

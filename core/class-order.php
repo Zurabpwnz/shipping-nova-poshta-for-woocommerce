@@ -2,9 +2,9 @@
 /**
  * Order
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  * @author    Maksym Denysenko
- * @link      https://github.com/wppunk/woo-nova-poshta
+ * @link      https://github.com/wppunk/shipping-nova-poshta-for-woocommerce
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -65,9 +65,9 @@ class Order {
 	 * Update nonce for new user after login
 	 */
 	public function update_nonce_for_new_users() {
-		$nonce = filter_input( INPUT_POST, 'woo_nova_poshta_nonce', FILTER_SANITIZE_STRING );
+		$nonce = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_nonce', FILTER_SANITIZE_STRING );
 		if ( $nonce ) {
-			$_POST['woo_nova_poshta_nonce'] = wp_create_nonce( Main::PLUGIN_SLUG . '-shipping' );
+			$_POST['shipping_nova_poshta_for_woocommerce_nonce'] = wp_create_nonce( Main::PLUGIN_SLUG . '-shipping' );
 		}
 	}
 
@@ -80,18 +80,18 @@ class Order {
 	 * @param WC_Order               $order       Current order.
 	 */
 	public function save( WC_Order_Item_Shipping $item, int $package_key, array $package, WC_Order $order ) {
-		if ( empty( $_POST['woo_nova_poshta_nonce'] ) ) {
+		if ( empty( $_POST['shipping_nova_poshta_for_woocommerce_nonce'] ) ) {
 			return;
 		}
-		$nonce = filter_var( wp_unslash( $_POST['woo_nova_poshta_nonce'] ), FILTER_SANITIZE_STRING );
+		$nonce = filter_var( wp_unslash( $_POST['shipping_nova_poshta_for_woocommerce_nonce'] ), FILTER_SANITIZE_STRING );
 		if ( ! wp_verify_nonce( $nonce, Main::PLUGIN_SLUG . '-shipping' ) ) {
 			return;
 		}
-		if ( 'woo_nova_poshta' !== $item->get_method_id() ) {
+		if ( 'shipping_nova_poshta_for_woocommerce' !== $item->get_method_id() ) {
 			return;
 		}
-		$city_id      = filter_input( INPUT_POST, 'woo_nova_poshta_city', FILTER_SANITIZE_STRING );
-		$warehouse_id = filter_input( INPUT_POST, 'woo_nova_poshta_warehouse', FILTER_SANITIZE_STRING );
+		$city_id      = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_city', FILTER_SANITIZE_STRING );
+		$warehouse_id = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_warehouse', FILTER_SANITIZE_STRING );
 		if ( ! $city_id || ! $warehouse_id ) {
 			return;
 		}
@@ -109,11 +109,11 @@ class Order {
 	 */
 	public function labels( string $key, WC_Meta_Data $meta ): string {
 		if ( 'city_id' === $meta->__get( 'key' ) ) {
-			$key = __( 'City', 'woo-nova-poshta' );
+			$key = __( 'City', 'shipping-nova-poshta-for-woocommerce' );
 		} elseif ( 'warehouse_id' === $meta->__get( 'key' ) ) {
-			$key = __( 'Warehouse', 'woo-nova-poshta' );
+			$key = __( 'Warehouse', 'shipping-nova-poshta-for-woocommerce' );
 		} elseif ( 'internet_document' === $meta->__get( 'key' ) ) {
-			$key = __( 'Invoice', 'woo-nova-poshta' );
+			$key = __( 'Invoice', 'shipping-nova-poshta-for-woocommerce' );
 		}
 
 		return $key;
@@ -147,7 +147,7 @@ class Order {
 		if ( ! is_a( $item, 'WC_Order_Item_Shipping' ) ) {
 			return;
 		}
-		if ( 'woo_nova_poshta' !== $item->get_method_id() ) {
+		if ( 'shipping_nova_poshta_for_woocommerce' !== $item->get_method_id() ) {
 			return;
 		}
 		$save = false;
@@ -175,7 +175,7 @@ class Order {
 	 * @return array
 	 */
 	public function register_order_actions( array $actions ): array {
-		$actions['nova_poshta_create_internet_document'] = __( 'Create Nova Poshta Internet Document', 'woo-nova-poshta' );
+		$actions['nova_poshta_create_internet_document'] = __( 'Create Nova Poshta Internet Document', 'shipping-nova-poshta-for-woocommerce' );
 
 		return $actions;
 	}
@@ -249,7 +249,7 @@ class Order {
 	 */
 	private function find_shipping_method( array $shipping_methods ) {
 		foreach ( $shipping_methods as $shipping_method ) {
-			if ( 'woo_nova_poshta' === $shipping_method->get_method_id() ) {
+			if ( 'shipping_nova_poshta_for_woocommerce' === $shipping_method->get_method_id() ) {
 				return $shipping_method;
 			}
 		}

@@ -2,9 +2,9 @@
 /**
  * Front area
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  * @author    Maksym Denysenko
- * @link      https://github.com/wppunk/woo-nova-poshta
+ * @link      https://github.com/wppunk/shipping-nova-poshta-for-woocommerce
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -66,7 +66,7 @@ class Front {
 		);
 		wp_localize_script(
 			Main::PLUGIN_SLUG,
-			'woo_nova_poshta',
+			'shipping_nova_poshta_for_woocommerce',
 			[
 				'url'   => admin_url( 'admin-ajax.php' ),
 				'nonce' => wp_create_nonce( Main::PLUGIN_SLUG ),

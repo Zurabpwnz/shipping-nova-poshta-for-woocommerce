@@ -2,9 +2,9 @@
 /**
  * User
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  * @author    Maksym Denysenko
- * @link      https://github.com/wppunk/woo-nova-poshta
+ * @link      https://github.com/wppunk/shipping-nova-poshta-for-woocommerce
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -42,11 +42,11 @@ class User {
 	 * Add hooks
 	 */
 	public function hooks() {
-		add_action( 'woo_nova_poshta_user_fields', [ $this, 'fields' ] );
+		add_action( 'shipping_nova_poshta_for_woocommerce_user_fields', [ $this, 'fields' ] );
 		add_action( 'woocommerce_checkout_create_order_shipping_item', [ $this, 'checkout' ], 10, 4 );
 
-		add_filter( 'woo_nova_poshta_default_city_id', [ $this, 'city' ] );
-		add_filter( 'woo_nova_poshta_default_warehouse_id', [ $this, 'warehouse' ] );
+		add_filter( 'shipping_nova_poshta_for_woocommerce_default_city_id', [ $this, 'city' ] );
+		add_filter( 'shipping_nova_poshta_for_woocommerce_default_warehouse_id', [ $this, 'warehouse' ] );
 	}
 
 	/**
@@ -54,35 +54,36 @@ class User {
 	 * TODO: Move to other place.
 	 */
 	public function fields() {
-		$city_id      = filter_input( INPUT_POST, 'woo_nova_poshta_city', FILTER_SANITIZE_STRING );
-		$warehouse_id = filter_input( INPUT_POST, 'woo_nova_poshta_warehouse', FILTER_SANITIZE_STRING );
+		$city_id      = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_city', FILTER_SANITIZE_STRING );
+		$warehouse_id = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_warehouse', FILTER_SANITIZE_STRING );
 		if ( empty( $city_id || $warehouse_id ) ) {
 			$city         = $this->api->cities(
-				apply_filters( 'woo_nova_poshta_default_city', 'Киев' ),
+				apply_filters( 'shipping_nova_poshta_for_woocommerce_default_city', 'Киев' ),
 				1
 			);
-			$city_id      = apply_filters( 'woo_nova_poshta_default_city_id', array_keys( $city )[0] ?? '' );
+			$city_id      = apply_filters( 'shipping_nova_poshta_for_woocommerce_default_city_id', array_keys( $city )[0] ?? '' );
 			$warehouses   = [ 0 => '' ];
 			$warehouse_id = '';
 			if ( $city_id ) {
 				$warehouses   = $this->api->warehouses( $city_id );
 				$warehouse_id = array_keys( $warehouses )[0] ?? '';
-				$warehouse_id = apply_filters( 'woo_nova_poshta_default_warehouse_id', $warehouse_id, $city );
+				$warehouse_id = apply_filters( 'shipping_nova_poshta_for_woocommerce_default_warehouse_id', $warehouse_id, $city );
 			}
 		}
 
 		$fields = [
-			'woo_nova_poshta_city'      => [
+			'shipping_nova_poshta_for_woocommerce_city' => [
 				'type'     => 'select',
-				'label'    => __( 'Select delivery city', 'woo-nova-poshta' ),
+				'label'    => __( 'Select delivery city', 'shipping-nova-poshta-for-woocommerce' ),
 				'required' => true,
 				'options'  => $city,
 				'default'  => $city_id,
 				'priority' => 10,
 			],
-			'woo_nova_poshta_warehouse' => [
+
+			'shipping_nova_poshta_for_woocommerce_warehouse' => [
 				'type'     => 'select',
-				'label'    => __( 'Choose branch', 'woo-nova-poshta' ),
+				'label'    => __( 'Choose branch', 'shipping-nova-poshta-for-woocommerce' ),
 				'required' => true,
 				'options'  => $warehouses,
 				'default'  => $warehouse_id,
@@ -90,7 +91,7 @@ class User {
 			],
 		];
 
-		wp_nonce_field( Main::PLUGIN_SLUG . '-shipping', 'woo_nova_poshta_nonce', false );
+		wp_nonce_field( Main::PLUGIN_SLUG . '-shipping', 'shipping_nova_poshta_for_woocommerce_nonce', false );
 		foreach ( $fields as $key => $field ) {
 			woocommerce_form_field( $key, $field );
 		}
@@ -106,10 +107,10 @@ class User {
 	public function city( string $city_id ): string {
 		$user_id = get_current_user_id();
 		if ( $user_id ) {
-			$user_city_id = get_user_meta( $user_id, 'woo_nova_poshta_city', true );
+			$user_city_id = get_user_meta( $user_id, 'shipping_nova_poshta_for_woocommerce_city', true );
 		}
 
-		return $user_city_id ?? $city_id;
+		return ! empty( $user_city_id ) ? $user_city_id : $city_id;
 	}
 
 	/**
@@ -122,10 +123,10 @@ class User {
 	public function warehouse( string $warehouse_id ): string {
 		$user_id = get_current_user_id();
 		if ( $user_id ) {
-			$user_warehouse_id = get_user_meta( $user_id, 'woo_nova_poshta_warehouse', true );
+			$user_warehouse_id = get_user_meta( $user_id, 'shipping_nova_poshta_for_woocommerce_warehouse', true );
 		}
 
-		return $user_warehouse_id ?? $warehouse_id;
+		return ! empty( $user_warehouse_id ) ? $user_warehouse_id : $warehouse_id;
 	}
 
 	/**
@@ -136,18 +137,18 @@ class User {
 		if ( ! $user_id ) {
 			return;
 		}
-		$nonce = filter_input( INPUT_POST, 'woo_nova_poshta_nonce', FILTER_SANITIZE_STRING );
+		$nonce = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_nonce', FILTER_SANITIZE_STRING );
 		if ( ! wp_verify_nonce( $nonce, Main::PLUGIN_SLUG . '-shipping' ) ) {
 			return;
 		}
 
-		$city_id      = filter_input( INPUT_POST, 'woo_nova_poshta_city', FILTER_SANITIZE_STRING );
-		$warehouse_id = filter_input( INPUT_POST, 'woo_nova_poshta_warehouse', FILTER_SANITIZE_STRING );
+		$city_id      = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_city', FILTER_SANITIZE_STRING );
+		$warehouse_id = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_warehouse', FILTER_SANITIZE_STRING );
 		if ( ! $city_id || ! $warehouse_id ) {
 			return;
 		}
-		update_user_meta( $user_id, 'woo_nova_poshta_city', $city_id );
-		update_user_meta( $user_id, 'woo_nova_poshta_warehouse', $warehouse_id );
+		update_user_meta( $user_id, 'shipping_nova_poshta_for_woocommerce_city', $city_id );
+		update_user_meta( $user_id, 'shipping_nova_poshta_for_woocommerce_warehouse', $warehouse_id );
 	}
 
 }

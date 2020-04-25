@@ -9,7 +9,7 @@
         beStrictAboutTestsThatDoNotTestAnything="false"
 >
     <testsuites>
-        <testsuite name="woo-nova-poshta-tests">
+        <testsuite name="shipping-nova-poshta-for-woocommerce-tests">
             <directory suffix=".php">./tests/</directory>
         </testsuite>
     </testsuites>
@@ -27,7 +27,7 @@
                 <directory>../../src</directory>
                 <directory>../../tests</directory>
                 <directory>../../vendor</directory>
-                <directory>../../woo-nova-poshta.php</directory>
+                <directory>../../shipping-nova-poshta-for-woocommerce.php</directory>
             </exclude>
         </whitelist>
     </filter>

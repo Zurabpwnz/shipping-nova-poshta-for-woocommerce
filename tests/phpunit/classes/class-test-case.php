@@ -2,15 +2,15 @@
 /**
  * Test case
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
 namespace Nova_Poshta\Tests;
 
 use Mockery;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 use ReflectionException;
+use ReflectionProperty;
 use tad\FunctionMocker\FunctionMocker;
 use WP_Mock;
 
@@ -39,7 +39,25 @@ abstract class Test_Case extends TestCase {
 	}
 
 	/**
-	 * Set an object protected property.
+	 * Read inaccessible property.
+	 *
+	 * @param object $object        Object.
+	 * @param string $property_name Property name.
+	 *
+	 * @return mixed
+	 * @throws ReflectionException Reflection exception.
+	 */
+	protected function read_inaccessible_property( $object, string $property_name ) {
+		$property = new ReflectionProperty( $object, $property_name );
+		$property->setAccessible( true );
+		$value = $property->getValue( $object );
+		$property->setAccessible( false );
+
+		return $value;
+	}
+
+	/**
+	 * Set an object inaccessible property.
 	 *
 	 * @param object $object        Object.
 	 * @param string $property_name Property name.
@@ -47,10 +65,8 @@ abstract class Test_Case extends TestCase {
 	 *
 	 * @throws ReflectionException Reflection exception.
 	 */
-	protected function set_protected_property( $object, string $property_name, $value ) {
-		$reflection_class = new ReflectionClass( $object );
-
-		$property = $reflection_class->getProperty( $property_name );
+	protected function update_inaccessible_property( $object, string $property_name, $value ) {
+		$property = new ReflectionProperty( $object, $property_name );
 		$property->setAccessible( true );
 		$property->setValue( $object, $value );
 		$property->setAccessible( false );

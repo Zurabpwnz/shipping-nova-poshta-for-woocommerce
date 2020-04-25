@@ -2,7 +2,7 @@
 /**
  * Admin area tests
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
 namespace Nova_Poshta\Admin;
@@ -44,7 +44,7 @@ class Test_Admin extends Test_Case {
 		WP_Mock::expectActionAdded( 'admin_enqueue_scripts', [ $admin, 'enqueue_scripts' ] );
 		WP_Mock::expectActionAdded( 'admin_menu', [ $admin, 'add_menu' ] );
 		WP_Mock::expectActionAdded( 'admin_init', [ $admin, 'register_setting' ] );
-		WP_Mock::expectFilterAdded( 'pre_update_option_woo-nova-poshta', [ $admin, 'validate' ], 10, 2 );
+		WP_Mock::expectFilterAdded( 'pre_update_option_shipping-nova-poshta-for-woocommerce', [ $admin, 'validate' ], 10, 2 );
 
 		$admin->hooks();
 	}
@@ -131,7 +131,7 @@ class Test_Admin extends Test_Case {
 			[
 				'args' => [
 					Main::PLUGIN_SLUG,
-					'woo_nova_poshta',
+					'shipping_nova_poshta_for_woocommerce',
 					[
 						'url'   => $admin_url,
 						'nonce' => $nonce,

@@ -2,7 +2,7 @@
 /**
  * Ajax tests
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
 namespace Nova_Poshta\Core;
@@ -26,10 +26,10 @@ class Test_Ajax extends Test_Case {
 		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$ajax = new AJAX( $api );
 
-		WP_Mock::expectActionAdded( 'wp_ajax_woo_nova_poshta_city', [ $ajax, 'cities' ] );
-		WP_Mock::expectActionAdded( 'wp_ajax_nopriv_woo_nova_poshta_city', [ $ajax, 'cities' ] );
-		WP_Mock::expectActionAdded( 'wp_ajax_woo_nova_poshta_warehouse', [ $ajax, 'warehouses' ] );
-		WP_Mock::expectActionAdded( 'wp_ajax_nopriv_woo_nova_poshta_warehouse', [ $ajax, 'warehouses' ] );
+		WP_Mock::expectActionAdded( 'wp_ajax_shipping_nova_poshta_for_woocommerce_city', [ $ajax, 'cities' ] );
+		WP_Mock::expectActionAdded( 'wp_ajax_nopriv_shipping_nova_poshta_for_woocommerce_city', [ $ajax, 'cities' ] );
+		WP_Mock::expectActionAdded( 'wp_ajax_shipping_nova_poshta_for_woocommerce_warehouse', [ $ajax, 'warehouses' ] );
+		WP_Mock::expectActionAdded( 'wp_ajax_nopriv_shipping_nova_poshta_for_woocommerce_warehouse', [ $ajax, 'warehouses' ] );
 
 		$ajax->hooks();
 	}

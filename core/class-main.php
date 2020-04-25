@@ -2,9 +2,9 @@
 /**
  * Bootstrap class
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  * @author    Maksym Denysenko
- * @link      https://github.com/wppunk/woo-nova-poshta
+ * @link      https://github.com/wppunk/shipping-nova-poshta-for-woocommerce
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -31,7 +31,7 @@ class Main {
 	/**
 	 * Plugin slug
 	 */
-	const PLUGIN_SLUG = 'woo-nova-poshta';
+	const PLUGIN_SLUG = 'shipping-nova-poshta-for-woocommerce';
 	/**
 	 * Plugin version
 	 */
@@ -54,13 +54,42 @@ class Main {
 	 */
 	public function init() {
 
-		$this->settings = new Settings();
+		$notice = new Notice();
+		$notice->hooks();
+		if ( ! $this->is_woocommerce_active() ) {
+			$notice->add(
+				'error',
+				sprintf(
+				/* translators: 1: Plugin name */
+					__(
+						'<strong>%s</strong> extends WooCommerce functionality and does not work without it.',
+						'shipping-nova-poshta-for-woocommerce'
+					),
+					self::PLUGIN_NAME
+				)
+			);
 
+			return;
+		}
+
+		$this->settings = new Settings( $notice );
+		$shipping       = new Shipping( $notice );
+
+		$shipping->hooks();
 		$this->define_hooks_without_api_key();
 
 		if ( $this->settings->api_key() ) {
 			$this->define_hooks_with_api_key();
 		}
+	}
+
+	/**
+	 * Is WooCommerce active
+	 *
+	 * @return bool
+	 */
+	private function is_woocommerce_active(): bool {
+		return is_plugin_active( 'woocommerce/woocommerce.php' );
 	}
 
 	/**
@@ -75,12 +104,6 @@ class Main {
 
 		$admin = new Admin( $this->api, $this->settings );
 		$admin->hooks();
-
-		$shipping = new Shipping();
-		$shipping->hooks();
-
-		$notice = new Notice( $this->settings, $shipping );
-		$notice->hooks();
 
 		$language->hooks();
 	}

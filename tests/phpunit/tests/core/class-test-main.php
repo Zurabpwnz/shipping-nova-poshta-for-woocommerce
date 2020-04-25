@@ -2,7 +2,7 @@
 /**
  * Main tests
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
 namespace Nova_Poshta\Core;
@@ -18,12 +18,48 @@ use Nova_Poshta\Tests\Test_Case;
 class Test_Main extends Test_Case {
 
 	/**
+	 * Test init without WooCommerce
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_init_without_woocommerce() {
+		$notice = Mockery::mock( 'overload:Nova_Poshta\Admin\Notice' );
+		$notice
+			->shouldReceive( 'add' )
+			->with(
+				'error',
+				'<strong>' . Main::PLUGIN_NAME . '</strong> extends WooCommerce functionality and does not work without it.'
+			)
+			->once();
+		$notice
+			->shouldReceive( 'hooks' )
+			->once();
+		\WP_Mock::userFunction( 'is_plugin_active' )->
+		with( 'woocommerce/woocommerce.php' )->
+		once()->
+		andReturn( false );
+
+		$main = new Main();
+
+		$main->init();
+	}
+
+	/**
 	 * Test init all hooks
 	 *
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
 	 */
 	public function test_init() {
+		\WP_Mock::userFunction( 'is_plugin_active' )->
+		with( 'woocommerce/woocommerce.php' )->
+		once()->
+		andReturn( true );
+		$notice = Mockery::mock( 'overload:Nova_Poshta\Admin\Notice' );
+		$notice
+			->shouldReceive( 'hooks' )
+			->once();
 		$settings = Mockery::mock( 'overload:Nova_Poshta\Core\Settings' );
 		$settings
 			->shouldReceive( 'api_key' )
@@ -39,10 +75,6 @@ class Test_Main extends Test_Case {
 			->once();
 		$admin = Mockery::mock( 'overload:Nova_Poshta\Admin\Admin' );
 		$admin
-			->shouldReceive( 'hooks' )
-			->once();
-		$notice = Mockery::mock( 'overload:Nova_Poshta\Admin\Notice' );
-		$notice
 			->shouldReceive( 'hooks' )
 			->once();
 		$user = Mockery::mock( 'overload:Nova_Poshta\Admin\User' );

@@ -2,7 +2,7 @@
 /**
  * Shipping tests
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
 namespace Nova_Poshta\Core;
@@ -22,7 +22,13 @@ class Test_Shipping extends Test_Case {
 	 * Test adding hooks
 	 */
 	public function test_hooks() {
-		$shipping = new Shipping();
+		WP_Mock::userFunction( 'wp_cache_get' )->
+		with( Shipping::METHOD_NAME . '_active' )->
+		once()->
+		andReturn( true );
+		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+
+		$shipping = new Shipping( $notice );
 
 		WP_Mock::expectActionAdded( 'woocommerce_shipping_init', [ $shipping, 'require_methods' ] );
 		WP_Mock::expectFilterAdded( 'woocommerce_shipping_methods', [ $shipping, 'register_methods' ] );
@@ -34,11 +40,17 @@ class Test_Shipping extends Test_Case {
 	 * Test register_methods
 	 */
 	public function test_register_methods() {
-		$shipping = new Shipping();
+		WP_Mock::userFunction( 'wp_cache_get' )->
+		with( Shipping::METHOD_NAME . '_active' )->
+		once()->
+		andReturn( true );
+		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+
+		$shipping = new Shipping( $notice );
 
 		$this->assertSame(
 			[
-				'woo_nova_poshta' => 'Nova_Poshta_Shipping_Method',
+				'shipping_nova_poshta_for_woocommerce' => 'Nova_Poshta_Shipping_Method',
 			],
 			$shipping->register_methods( [] )
 		);
@@ -47,21 +59,25 @@ class Test_Shipping extends Test_Case {
 	/**
 	 * Check active nova poshta shipping method
 	 */
-	public function test_is_active() {
+	public function test_notices() {
+		WP_Mock::userFunction( 'wp_cache_get' )->
+		with( Shipping::METHOD_NAME . '_active' )->
+		once()->
+		andReturn( false );
 		global $wpdb;
-		$request = 7;
+		$request = false;
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wpdb         = Mockery::mock( 'wpdb' );
 		$wpdb->prefix = 'prefix_';
 		$sql          = 'SELECT `instance_id` FROM ' . $wpdb->prefix . 'woocommerce_shipping_zone_methods
-			WHERE `method_id` = "woo_nova_poshta" AND `is_enabled` = 1 LIMIT 1';
+			WHERE `method_id` = "shipping_nova_poshta_for_woocommerce" AND `is_enabled` = 1 LIMIT 1';
 		$wpdb
 			->shouldReceive( 'prepare' )
 			->withArgs(
 				[
 					'SELECT `instance_id` FROM ' . $wpdb->prefix . 'woocommerce_shipping_zone_methods
 			WHERE `method_id` = %s AND `is_enabled` = 1 LIMIT 1',
-					'woo_nova_poshta',
+					'shipping_nova_poshta_for_woocommerce',
 				]
 			)
 			->once()
@@ -72,17 +88,23 @@ class Test_Shipping extends Test_Case {
 			->once()
 			->andReturn( $request );
 
-		WP_Mock::userFunction( 'wp_cache_get' )->
-		withArgs( [ 'woo_nova_poshta_active' ] )->
-		once()->
-		andReturn( null );
 		WP_Mock::userFunction( 'wp_cache_set' )->
-		withArgs( [ 'woo_nova_poshta_active', $request ] )->
+		with( 'shipping_nova_poshta_for_woocommerce_active', $request )->
 		once();
+		WP_Mock::userFunction( 'get_admin_url' )->
+		with( null, 'admin.php?page=wc-settings&tab=shipping' )->
+		once()->
+		andReturn( 'url' );
+		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice
+			->shouldReceive( 'add' )
+			->with(
+				'error',
+				'You must add the "New Delivery Method" delivery method <a href="url">in the WooCommerce settings</a>'
+			)
+			->once();
 
-		$shipping = new Shipping();
-
-		$this->assertTrue( $shipping->is_active() );
+		new Shipping( $notice );
 	}
 
 }

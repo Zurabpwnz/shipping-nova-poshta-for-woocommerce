@@ -2,9 +2,9 @@
 /**
  * Admin area
  *
- * @package   Woo-Nova-Poshta
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
  * @author    Maksym Denysenko
- * @link      https://github.com/wppunk/woo-nova-poshta
+ * @link      https://github.com/wppunk/shipping-nova-poshta-for-woocommerce
  * @copyright Copyright (c) 2020
  * @license   GPL-2.0+
  * @wordpress-plugin
@@ -56,7 +56,7 @@ class Admin {
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 		add_action( 'admin_menu', [ $this, 'add_menu' ] );
 		add_action( 'admin_init', [ $this, 'register_setting' ] );
-		add_filter( 'pre_update_option_woo-nova-poshta', [ $this, 'validate' ], 10, 2 );
+		add_filter( 'pre_update_option_shipping-nova-poshta-for-woocommerce', [ $this, 'validate' ], 10, 2 );
 	}
 
 	/**
@@ -96,7 +96,7 @@ class Admin {
 		);
 		wp_localize_script(
 			Main::PLUGIN_SLUG,
-			'woo_nova_poshta',
+			'shipping_nova_poshta_for_woocommerce',
 			[
 				'url'   => admin_url( 'admin-ajax.php' ),
 				'nonce' => wp_create_nonce( Main::PLUGIN_SLUG ),
@@ -184,7 +184,7 @@ class Admin {
 		if ( isset( $value['api_key'] ) && $this->api->validate( $value['api_key'] ) ) {
 			$this->api->cities();
 		} else {
-			add_settings_error( Main::PLUGIN_SLUG, 403, __( 'Invalid api key', 'woo-nova-poshta' ) );
+			add_settings_error( Main::PLUGIN_SLUG, 403, __( 'Invalid api key', 'shipping-nova-poshta-for-woocommerce' ) );
 			unset( $value['api_key'] );
 		}
 

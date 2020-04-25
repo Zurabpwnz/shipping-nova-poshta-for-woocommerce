@@ -15,12 +15,12 @@ $active_tab = filter_input( INPUT_GET, 'tab', FILTER_SANITIZE_STRING );
 		<a
 				href="<?php echo esc_url( $url ); ?>"
 				class="nav-tab<?php echo ! $active_tab ? ' nav-tab-active' : ''; ?>">
-			<?php esc_attr_e( 'General', 'woo-nova-poshta' ); ?>
+			<?php esc_attr_e( 'General', 'shipping-nova-poshta-for-woocommerce' ); ?>
 		</a>
 		<a
 				href="<?php echo esc_url( $url . '&tab=internet_document' ); ?>"
 				class="nav-tab<?php echo 'internet_document' === $active_tab ? ' nav-tab-active' : ''; ?>">
-			<?php esc_attr_e( 'Create invoice', 'woo-nova-poshta' ); ?>
+			<?php esc_attr_e( 'Create invoice', 'shipping-nova-poshta-for-woocommerce' ); ?>
 		</a>
 	</div>
 	<?php
