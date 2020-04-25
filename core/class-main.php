@@ -89,6 +89,7 @@ class Main {
 	 * @return bool
 	 */
 	private function is_woocommerce_active(): bool {
+		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 		return is_plugin_active( 'woocommerce/woocommerce.php' );
 	}
 
