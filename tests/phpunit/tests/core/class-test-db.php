@@ -408,9 +408,14 @@ class Test_DB extends Test_Case {
 			->andReturn( 'SELECT `description_ru`, `description_ua` FROM ' . $wpdb->prefix . 'np_warehouses WHERE warehouse_id = "' . $warehouse_id . '"' );
 		$wpdb
 			->shouldReceive( 'get_row' )
-			->withArgs( [ 'SELECT `description_ru`, `description_ua` FROM ' . $wpdb->prefix . 'np_warehouses WHERE warehouse_id = "' . $warehouse_id . '"', ARRAY_A ] )
+			->withArgs(
+				[
+					'SELECT `description_ru`, `description_ua` FROM ' . $wpdb->prefix . 'np_warehouses WHERE warehouse_id = "' . $warehouse_id . '"',
+					ARRAY_A,
+				]
+			)
 			->once()
-			->andReturn( ['description_ru' => $warehouse_name] );
+			->andReturn( [ 'description_ru' => $warehouse_name ] );
 		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
 		$language
 			->shouldReceive( 'get_current_language' )
