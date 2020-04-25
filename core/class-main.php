@@ -67,7 +67,8 @@ class Main {
 	 * Define hooks without API key
 	 */
 	private function define_hooks_without_api_key() {
-		$db = new DB();
+		$language = new Language();
+		$db       = new DB( $language );
 		$db->hooks();
 
 		$this->api = new API( $db, $this->settings );
@@ -81,7 +82,6 @@ class Main {
 		$notice = new Notice( $this->settings, $shipping );
 		$notice->hooks();
 
-		$language = new Language();
 		$language->hooks();
 	}
 

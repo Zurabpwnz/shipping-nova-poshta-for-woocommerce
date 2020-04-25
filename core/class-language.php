@@ -20,6 +20,20 @@ namespace Nova_Poshta\Core;
 class Language {
 
 	/**
+	 * Current site language
+	 *
+	 * @var string
+	 */
+	private $current_language;
+
+	/**
+	 * Language constructor.
+	 */
+	public function __construct() {
+		$this->current_language = 'uk' === get_locale() ? 'ua' : 'ru';
+	}
+
+	/**
 	 * Add hooks
 	 */
 	public function hooks() {
@@ -35,6 +49,13 @@ class Language {
 			false,
 			dirname( plugin_basename( __DIR__ ) ) . '/languages/'
 		);
+	}
+
+	/**
+	 * Get current language
+	 */
+	public function get_current_language() {
+		return $this->current_language;
 	}
 
 }

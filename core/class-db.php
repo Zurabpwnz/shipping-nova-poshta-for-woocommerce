@@ -31,14 +31,23 @@ class DB {
 	 * @var string
 	 */
 	private $warehouses_table;
+	/**
+	 * Language object
+	 *
+	 * @var object
+	 */
+	private $language;
 
 	/**
 	 * DB constructor.
+	 *
+	 * @param Language $language language object.
 	 */
-	public function __construct() {
+	public function __construct( Language $language ) {
 		global $wpdb;
 		$this->cities_table     = $wpdb->prefix . 'np_cities';
 		$this->warehouses_table = $wpdb->prefix . 'np_warehouses';
+		$this->language         = $language;
 	}
 
 	/**
@@ -106,13 +115,16 @@ class DB {
 	 */
 	public function cities( string $search, int $limit ): array {
 		global $wpdb;
-		$sql = 'SELECT * FROM ' . $this->cities_table;
+		$field_name = 'ua' === $this->language->get_current_language() ? 'description_ua' : 'description_ru';
+		$sql        = 'SELECT * FROM ' . $this->cities_table;
 		if ( $search ) {
+			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 			$sql .= $wpdb->remove_placeholder_escape(
-				$wpdb->prepare( ' WHERE description_ru LIKE %s', '%' . $wpdb->esc_like( $search ) . '%' )
+				$wpdb->prepare( ' WHERE ' . $field_name . ' LIKE %s', '%' . $wpdb->esc_like( $search ) . '%' )
 			);
+			//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 		}
-		$sql .= ' ORDER BY LENGTH(`description_ru`), `description_ru`';
+		$sql .= ' ORDER BY LENGTH(`' . $field_name . '`), `' . $field_name . '`';
 		if ( $limit ) {
 			$sql .= $wpdb->prepare( ' LIMIT %d', $limit );
 		}
@@ -125,7 +137,8 @@ class DB {
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
-		return wp_list_pluck( $cities, 'description_ru', 'city_id' );
+		return wp_list_pluck( $cities, $field_name, 'city_id' );
+
 	}
 
 	/**
@@ -170,18 +183,24 @@ class DB {
 	 */
 	public function city( string $city_id ): string {
 		global $wpdb;
+		$field_name = 'ua' === $this->language->get_current_language() ? 'description_ua' : 'description_ru';
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		$description =  $wpdb->get_var(
-			$wpdb->prepare( 'SELECT `description_ru` FROM ' . $this->cities_table . ' WHERE city_id = %s', $city_id )
+		$description = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT `description_ru`, `description_ua` FROM ' . $this->cities_table . ' WHERE city_id = %s',
+				$city_id
+			),
+			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
-		return (string) $description;
+		return isset( $description[ $field_name ] ) ? $description[ $field_name ] : '';
+
 	}
 
 	/**
@@ -216,10 +235,11 @@ class DB {
 	 */
 	public function warehouses( string $city_id ): array {
 		global $wpdb;
+		$field_name = 'ua' === $this->language->get_current_language() ? 'description_ua' : 'description_ru';
 
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		$sql = $wpdb->prepare(
-			'SELECT warehouse_id, description_ru FROM ' . $this->warehouses_table .
+			'SELECT warehouse_id, description_ru, description_ua FROM ' . $this->warehouses_table .
 			' WHERE city_id = %s  ORDER BY LENGTH(`order`), `order`',
 			$city_id
 		);
@@ -231,7 +251,7 @@ class DB {
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
-		return wp_list_pluck( $warehouses, 'description_ru', 'warehouse_id' );
+		return wp_list_pluck( $warehouses, $field_name, 'warehouse_id' );
 	}
 
 	/**
@@ -274,19 +294,24 @@ class DB {
 	 */
 	public function warehouse( string $warehouse_id ): string {
 		global $wpdb;
+		$field_name = 'ua' === $this->language->get_current_language() ? 'description_ua' : 'description_ru';
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		return $wpdb->get_var(
+		$warehouse = $wpdb->get_row(
 			$wpdb->prepare(
-				'SELECT `description_ru` FROM ' . $this->warehouses_table . ' WHERE warehouse_id = %s',
+				'SELECT `description_ru`, `description_ua` FROM ' . $this->warehouses_table . ' WHERE warehouse_id = %s',
 				$warehouse_id
-			)
+			),
+			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+		return isset( $warehouse[ $field_name ] ) ? $warehouse[ $field_name ] : '';
+
 	}
 
 }
