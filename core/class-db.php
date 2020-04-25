@@ -31,12 +31,6 @@ class DB {
 	 * @var string
 	 */
 	private $warehouses_table;
-	/**
-	 * Current language database field (name of city/warehouse)
-	 *
-	 * @var string
-	 */
-	private $local_descr;
 
 	/**
 	 * DB constructor.
@@ -45,7 +39,6 @@ class DB {
 		global $wpdb;
 		$this->cities_table     = $wpdb->prefix . 'np_cities';
 		$this->warehouses_table = $wpdb->prefix . 'np_warehouses';
-		$this->local_descr      = ( 'uk' === get_locale() ) ? 'description_ua' : 'description_ru';
 	}
 
 	/**
@@ -116,10 +109,10 @@ class DB {
 		$sql = 'SELECT * FROM ' . $this->cities_table;
 		if ( $search ) {
 			$sql .= $wpdb->remove_placeholder_escape(
-				$wpdb->prepare( ' WHERE ' . $this->local_descr . ' LIKE %s', '%' . $wpdb->esc_like( $search ) . '%' )
+				$wpdb->prepare( ' WHERE description_ru LIKE %s', '%' . $wpdb->esc_like( $search ) . '%' )
 			);
 		}
-		$sql .= ' ORDER BY LENGTH(`' . $this->local_descr . '`), `' . $this->local_descr . '`';
+		$sql .= ' ORDER BY LENGTH(`description_ru`), `description_ru`';
 		if ( $limit ) {
 			$sql .= $wpdb->prepare( ' LIMIT %d', $limit );
 		}
@@ -132,7 +125,7 @@ class DB {
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
-		return wp_list_pluck( $cities, $this->local_descr, 'city_id' );
+		return wp_list_pluck( $cities, 'description_ru', 'city_id' );
 	}
 
 	/**
@@ -181,13 +174,12 @@ class DB {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		$description = $wpdb->get_var(
-			$wpdb->prepare( 'SELECT `' . $this->local_descr . '` FROM ' . $this->cities_table . ' WHERE city_id = %s', $city_id ) );
+		return $wpdb->get_var(
+			$wpdb->prepare( 'SELECT `description_ru` FROM ' . $this->cities_table . ' WHERE city_id = %s', $city_id )
+		) ?: '';
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
-
-		return (string) $description;
 	}
 
 	/**
@@ -203,14 +195,12 @@ class DB {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		$area = $wpdb->get_var(
+		return $wpdb->get_var(
 			$wpdb->prepare( 'SELECT `area` FROM ' . $this->cities_table . ' WHERE city_id = %s', $city_id )
-		);
+		) ?: '';
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
-
-		return (string) $area;
 	}
 
 	/**
@@ -225,7 +215,7 @@ class DB {
 
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		$sql = $wpdb->prepare(
-			'SELECT warehouse_id, ' . $this->local_descr . ' FROM ' . $this->warehouses_table .
+			'SELECT warehouse_id, description_ru FROM ' . $this->warehouses_table .
 			' WHERE city_id = %s  ORDER BY LENGTH(`order`), `order`',
 			$city_id
 		);
@@ -237,7 +227,7 @@ class DB {
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
-		return wp_list_pluck( $warehouses, $this->local_descr, 'warehouse_id' );
+		return wp_list_pluck( $warehouses, 'description_ru', 'warehouse_id' );
 	}
 
 	/**
@@ -286,7 +276,7 @@ class DB {
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		return $wpdb->get_var(
 			$wpdb->prepare(
-				'SELECT `' . $this->local_descr . '` FROM ' . $this->warehouses_table . ' WHERE warehouse_id = %s',
+				'SELECT `description_ru` FROM ' . $this->warehouses_table . ' WHERE warehouse_id = %s',
 				$warehouse_id
 			)
 		);
