@@ -37,6 +37,9 @@ class Test_Front extends Test_Case {
 		WP_Mock::userFunction( 'is_checkout' )->
 		andReturn( false )->
 		once();
+		WP_Mock::userFunction( 'is_cart' )->
+		andReturn( false )->
+		once();
 		$front = new Front();
 
 		$front->enqueue_styles();
