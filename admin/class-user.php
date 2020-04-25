@@ -80,6 +80,7 @@ class User {
 				'default'  => $city_id,
 				'priority' => 10,
 			],
+
 			'shipping_nova_poshta_for_woocommerce_warehouse' => [
 				'type'     => 'select',
 				'label'    => __( 'Choose branch', 'shipping-nova-poshta-for-woocommerce' ),
@@ -109,7 +110,7 @@ class User {
 			$user_city_id = get_user_meta( $user_id, 'shipping_nova_poshta_for_woocommerce_city', true );
 		}
 
-		return $user_city_id ?? $city_id;
+		return ! empty( $user_city_id ) ? $user_city_id : $city_id;
 	}
 
 	/**
@@ -125,7 +126,7 @@ class User {
 			$user_warehouse_id = get_user_meta( $user_id, 'shipping_nova_poshta_for_woocommerce_warehouse', true );
 		}
 
-		return $user_warehouse_id ?? $warehouse_id;
+		return ! empty( $user_warehouse_id ) ? $user_warehouse_id : $warehouse_id;
 	}
 
 	/**
