@@ -30,8 +30,6 @@ class Test_DB extends Test_Case {
 		andReturn( 'path/to/main-file' );
 		WP_Mock::userFunction( 'register_activation_hook' )->
 		once();
-		WP_Mock::userFunction( 'get_locale' )->
-		once();
 		global $wpdb;
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wpdb         = Mockery::mock( 'wpdb' );
