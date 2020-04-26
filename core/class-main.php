@@ -103,9 +103,7 @@ class Main {
 	 */
 	private function define_hooks_without_api_key() {
 		$language = new Language();
-		$language->hooks();
-
-		$db = new DB( $language );
+		$db       = new DB( $language );
 		$db->hooks();
 
 		$this->api = new API( $db, $this->settings );

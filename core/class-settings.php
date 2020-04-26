@@ -55,7 +55,7 @@ class Settings {
 				sprintf(
 				/* translators: 1: link on page option */
 					__(
-						'For the plugin to work, you must enter the API key on the <a href="%s">plugin settings page</a>',
+						'For the plugin to work, you must enter the API key on the <a href=%s>plugin settings page</a>',
 						'shipping-nova-poshta-for-woocommerce'
 					),
 					get_admin_url( null, 'admin.php?page=' . Main::PLUGIN_SLUG )

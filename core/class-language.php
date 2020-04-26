@@ -35,24 +35,6 @@ class Language {
 	}
 
 	/**
-	 * Add hooks
-	 */
-	public function hooks() {
-		add_action( 'plugins_loaded', [ $this, 'load' ] );
-	}
-
-	/**
-	 * Load translate
-	 */
-	public function load() {
-		load_plugin_textdomain(
-			Main::PLUGIN_SLUG,
-			false,
-			dirname( plugin_basename( __DIR__ ) ) . '/languages/'
-		);
-	}
-
-	/**
 	 * Get current language
 	 */
 	public function get_current_language() {

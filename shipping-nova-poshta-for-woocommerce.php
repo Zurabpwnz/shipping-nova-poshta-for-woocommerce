@@ -6,14 +6,13 @@
  * Plugin URI:  https://github.com/wppunk/shipping-nova-poshta-for-woocommerce
  * Description: Shipping method for Nova Poshta. Creating internet documents for orders.
  * Version: 1.0.0
- * Author: Maksym Denysenko, Anton Serednii
- * Author URI: https://profiles.wordpress.org/wppunk/
- *
+ * Author: WP Punk, Anton Serednii
+ * Author URI: https://profiles.wordpress.org/wppunk/, https://profiles.wordpress.org/seredniy/
+ * License: GPLv2 or later
  * Text Domain: shipping-nova-poshta-for-woocommerce
- * Domain Path: /languages/
  *
  * @package Shipping Nova Poshta for WooCommerce
- * @author  Maksym Denysenko, Anton Serednii
+ * @author  WP Punk, Anton Serednii
  */
 
 use Nova_Poshta\Core\Main;

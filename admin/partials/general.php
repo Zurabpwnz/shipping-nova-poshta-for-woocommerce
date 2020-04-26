@@ -19,8 +19,18 @@ use Nova_Poshta\Core\Main;
 					name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[api_key]"
 					value="<?php echo esc_attr( $this->settings->api_key() ); ?>"/>
 		</label>
-		Если у вас нет API ключа, то вы можете получить его на
-		<a href="https://my.novaposhta.ua/settings/index#apikeys" target="_blank">my.novaposhta.ua/settings/index#apikeys</a>
+		<?php
+		echo wp_kses_post(
+			sprintf(
+			/* translators: 1: Link on Nova Poshta personal account */
+				__(
+					'Если у вас нет API ключа, то вы можете получить его в <a href=%s target="_blank">личном кабине Новой Почты</a>',
+					'shipping-nova-poshta-for-woocommerce'
+				),
+				'https://new.novaposhta.ua/#/1/settings/developers'
+			)
+		);
+		?>
 	</p>
 	<div<?php echo ! $this->settings->api_key() ? ' style="display: none;"' : ''; ?>>
 		<p>
