@@ -30,7 +30,8 @@ class Language {
 	 * Language constructor.
 	 */
 	public function __construct() {
-		$this->current_language = 'uk' === get_locale() ? 'ua' : 'ru';
+		$current_language       = apply_filters( 'shipping_nova_poshta_for_woocommerce_current_language', get_locale() );
+		$this->current_language = 'uk' === $current_language ? 'ua' : 'ru';
 	}
 
 	/**

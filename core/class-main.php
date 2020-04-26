@@ -103,15 +103,15 @@ class Main {
 	 */
 	private function define_hooks_without_api_key() {
 		$language = new Language();
-		$db       = new DB( $language );
+		$language->hooks();
+
+		$db = new DB( $language );
 		$db->hooks();
 
 		$this->api = new API( $db, $this->settings );
 
 		$admin = new Admin( $this->api, $this->settings );
 		$admin->hooks();
-
-		$language->hooks();
 	}
 
 	/**

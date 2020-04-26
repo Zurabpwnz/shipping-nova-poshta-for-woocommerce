@@ -115,7 +115,7 @@ class DB {
 	 */
 	public function cities( string $search, int $limit ): array {
 		global $wpdb;
-		$field_name = 'ua' === $this->language->get_current_language() ? 'description_ua' : 'description_ru';
+		$field_name = 'description_' . $this->language->get_current_language();
 		$sql        = 'SELECT * FROM ' . $this->cities_table;
 		if ( $search ) {
 			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
@@ -183,7 +183,7 @@ class DB {
 	 */
 	public function city( string $city_id ): string {
 		global $wpdb;
-		$field_name = 'ua' === $this->language->get_current_language() ? 'description_ua' : 'description_ru';
+		$field_name = 'description_' . $this->language->get_current_language();
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -235,7 +235,7 @@ class DB {
 	 */
 	public function warehouses( string $city_id ): array {
 		global $wpdb;
-		$field_name = 'ua' === $this->language->get_current_language() ? 'description_ua' : 'description_ru';
+		$field_name = 'description_' . $this->language->get_current_language();
 
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		$sql = $wpdb->prepare(
@@ -294,7 +294,7 @@ class DB {
 	 */
 	public function warehouse( string $warehouse_id ): string {
 		global $wpdb;
-		$field_name = 'ua' === $this->language->get_current_language() ? 'description_ua' : 'description_ru';
+		$field_name = 'description_' . $this->language->get_current_language();
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
