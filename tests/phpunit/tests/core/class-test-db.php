@@ -35,7 +35,9 @@ class Test_DB extends Test_Case {
 		$wpdb         = Mockery::mock( 'wpdb' );
 		$wpdb->prefix = 'prefix_';
 
-		$db = new DB();
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+
+		$db = new DB( $language );
 
 		$db->hooks();
 	}
@@ -57,7 +59,9 @@ class Test_DB extends Test_Case {
 		WP_Mock::userFunction( 'maybe_create_table' )->
 		withArgs( [ $wpdb->prefix . 'np_warehouses', Functions::type( 'string' ) ] )->
 		once();
-		$db = new DB();
+
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$db       = new DB( $language );
 
 		$db->create();
 	}
@@ -80,14 +84,14 @@ class Test_DB extends Test_Case {
 			->andReturn( $esc_search );
 		$wpdb
 			->shouldReceive( 'prepare' )
-			->withArgs( [ ' WHERE description LIKE %s', '%' . $esc_search . '%' ] )
+			->withArgs( [ ' WHERE description_ru LIKE %s', '%' . $esc_search . '%' ] )
 			->once()
-			->andReturn( ' WHERE description LIKE "%' . $esc_search . '%"' );
+			->andReturn( ' WHERE description_ru LIKE "%' . $esc_search . '%"' );
 		$wpdb
 			->shouldReceive( 'remove_placeholder_escape' )
-			->withArgs( [ ' WHERE description LIKE "%' . $esc_search . '%"' ] )
+			->withArgs( [ ' WHERE description_ru LIKE "%' . $esc_search . '%"' ] )
 			->once()
-			->andReturn( ' WHERE description LIKE "%' . $esc_search . '%"' );
+			->andReturn( ' WHERE description_ru LIKE "%' . $esc_search . '%"' );
 		$wpdb
 			->shouldReceive( 'prepare' )
 			->withArgs( [ ' LIMIT %d', $limit ] )
@@ -98,18 +102,23 @@ class Test_DB extends Test_Case {
 			->withArgs(
 				[
 					'SELECT * FROM ' . $wpdb->prefix . 'np_cities' .
-					' WHERE description LIKE "%' . $esc_search . '%"' .
-					' ORDER BY LENGTH(`description`), `description`' .
+					' WHERE description_ru LIKE "%' . $esc_search . '%"' .
+					' ORDER BY LENGTH(`description_ru`), `description_ru`' .
 					' LIMIT ' . $limit,
 				]
 			)
 			->once()
 			->andReturn( $cities );
 		WP_Mock::userFunction( 'wp_list_pluck' )->
-		withArgs( [ $cities, 'description', 'city_id' ] )->
+		withArgs( [ $cities, 'description_ru', 'city_id' ] )->
 		once()->
 		andReturn( $cities );
-		$db = new DB();
+
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$language
+			->shouldReceive( 'get_current_language' )
+			->andReturn( 'ru' );
+		$db = new DB( $language );
 
 		$this->assertSame( $cities, $db->cities( $search, $limit ) );
 	}
@@ -122,11 +131,13 @@ class Test_DB extends Test_Case {
 		$city1  = [
 			'Ref'           => 'Ref 1',
 			'DescriptionRu' => 'DescriptionRu 1',
+			'Description'   => 'Description 1',
 			'Area'          => 'Area 1',
 		];
 		$city2  = [
 			'Ref'           => 'Ref 2',
 			'DescriptionRu' => 'DescriptionRu 2',
+			'Description'   => 'Description 2',
 			'Area'          => 'Area 2',
 		];
 		$cities = [
@@ -142,26 +153,43 @@ class Test_DB extends Test_Case {
 		$wpdb->prefix = 'prefix_';
 		$wpdb
 			->shouldReceive( 'prepare' )
-			->withArgs( [ '(%s, %s, %s),', $city1['Ref'], $city1['DescriptionRu'], $city1['Area'] ] )
+			->withArgs(
+				[
+					'(%s, %s, %s, %s),',
+					$city1['Ref'],
+					$city1['DescriptionRu'],
+					$city1['Description'],
+					$city1['Area'],
+				]
+			)
 			->once()
 			->andReturn( '("' . implode( '", "', $city1 ) . '"),' );
 		$wpdb
 			->shouldReceive( 'prepare' )
-			->withArgs( [ '(%s, %s, %s),', $city2['Ref'], $city2['DescriptionRu'], $city2['Area'] ] )
+			->withArgs(
+				[
+					'(%s, %s, %s, %s),',
+					$city2['Ref'],
+					$city2['DescriptionRu'],
+					$city2['Description'],
+					$city2['Area'],
+				]
+			)
 			->once()
 			->andReturn( '("' . implode( '", "', $city2 ) . '"),' );
 		$wpdb
 			->shouldReceive( 'query' )
 			->withArgs(
 				[
-					'INSERT INTO ' . $wpdb->prefix . 'np_cities (`city_id`, `description`, `area`) VALUES ' .
+					'INSERT INTO ' . $wpdb->prefix . 'np_cities (`city_id`, `description_ru`, `description_ua`, `area`) VALUES ' .
 					'("' . implode( '", "', $city1 ) . '"),' .
 					'("' . implode( '", "', $city2 ) . '")' .
-					' ON DUPLICATE KEY UPDATE `description`=VALUES(`description`), `area`=VALUES(`area`)',
+					' ON DUPLICATE KEY UPDATE `description_ru`=VALUES(`description_ru`), `description_ua`=VALUES(`description_ua`), `area`=VALUES(`area`)',
 				]
 			)
 			->once();
-		$db = new DB();
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$db       = new DB( $language );
 
 		$db->update_cities( $cities );
 	}
@@ -178,15 +206,31 @@ class Test_DB extends Test_Case {
 		$wpdb->prefix = 'prefix_';
 		$wpdb
 			->shouldReceive( 'prepare' )
-			->withArgs( [ 'SELECT `description` FROM ' . $wpdb->prefix . 'np_cities WHERE city_id = %s', $city_id ] )
+			->withArgs(
+				[
+					'SELECT `description_ru`, `description_ua` FROM ' . $wpdb->prefix . 'np_cities WHERE city_id = %s',
+					$city_id,
+				]
+			)
 			->once()
-			->andReturn( 'SELECT `description` FROM ' . $wpdb->prefix . 'np_cities WHERE city_id = "' . $city_id . '"' );
+			->andReturn( 'SELECT `description_ru`, `description_ua` FROM ' . $wpdb->prefix . 'np_cities WHERE city_id = "' . $city_id . '"' );
 		$wpdb
-			->shouldReceive( 'get_var' )
-			->withArgs( [ 'SELECT `description` FROM ' . $wpdb->prefix . 'np_cities WHERE city_id = "' . $city_id . '"' ] )
+			->shouldReceive( 'get_row' )
+			->withArgs(
+				[
+					'SELECT `description_ru`, `description_ua` FROM ' . $wpdb->prefix . 'np_cities WHERE city_id = "' . $city_id . '"',
+					ARRAY_A,
+				]
+			)
 			->once()
-			->andReturn( $city_name );
-		$db = new DB();
+			->andReturn( [ 'description_ru' => $city_name ] );
+
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$language
+			->shouldReceive( 'get_current_language' )
+			->andReturn( 'ru' );
+
+		$db = new DB( $language );
 
 		$this->assertSame( $city_name, $db->city( $city_id ) );
 	}
@@ -211,7 +255,10 @@ class Test_DB extends Test_Case {
 			->withArgs( [ 'SELECT `area` FROM ' . $wpdb->prefix . 'np_cities WHERE city_id = "' . $city_id . '"' ] )
 			->once()
 			->andReturn( $area );
-		$db = new DB();
+
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+
+		$db = new DB( $language );
 
 		$this->assertSame( $area, $db->area( $city_id ) );
 	}
@@ -230,31 +277,37 @@ class Test_DB extends Test_Case {
 			->shouldReceive( 'prepare' )
 			->withArgs(
 				[
-					'SELECT warehouse_id, description FROM ' . $wpdb->prefix . 'np_warehouses' .
+					'SELECT warehouse_id, description_ru, description_ua FROM ' . $wpdb->prefix . 'np_warehouses' .
 					' WHERE city_id = %s  ORDER BY LENGTH(`order`), `order`',
 					$city_id,
 				]
 			)
 			->once()
 			->andReturn(
-				'SELECT warehouse_id, description FROM ' . $wpdb->prefix .
+				'SELECT warehouse_id, description_ru, description_ua FROM ' . $wpdb->prefix .
 				'np_warehouses  WHERE city_id = "' . $city_id . '"  ORDER BY LENGTH(`order`), `order`'
 			);
 		$wpdb
 			->shouldReceive( 'get_results' )
 			->withArgs(
 				[
-					'SELECT warehouse_id, description FROM ' . $wpdb->prefix .
+					'SELECT warehouse_id, description_ru, description_ua FROM ' . $wpdb->prefix .
 					'np_warehouses  WHERE city_id = "' . $city_id . '"  ORDER BY LENGTH(`order`), `order`',
 				]
 			)
 			->once()
 			->andReturn( $warehouses );
 		WP_Mock::userFunction( 'wp_list_pluck' )->
-		withArgs( [ $warehouses, 'description', 'warehouse_id' ] )->
+		withArgs( [ $warehouses, 'description_ru', 'warehouse_id' ] )->
 		once()->
 		andReturn( $warehouses );
-		$db = new DB();
+
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$language
+			->shouldReceive( 'get_current_language' )
+			->andReturn( 'ru' );
+
+		$db = new DB( $language );
 
 		$this->assertSame( $warehouses, $db->warehouses( $city_id ) );
 	}
@@ -268,11 +321,13 @@ class Test_DB extends Test_Case {
 			'Ref'           => 'Ref 1',
 			'CityRef'       => 'CityRef 1',
 			'DescriptionRu' => 'DescriptionRu 1',
+			'Description'   => 'Description 1',
 		];
 		$warehouse2 = [
 			'Ref'           => 'Ref 2',
 			'CityRef'       => 'CityRef 2',
 			'DescriptionRu' => 'DescriptionRu 2',
+			'Description'   => 'Description 2',
 		];
 		$warehouses = [
 			$warehouse1,
@@ -285,44 +340,48 @@ class Test_DB extends Test_Case {
 			->shouldReceive( 'prepare' )
 			->withArgs(
 				[
-					'(%s, %s, %s, %d),',
+					'(%s, %s, %s, %s, %d),',
 					$warehouse1['Ref'],
 					$warehouse1['CityRef'],
 					$warehouse1['DescriptionRu'],
+					$warehouse1['Description'],
 					0,
 				]
 			)
 			->once()
 			->andReturn(
-				'("' . $warehouse1['Ref'] . '", "' . $warehouse1['CityRef'] . '", "' . $warehouse1['DescriptionRu'] . '", 0),'
+				'("' . $warehouse1['Ref'] . '", "' . $warehouse1['CityRef'] . '", "' . $warehouse1['DescriptionRu'] . '", "' . $warehouse1['Description'] . '", 0),'
 			);
 		$wpdb
 			->shouldReceive( 'prepare' )
 			->withArgs(
 				[
-					'(%s, %s, %s, %d),',
+					'(%s, %s, %s, %s, %d),',
 					$warehouse2['Ref'],
 					$warehouse2['CityRef'],
 					$warehouse2['DescriptionRu'],
+					$warehouse2['Description'],
 					1,
 				]
 			)
 			->once()
 			->andReturn(
-				'("' . $warehouse2['Ref'] . '", "' . $warehouse2['CityRef'] . '", "' . $warehouse2['DescriptionRu'] . '", 1),'
+				'("' . $warehouse2['Ref'] . '", "' . $warehouse2['CityRef'] . '", "' . $warehouse2['DescriptionRu'] . '", "' . $warehouse2['Description'] . '", 1),'
 			);
 		$wpdb
 			->shouldReceive( 'query' )
 			->withArgs(
 				[
-					'INSERT INTO ' . $wpdb->prefix . 'np_warehouses (`warehouse_id`,`city_id`, `description`, `order`) VALUES ' .
-					'("' . $warehouse1['Ref'] . '", "' . $warehouse1['CityRef'] . '", "' . $warehouse1['DescriptionRu'] . '", 0),' .
-					'("' . $warehouse2['Ref'] . '", "' . $warehouse2['CityRef'] . '", "' . $warehouse2['DescriptionRu'] . '", 1)' .
-					' ON DUPLICATE KEY UPDATE `city_id`=VALUES(`city_id`), `description`=VALUES(`description`), `order`=VALUES(`order`)',
+					'INSERT INTO ' . $wpdb->prefix . 'np_warehouses (`warehouse_id`,`city_id`, `description_ru`, `description_ua`, `order`) VALUES ' .
+					'("' . $warehouse1['Ref'] . '", "' . $warehouse1['CityRef'] . '", "' . $warehouse1['DescriptionRu'] . '", "' . $warehouse1['Description'] . '", 0),' .
+					'("' . $warehouse2['Ref'] . '", "' . $warehouse2['CityRef'] . '", "' . $warehouse2['DescriptionRu'] . '", "' . $warehouse2['Description'] . '", 1)' .
+					' ON DUPLICATE KEY UPDATE `city_id`=VALUES(`city_id`), `description_ru`=VALUES(`description_ru`), `description_ua`=VALUES(`description_ua`), `order`=VALUES(`order`)',
 				]
 			)
 			->once();
-		$db = new DB();
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+
+		$db = new DB( $language );
 
 		$db->update_warehouses( $warehouses );
 	}
@@ -341,18 +400,28 @@ class Test_DB extends Test_Case {
 			->shouldReceive( 'prepare' )
 			->withArgs(
 				[
-					'SELECT `description` FROM ' . $wpdb->prefix . 'np_warehouses WHERE warehouse_id = %s',
+					'SELECT `description_ru`, `description_ua` FROM ' . $wpdb->prefix . 'np_warehouses WHERE warehouse_id = %s',
 					$warehouse_id,
 				]
 			)
 			->once()
-			->andReturn( 'SELECT `description` FROM ' . $wpdb->prefix . 'np_warehouses WHERE warehouse_id = "' . $warehouse_id . '"' );
+			->andReturn( 'SELECT `description_ru`, `description_ua` FROM ' . $wpdb->prefix . 'np_warehouses WHERE warehouse_id = "' . $warehouse_id . '"' );
 		$wpdb
-			->shouldReceive( 'get_var' )
-			->withArgs( [ 'SELECT `description` FROM ' . $wpdb->prefix . 'np_warehouses WHERE warehouse_id = "' . $warehouse_id . '"' ] )
+			->shouldReceive( 'get_row' )
+			->withArgs(
+				[
+					'SELECT `description_ru`, `description_ua` FROM ' . $wpdb->prefix . 'np_warehouses WHERE warehouse_id = "' . $warehouse_id . '"',
+					ARRAY_A,
+				]
+			)
 			->once()
-			->andReturn( $warehouse_name );
-		$db = new DB();
+			->andReturn( [ 'description_ru' => $warehouse_name ] );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$language
+			->shouldReceive( 'get_current_language' )
+			->andReturn( 'ru' );
+
+		$db = new DB( $language );
 
 		$this->assertSame( $warehouse_name, $db->warehouse( $warehouse_id ) );
 	}

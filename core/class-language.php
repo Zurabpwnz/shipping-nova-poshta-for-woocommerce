@@ -20,6 +20,21 @@ namespace Nova_Poshta\Core;
 class Language {
 
 	/**
+	 * Current site language
+	 *
+	 * @var string
+	 */
+	private $current_language;
+
+	/**
+	 * Language constructor.
+	 */
+	public function __construct() {
+		$current_language       = apply_filters( 'shipping_nova_poshta_for_woocommerce_current_language', get_locale() );
+		$this->current_language = 'uk' === $current_language ? 'ua' : 'ru';
+	}
+
+	/**
 	 * Add hooks
 	 */
 	public function hooks() {
@@ -35,6 +50,13 @@ class Language {
 			false,
 			dirname( plugin_basename( __DIR__ ) ) . '/languages/'
 		);
+	}
+
+	/**
+	 * Get current language
+	 */
+	public function get_current_language() {
+		return $this->current_language;
 	}
 
 }

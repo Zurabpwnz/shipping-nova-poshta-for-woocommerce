@@ -31,14 +31,23 @@ class DB {
 	 * @var string
 	 */
 	private $warehouses_table;
+	/**
+	 * Language object
+	 *
+	 * @var object
+	 */
+	private $language;
 
 	/**
 	 * DB constructor.
+	 *
+	 * @param Language $language language object.
 	 */
-	public function __construct() {
+	public function __construct( Language $language ) {
 		global $wpdb;
 		$this->cities_table     = $wpdb->prefix . 'np_cities';
 		$this->warehouses_table = $wpdb->prefix . 'np_warehouses';
+		$this->language         = $language;
 	}
 
 	/**
@@ -58,17 +67,19 @@ class DB {
 		global $wpdb;
 		$cities_sql = 'CREATE TABLE ' . $this->cities_table . '
 			(
-		        city_id            VARCHAR(36)  NOT NULL UNIQUE,
-		        description        VARCHAR(100) NOT NULL,
-		        area               VARCHAR(100) NOT NULL
+		        city_id               VARCHAR(36)  NOT NULL UNIQUE,
+		        description_ru        VARCHAR(100) NOT NULL,
+		        description_ua        VARCHAR(100) NOT NULL,
+		        area                  VARCHAR(100) NOT NULL
 	        ) ' . $wpdb->get_charset_collate();
 
 		$warehouses_sql = 'CREATE TABLE ' . $this->warehouses_table . '
 			(
-		        `warehouse_id`       VARCHAR(36)  NOT NULL UNIQUE,
-		        `city_id`            VARCHAR(36)  NOT NULL,
-		        `description`        VARCHAR(100) NOT NULL,
-		        `order`              INT(4)       UNSIGNED NOT NULL,
+		        `warehouse_id`        VARCHAR(36)  NOT NULL UNIQUE,
+		        `city_id`             VARCHAR(36)  NOT NULL,
+		        `description_ru`      VARCHAR(100) NOT NULL,
+		        `description_ua`      VARCHAR(100) NOT NULL,
+		        `order`               INT(4)       UNSIGNED NOT NULL,
                   
                 CONSTRAINT `city_id` FOREIGN KEY( `city_id` ) REFERENCES ' . $this->cities_table . ' ( `city_id` )
                     ON DELETE CASCADE
@@ -104,13 +115,16 @@ class DB {
 	 */
 	public function cities( string $search, int $limit ): array {
 		global $wpdb;
-		$sql = 'SELECT * FROM ' . $this->cities_table;
+		$field_name = 'description_' . $this->language->get_current_language();
+		$sql        = 'SELECT * FROM ' . $this->cities_table;
 		if ( $search ) {
+			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 			$sql .= $wpdb->remove_placeholder_escape(
-				$wpdb->prepare( ' WHERE description LIKE %s', '%' . $wpdb->esc_like( $search ) . '%' )
+				$wpdb->prepare( ' WHERE ' . $field_name . ' LIKE %s', '%' . $wpdb->esc_like( $search ) . '%' )
 			);
+			//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 		}
-		$sql .= ' ORDER BY LENGTH(`description`), `description`';
+		$sql .= ' ORDER BY LENGTH(`' . $field_name . '`), `' . $field_name . '`';
 		if ( $limit ) {
 			$sql .= $wpdb->prepare( ' LIMIT %d', $limit );
 		}
@@ -123,7 +137,8 @@ class DB {
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
-		return wp_list_pluck( $cities, 'description', 'city_id' );
+		return wp_list_pluck( $cities, $field_name, 'city_id' );
+
 	}
 
 	/**
@@ -133,21 +148,22 @@ class DB {
 	 */
 	public function update_cities( array $cities ) {
 		global $wpdb;
-		$sql = 'INSERT INTO ' . $this->cities_table . ' (`city_id`, `description`, `area`) VALUES ';
+		$sql = 'INSERT INTO ' . $this->cities_table . ' (`city_id`, `description_ru`, `description_ua`, `area`) VALUES ';
 		foreach ( $cities as $city ) {
 			if ( ! isset( $city['DescriptionRu'] ) ) {
 				continue;
 			}
 			$sql .= $wpdb->prepare(
-				'(%s, %s, %s),',
+				'(%s, %s, %s, %s),',
 				$city['Ref'],
 				$city['DescriptionRu'],
+				$city['Description'],
 				$city['Area']
 			);
 		}
 		$sql = rtrim( $sql, ',' );
 
-		$sql .= ' ON DUPLICATE KEY UPDATE `description`=VALUES(`description`), `area`=VALUES(`area`)';
+		$sql .= ' ON DUPLICATE KEY UPDATE `description_ru`=VALUES(`description_ru`), `description_ua`=VALUES(`description_ua`), `area`=VALUES(`area`)';
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -167,18 +183,24 @@ class DB {
 	 */
 	public function city( string $city_id ): string {
 		global $wpdb;
+		$field_name = 'description_' . $this->language->get_current_language();
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		$description = $wpdb->get_var(
-			$wpdb->prepare( 'SELECT `description` FROM ' . $this->cities_table . ' WHERE city_id = %s', $city_id )
+		$description = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT `description_ru`, `description_ua` FROM ' . $this->cities_table . ' WHERE city_id = %s',
+				$city_id
+			),
+			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
-		return (string) $description;
+		return isset( $description[ $field_name ] ) ? $description[ $field_name ] : '';
+
 	}
 
 	/**
@@ -213,10 +235,11 @@ class DB {
 	 */
 	public function warehouses( string $city_id ): array {
 		global $wpdb;
+		$field_name = 'description_' . $this->language->get_current_language();
 
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		$sql = $wpdb->prepare(
-			'SELECT warehouse_id, description FROM ' . $this->warehouses_table .
+			'SELECT warehouse_id, description_ru, description_ua FROM ' . $this->warehouses_table .
 			' WHERE city_id = %s  ORDER BY LENGTH(`order`), `order`',
 			$city_id
 		);
@@ -228,7 +251,7 @@ class DB {
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
-		return wp_list_pluck( $warehouses, 'description', 'warehouse_id' );
+		return wp_list_pluck( $warehouses, $field_name, 'warehouse_id' );
 	}
 
 	/**
@@ -238,19 +261,20 @@ class DB {
 	 */
 	public function update_warehouses( array $warehouses ) {
 		global $wpdb;
-		$sql = 'INSERT INTO ' . $this->warehouses_table . ' (`warehouse_id`,`city_id`, `description`, `order`) VALUES ';
+		$sql = 'INSERT INTO ' . $this->warehouses_table . ' (`warehouse_id`,`city_id`, `description_ru`, `description_ua`, `order`) VALUES ';
 		foreach ( $warehouses as $key => $warehouse ) {
 			$sql .= $wpdb->prepare(
-				'(%s, %s, %s, %d),',
+				'(%s, %s, %s, %s, %d),',
 				$warehouse['Ref'],
 				$warehouse['CityRef'],
 				$warehouse['DescriptionRu'],
+				$warehouse['Description'],
 				$key
 			);
 		}
 		$sql = rtrim( $sql, ',' );
 
-		$sql .= ' ON DUPLICATE KEY UPDATE `city_id`=VALUES(`city_id`), `description`=VALUES(`description`), `order`=VALUES(`order`)';
+		$sql .= ' ON DUPLICATE KEY UPDATE `city_id`=VALUES(`city_id`), `description_ru`=VALUES(`description_ru`), `description_ua`=VALUES(`description_ua`), `order`=VALUES(`order`)';
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -270,19 +294,24 @@ class DB {
 	 */
 	public function warehouse( string $warehouse_id ): string {
 		global $wpdb;
+		$field_name = 'description_' . $this->language->get_current_language();
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-		return $wpdb->get_var(
+		$warehouse = $wpdb->get_row(
 			$wpdb->prepare(
-				'SELECT `description` FROM ' . $this->warehouses_table . ' WHERE warehouse_id = %s',
+				'SELECT `description_ru`, `description_ua` FROM ' . $this->warehouses_table . ' WHERE warehouse_id = %s',
 				$warehouse_id
-			)
+			),
+			ARRAY_A
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+		return isset( $warehouse[ $field_name ] ) ? $warehouse[ $field_name ] : '';
+
 	}
 
 }

@@ -1,5 +1,5 @@
 === Shipping Nova Poshta for WooCommerce ===
-Contributors: wppunk
+Contributors: wppunk, seredniy
 Donate link: https://www.liqpay.ua/api/3/checkout?data=eyJ2ZXJzaW9uIjozLCJhY3Rpb24iOiJwYXlkb25hdGUiLCJwdWJsaWNfa2V5IjoiaTM0ODU5MzcyNjEwIiwiYW1vdW50IjoiMCIsImN1cnJlbmN5IjoiVUFIIiwiZGVzY3JpcHRpb24iOiLQodC%2F0LDRgdC40LHQviDQsNCy0YLQvtGA0YMg0LfQsCBTaGlwcGluZyBOb3ZhIFBvc2h0YSBmb3IgV29vQ29tbWVyY2UiLCJ0eXBlIjoiZG9uYXRlIiwibGFuZ3VhZ2UiOiJydSJ9&signature=rGy8tJ7N1bDPT8o0wxvI0G59vRw%3D
 Tags: Нова пошта, новая почта, nova poshta, novaposhta
 Requires at least: 5.1

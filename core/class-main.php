@@ -89,6 +89,12 @@ class Main {
 	 * @return bool
 	 */
 	private function is_woocommerce_active(): bool {
+		if ( ! function_exists( 'is_plugin_active' ) ) {
+			// @codeCoverageIgnoreStart
+			include_once ABSPATH . 'wp-admin/includes/plugin.php';
+			// @codeCoverageIgnoreEnd
+		}
+
 		return is_plugin_active( 'woocommerce/woocommerce.php' );
 	}
 
@@ -96,16 +102,16 @@ class Main {
 	 * Define hooks without API key
 	 */
 	private function define_hooks_without_api_key() {
-		$db = new DB();
+		$language = new Language();
+		$language->hooks();
+
+		$db = new DB( $language );
 		$db->hooks();
 
 		$this->api = new API( $db, $this->settings );
 
 		$admin = new Admin( $this->api, $this->settings );
 		$admin->hooks();
-
-		$language = new Language();
-		$language->hooks();
 	}
 
 	/**
