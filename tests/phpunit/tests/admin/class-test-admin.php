@@ -44,7 +44,10 @@ class Test_Admin extends Test_Case {
 		WP_Mock::expectActionAdded( 'admin_enqueue_scripts', [ $admin, 'enqueue_scripts' ] );
 		WP_Mock::expectActionAdded( 'admin_menu', [ $admin, 'add_menu' ] );
 		WP_Mock::expectActionAdded( 'admin_init', [ $admin, 'register_setting' ] );
-		WP_Mock::expectFilterAdded( 'pre_update_option_shipping-nova-poshta-for-woocommerce', [ $admin, 'validate' ], 10, 2 );
+		WP_Mock::expectFilterAdded( 'pre_update_option_shipping-nova-poshta-for-woocommerce', [
+			$admin,
+			'validate',
+		], 10, 2 );
 
 		$admin->hooks();
 	}
@@ -221,6 +224,9 @@ class Test_Admin extends Test_Case {
 			->shouldReceive( 'warehouse_id' )
 			->once()
 			->andReturn( $warehouse_id );
+		WP_Mock::userFunction( 'wp_kses_post' )->
+		with( 'Если у вас нет API ключа, то вы можете получить его в <a href="https://new.novaposhta.ua/#/1/settings/developers" target="_blank">личном кабине Новой Почты</a>')->
+		once();
 		$admin = new Admin( $api, $settings );
 
 		ob_start();

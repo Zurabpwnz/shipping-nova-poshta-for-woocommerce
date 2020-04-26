@@ -34,10 +34,15 @@ Integration Nova Poshta API with WooCommerce. Add shipping method for WooCommerc
 = 1.0.0 =
 * Initial release
 
+= 1.1.0 =
+* Update translates
+* Auto detect user language
+
 == Upgrade Notice ==
 
 = 1.0.0 =
 * Initial release
+* Auto detect user language
 
 == Screenshots ==
 
