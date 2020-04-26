@@ -54,7 +54,7 @@ class Shipping {
 				sprintf(
 				/* translators: 1: link on WooCommerce settings */
 					__(
-						'You must add the "New Delivery Method" delivery method <a href=%s>in the WooCommerce settings</a>',
+						'You must add the "New Delivery Method" delivery method <a href="%s">in the WooCommerce settings</a>',
 						'shipping-nova-poshta-for-woocommerce'
 					),
 					get_admin_url( null, 'admin.php?page=wc-settings&tab=shipping' )
