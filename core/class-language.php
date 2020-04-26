@@ -20,21 +20,25 @@ namespace Nova_Poshta\Core;
 class Language {
 
 	/**
-	 * Add hooks
+	 * Current site language
+	 *
+	 * @var string
 	 */
-	public function hooks() {
-		add_action( 'plugins_loaded', [ $this, 'load' ] );
+	private $current_language;
+
+	/**
+	 * Language constructor.
+	 */
+	public function __construct() {
+		$current_language       = apply_filters( 'shipping_nova_poshta_for_woocommerce_current_language', get_locale() );
+		$this->current_language = 'uk' === $current_language ? 'ua' : 'ru';
 	}
 
 	/**
-	 * Load translate
+	 * Get current language
 	 */
-	public function load() {
-		load_plugin_textdomain(
-			Main::PLUGIN_SLUG,
-			false,
-			dirname( plugin_basename( __DIR__ ) ) . '/languages/'
-		);
+	public function get_current_language() {
+		return $this->current_language;
 	}
 
 }

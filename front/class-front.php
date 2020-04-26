@@ -33,7 +33,7 @@ class Front {
 	 * Enqueue styles
 	 */
 	public function enqueue_styles() {
-		if ( ! is_checkout() ) {
+		if ( ! is_checkout() && ! is_cart() ) {
 			return;
 		}
 		wp_enqueue_style( 'select2', plugin_dir_url( __FILE__ ) . 'assets/css/select2.min.css', [], Main::VERSION, 'all' );
@@ -44,7 +44,7 @@ class Front {
 	 * Enqueue scripts
 	 */
 	public function enqueue_scripts() {
-		if ( ! is_checkout() ) {
+		if ( ! is_checkout() && ! is_cart() ) {
 			return;
 		}
 		wp_enqueue_script(
