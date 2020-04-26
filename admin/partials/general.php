@@ -24,7 +24,7 @@ use Nova_Poshta\Core\Main;
 			sprintf(
 			/* translators: 1: Link on Nova Poshta personal account */
 				__(
-					'Если у вас нет API ключа, то вы можете получить его в <a href="%s" target="_blank">личном кабине Новой Почты</a>',
+					'If you do not have an API key, then you can get it in the <a href="%s" target="_blank">personal account of Nova Poshta</a>',
 					'shipping-nova-poshta-for-woocommerce'
 				),
 				'https://new.novaposhta.ua/#/1/settings/developers'
