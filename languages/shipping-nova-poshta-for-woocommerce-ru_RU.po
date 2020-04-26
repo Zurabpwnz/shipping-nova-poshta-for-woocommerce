@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2020-03-26 23:12+0200\n"
-"PO-Revision-Date: 2020-03-26 23:17+0200\n"
+"POT-Creation-Date: 2020-04-25 18:29+0300\n"
+"PO-Revision-Date: 2020-04-25 18:29+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ru\n"
@@ -17,11 +17,11 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: vendor\n"
 
-#: admin/class-admin.php:146
+#: admin/class-admin.php:187
 msgid "Invalid api key"
 msgstr "Неверный API ключ"
 
-#: admin/class-notice.php:70
+#: admin/class-notice.php:77
 #, php-format
 msgid ""
 "For the plugin to work, you must enter the API key on the <a href=\"%s"
@@ -30,7 +30,7 @@ msgstr ""
 "Для работы плагина неоходимо ввести API ключ на <a href=“%s”>странице "
 "настроек плагина</a>"
 
-#: admin/class-notice.php:90
+#: admin/class-notice.php:97
 #, php-format
 msgid ""
 "You must add the \"New Delivery Method\" delivery method <a href=\"%s\">in "
@@ -39,11 +39,11 @@ msgstr ""
 "Вы должны добавить метод “Доставка Новой почтой” <a href=“%s”>на странице "
 "настроек WooCommerce</a>"
 
-#: admin/class-user.php:62 core/class-checkout.php:46
+#: admin/class-user.php:77 core/class-checkout.php:54
 msgid "Select delivery city"
 msgstr "Выберите город"
 
-#: admin/class-user.php:70 core/class-checkout.php:49
+#: admin/class-user.php:85 core/class-checkout.php:57
 msgid "Choose branch"
 msgstr "Выберите отделение"
 
@@ -55,15 +55,15 @@ msgstr "Общие"
 msgid "API key"
 msgstr "API ключ"
 
-#: admin/partials/general.php:27
+#: admin/partials/general.php:28
 msgid "Phone"
 msgstr "Телефон"
 
-#: admin/partials/general.php:40 core/class-order.php:91
+#: admin/partials/general.php:41 core/class-order.php:112
 msgid "City"
 msgstr "Город"
 
-#: admin/partials/general.php:54 core/class-order.php:93
+#: admin/partials/general.php:55 core/class-order.php:114
 msgid "Warehouse"
 msgstr "Отделение"
 
@@ -71,49 +71,53 @@ msgstr "Отделение"
 msgid "Create invoice"
 msgstr "Создание накладной"
 
-#: admin/partials/internet-document.php:15
+#: admin/partials/internet-document.php:16
 msgid "Recipient's last name:"
 msgstr "Фамилия получателя:"
 
-#: admin/partials/internet-document.php:24
+#: admin/partials/internet-document.php:25
 msgid "Recipient's first name:"
 msgstr "Имя получателя:"
 
-#: admin/partials/internet-document.php:33
+#: admin/partials/internet-document.php:34
 msgid "Recipient's phone:"
 msgstr "Телефон получателя:"
 
-#: admin/partials/internet-document.php:51
+#: admin/partials/internet-document.php:52
 msgid "Recipient's city:"
 msgstr "Город получателя:"
 
-#: admin/partials/internet-document.php:65
+#: admin/partials/internet-document.php:67
 msgid "Recipient's warehouse:"
 msgstr "Отделение получателя:"
 
-#: admin/partials/internet-document.php:80
+#: admin/partials/internet-document.php:83
 msgid "Assessed value:"
 msgstr "Оценочная стоимость:"
 
-#: admin/partials/internet-document.php:89
+#: admin/partials/internet-document.php:92
 msgid "Return shipping"
 msgstr "Обрантная доставка"
 
-#: admin/partials/internet-document.php:94
+#: admin/partials/internet-document.php:97
 msgid "Remittance"
 msgstr "Денежный перевод"
 
-#: core/class-order.php:95
+#: core/class-order.php:116
 msgid "Invoice"
 msgstr "Накладная"
 
-#: shipping/class-nova-poshta-shipping-method.php:26
-#: shipping/class-nova-poshta-shipping-method.php:27
-#: shipping/class-nova-poshta-shipping-method.php:28
-#: shipping/class-nova-poshta-shipping-method.php:57
+#: core/class-order.php:178
+msgid "Create Nova Poshta Internet Document"
+msgstr "Создание накладной для Новой почты"
+
+#: shipping/class-nova-poshta-shipping-method.php:61
+#: shipping/class-nova-poshta-shipping-method.php:62
+#: shipping/class-nova-poshta-shipping-method.php:63
+#: shipping/class-nova-poshta-shipping-method.php:92
 msgid "Nova Poshta delivery"
 msgstr "Доставка Новой почты"
 
-#: shipping/class-nova-poshta-shipping-method.php:55
+#: shipping/class-nova-poshta-shipping-method.php:90
 msgid "Method header"
 msgstr "Заголовок метода"

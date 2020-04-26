@@ -12,10 +12,6 @@
 
 namespace Nova_Poshta\Admin;
 
-use Nova_Poshta\Core\Main;
-use Nova_Poshta\Core\Settings;
-use Nova_Poshta\Core\Shipping;
-
 /**
  * Class Admin
  *
@@ -24,27 +20,23 @@ use Nova_Poshta\Core\Shipping;
 class Notice {
 
 	/**
-	 * Plugin settings
+	 * List of notices
 	 *
-	 * @var Settings
+	 * @var array
 	 */
-	private $settings;
-	/**
-	 * Shipping method
-	 *
-	 * @var Shipping
-	 */
-	private $shipping;
+	private $notices = [];
 
 	/**
-	 * Notice constructor.
+	 * Register plugin notice
 	 *
-	 * @param Settings $settings Plugin settings.
-	 * @param Shipping $shipping Shipping method.
+	 * @param string $type    Type of notice.
+	 * @param string $message Message of notice.
 	 */
-	public function __construct( Settings $settings, Shipping $shipping ) {
-		$this->settings = $settings;
-		$this->shipping = $shipping;
+	public function add( string $type, string $message ) {
+		$this->notices[] = [
+			'type'    => $type,
+			'message' => $message,
+		];
 	}
 
 	/**
@@ -58,48 +50,12 @@ class Notice {
 	 * Show notices
 	 */
 	public function notices() {
-		$this->empty_api_key();
-		$this->shipping_method_enable();
-	}
-
-	/**
-	 * Notice empty api key
-	 */
-	private function empty_api_key() {
-		if ( ! empty( $this->settings->api_key() ) ) {
+		if ( empty( $this->notices ) ) {
 			return;
 		}
-		$this->show(
-			'error',
-			sprintf(
-			/* translators: 1: link on page option */
-				__(
-					'For the plugin to work, you must enter the API key on the <a href="%s">plugin settings page</a>',
-					'shipping-nova-poshta-for-woocommerce'
-				),
-				get_admin_url( null, 'admin.php?page=' . Main::PLUGIN_SLUG )
-			)
-		);
-	}
-
-	/**
-	 * Shipping method not enabled
-	 */
-	private function shipping_method_enable() {
-		if ( $this->shipping->is_active() ) {
-			return;
+		foreach ( $this->notices as $notice ) {
+			$this->show( $notice['type'], $notice['message'] );
 		}
-		$this->show(
-			'error',
-			sprintf(
-			/* translators: 1: link on WooCommerce settings */
-				__(
-					'You must add the "New Delivery Method" delivery method <a href="%s">in the WooCommerce settings</a>',
-					'shipping-nova-poshta-for-woocommerce'
-				),
-				get_admin_url( null, 'admin.php?page=wc-settings&tab=shipping' )
-			)
-		);
 	}
 
 	/**

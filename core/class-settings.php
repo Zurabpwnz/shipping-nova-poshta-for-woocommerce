@@ -12,6 +12,8 @@
 
 namespace Nova_Poshta\Core;
 
+use Nova_Poshta\Admin\Notice;
+
 /**
  * Class Settings
  *
@@ -25,12 +27,41 @@ class Settings {
 	 * @var array
 	 */
 	private $options;
+	/**
+	 * Plugin notices.
+	 *
+	 * @var Notice
+	 */
+	private $notice;
 
 	/**
 	 * Settings constructor.
+	 *
+	 * @param Notice $notice Plugin notices.
 	 */
-	public function __construct() {
+	public function __construct( Notice $notice ) {
 		$this->options = get_option( Main::PLUGIN_SLUG, [] );
+		$this->notice  = $notice;
+		$this->notices();
+	}
+
+	/**
+	 * Register notices.
+	 */
+	private function notices() {
+		if ( ! $this->api_key() ) {
+			$this->notice->add(
+				'error',
+				sprintf(
+				/* translators: 1: link on page option */
+					__(
+						'For the plugin to work, you must enter the API key on the <a href="%s">plugin settings page</a>',
+						'shipping-nova-poshta-for-woocommerce'
+					),
+					get_admin_url( null, 'admin.php?page=' . Main::PLUGIN_SLUG )
+				)
+			);
+		}
 	}
 
 	/**
