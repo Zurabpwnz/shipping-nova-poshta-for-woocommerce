@@ -230,7 +230,7 @@ class Test_Admin extends Test_Case {
 			->once()
 			->andReturn( $warehouse_id );
 		WP_Mock::userFunction( 'wp_kses_post' )->
-		with( 'Если у вас нет API ключа, то вы можете получить его в <a href="https://new.novaposhta.ua/#/1/settings/developers" target="_blank">личном кабине Новой Почты</a>' )->
+		with( 'If you do not have an API key, then you can get it in the <a href="https://new.novaposhta.ua/#/1/settings/developers" target="_blank">personal account of Nova Poshta</a>' )->
 		once();
 		$admin = new Admin( $api, $settings );
 
