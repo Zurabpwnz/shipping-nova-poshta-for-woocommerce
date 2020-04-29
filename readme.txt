@@ -56,6 +56,10 @@ a) In order actions In select choose a create internet document for Nova Poshta.
 b) Change order status to processing.
 4. Check internet document in shipping method item.
 
+= How to change the plugin? =
+
+Please do not change the code, otherwise it will be lost during the next update. Use hooks instead. We have written [documentation](https://github.com/wppunk/shipping-nova-poshta-for-woocommerce/wiki/%D0%A5%D1%83%D0%BA%D0%B8-%D0%BF%D0%BB%D0%B0%D0%B3%D0%B8%D0%BD%D0%B0) for you with examples. If there is no necessary hook for you, then create a [task](https://wordpress.org/support/plugin/shipping-nova-poshta-for-woocommerce/) and we will do it in the near future.
+
 == Changelog ==
 
 = 1.0.0 =
