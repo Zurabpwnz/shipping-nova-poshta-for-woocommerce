@@ -45,13 +45,15 @@ class Test_User extends Test_Case {
 	 * Test fields
 	 */
 	public function test_fields() {
-		$city_id    = 'city-id';
-		$city       = 'City';
-		$warehouses = [
+		$user_id      = 10;
+		$city_id      = 'city-id';
+		$city         = 'City';
+		$warehouse_id = 'warehouse-id-2';
+		$warehouses   = [
 			'warehouse-id-1' => 'Warehouse',
-			'warehouse-id-2' => 'Warehouse 2',
+			$warehouse_id    => 'Warehouse 2',
 		];
-		$api        = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$api          = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
 			->shouldReceive( 'cities' )
 			->once()
@@ -61,6 +63,9 @@ class Test_User extends Test_Case {
 			->once()
 			->withArgs( [ $city_id ] )
 			->andReturn( $warehouses );
+		WP_Mock::userFunction( 'get_current_user_id' )->
+		once()->
+		andReturn( $user_id );
 		WP_Mock::userFunction(
 			'wp_nonce_field',
 			[
@@ -76,6 +81,12 @@ class Test_User extends Test_Case {
 			'before_shipping_nova_poshta_for_woocommerce_field',
 			'shipping_nova_poshta_for_woocommerce_city'
 		);
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_default_city' )->
+		with( $city, $user_id )->
+		reply( $city );
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_default_warehouse_id' )->
+		with( $warehouse_id, $user_id, $city )->
+		reply( $warehouse_id );
 		WP_Mock::expectAction(
 			'after_shipping_nova_poshta_for_woocommerce_field',
 			'shipping_nova_poshta_for_woocommerce_city'

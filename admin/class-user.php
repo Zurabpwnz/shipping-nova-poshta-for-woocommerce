@@ -54,11 +54,16 @@ class User {
 	 * TODO: Move to other place.
 	 */
 	public function fields() {
+		$user_id      = get_current_user_id();
 		$city_id      = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_city', FILTER_SANITIZE_STRING );
 		$warehouse_id = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_warehouse', FILTER_SANITIZE_STRING );
 		if ( empty( $city_id || $warehouse_id ) ) {
 			$city         = $this->api->cities(
-				apply_filters( 'shipping_nova_poshta_for_woocommerce_default_city', 'Киев' ),
+				apply_filters(
+					'shipping_nova_poshta_for_woocommerce_default_city',
+					'Киев',
+					$user_id
+				),
 				1
 			);
 			$city_id      = apply_filters( 'shipping_nova_poshta_for_woocommerce_default_city_id', array_keys( $city )[0] ?? '' );
@@ -67,7 +72,12 @@ class User {
 			if ( $city_id ) {
 				$warehouses   = $this->api->warehouses( $city_id );
 				$warehouse_id = array_keys( $warehouses )[0] ?? '';
-				$warehouse_id = apply_filters( 'shipping_nova_poshta_for_woocommerce_default_warehouse_id', $warehouse_id, $city );
+				$warehouse_id = apply_filters(
+					'shipping_nova_poshta_for_woocommerce_default_warehouse_id',
+					$warehouse_id,
+					$user_id,
+					$city
+				);
 			}
 		}
 
