@@ -72,6 +72,22 @@ class Test_User extends Test_Case {
 				'times' => 1,
 			]
 		);
+		WP_Mock::expectAction(
+			'before_shipping_nova_poshta_for_woocommerce_field',
+			'shipping_nova_poshta_for_woocommerce_city'
+		);
+		WP_Mock::expectAction(
+			'after_shipping_nova_poshta_for_woocommerce_field',
+			'shipping_nova_poshta_for_woocommerce_city'
+		);
+		WP_Mock::expectAction(
+			'before_shipping_nova_poshta_for_woocommerce_field',
+			'shipping_nova_poshta_for_woocommerce_warehouse'
+		);
+		WP_Mock::expectAction(
+			'after_shipping_nova_poshta_for_woocommerce_field',
+			'shipping_nova_poshta_for_woocommerce_warehouse'
+		);
 
 		WP_Mock::userFunction( 'woocommerce_form_field', [ 'times' => 2 ] );
 		$user = new User( $api );

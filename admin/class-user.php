@@ -90,10 +90,11 @@ class User {
 				'priority' => 20,
 			],
 		];
-
 		wp_nonce_field( Main::PLUGIN_SLUG . '-shipping', 'shipping_nova_poshta_for_woocommerce_nonce', false );
 		foreach ( $fields as $key => $field ) {
+			do_action( 'before_shipping_nova_poshta_for_woocommerce_field', $key );
 			woocommerce_form_field( $key, $field );
+			do_action( 'after_shipping_nova_poshta_for_woocommerce_field', $key );
 		}
 	}
 
