@@ -27,7 +27,34 @@ Integration Nova Poshta API with WooCommerce. Add shipping method for WooCommerc
 
 == Frequently Asked Questions ==
 
-= How can I define my own substitutions? =
+= How to get a API key? =
+
+You need to enter your [personal account](https://new.novaposhta.ua/)
+
+1. Go to **Settings**
+2. Tab a **Security**
+3. Press button **Create a key**
+4. In popup you click to **Create**
+5. You need a copy key with the service *Business cabinet*
+
+[Visual guide](https://github.com/wppunk/shipping-nova-poshta-for-woocommerce/wiki/%D0%9A%D0%B0%D0%BA-%D0%BF%D0%BE%D0%BB%D1%83%D1%87%D0%B8%D1%82%D1%8C-API-%D0%BA%D0%BB%D1%8E%D1%87%3F)
+
+= How to change a recipient city or warehouse? =
+
+1. Go to **Edit order** page
+2. Check what you order status *On hold* or *Pending*.
+3. In shipping method item click to **Edit** in the right top corner.
+4. Update current recipient information
+5. Save changes
+
+= How to create an internet document? =
+
+1. Go to **Edit order** page
+2. You need to check what in shipping method item has a recipient city and warehouse.
+3.
+a) In order actions In select choose a create internet document for Nova Poshta.
+b) Change order status to processing.
+4. Check internet document in shipping method item.
 
 == Changelog ==
 
@@ -38,6 +65,10 @@ Integration Nova Poshta API with WooCommerce. Add shipping method for WooCommerc
 * Update translates
 * Auto detect user language
 
+= 1.1.1 =
+* Update documentation
+* Add hooks
+
 == Upgrade Notice ==
 
 = 1.0.0 =
@@ -46,4 +77,4 @@ Integration Nova Poshta API with WooCommerce. Add shipping method for WooCommerc
 
 == Screenshots ==
 
-1. /admin/assets/img/screenshot-1.png
+1. /assets/img/screenshot-1.png
