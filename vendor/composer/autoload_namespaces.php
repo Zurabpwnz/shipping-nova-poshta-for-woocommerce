@@ -6,9 +6,4 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'xrstf\\Composer52' => array($vendorDir . '/xrstf/composer-php52/lib'),
-    'tad_' => array($vendorDir . '/lucatume/args/src'),
-    'tad\\FunctionMocker' => array($vendorDir . '/lucatume/function-mocker/src'),
-    'Mockery' => array($vendorDir . '/mockery/mockery/library'),
-    'Arg' => array($vendorDir . '/lucatume/args/src'),
 );
