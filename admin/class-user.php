@@ -66,7 +66,7 @@ class User {
 				),
 				1
 			);
-			$city_id      = apply_filters( 'shipping_nova_poshta_for_woocommerce_default_city_id', array_keys( $city )[0] ?? '' );
+			$city_id      = apply_filters( 'shipping_nova_poshta_for_woocommerce_default_city_id', array_keys( $city )[0] ?? '', $user_id );
 			$warehouses   = [ 0 => '' ];
 			$warehouse_id = '';
 			if ( $city_id ) {

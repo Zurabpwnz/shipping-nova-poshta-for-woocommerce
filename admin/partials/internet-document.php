@@ -40,9 +40,9 @@ use Nova_Poshta\Core\Main;
 	</p>
 	<p>
 		<?php
-
+		$user_id         = get_current_user_id();
 		$city            = $this->api->cities(
-			apply_filters( 'shipping_nova_poshta_for_woocommerce_default_city', 'Киев' ),
+			apply_filters( 'shipping_nova_poshta_for_woocommerce_default_city', 'Киев', $user_id ),
 			1
 		);
 		$current_city_id = array_keys( $city )[0] ?? '';
