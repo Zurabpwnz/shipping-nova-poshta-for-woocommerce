@@ -320,12 +320,17 @@ class API {
 			[
 				'headers'     => [ 'Content-Type' => 'application/json' ],
 				'body'        => wp_json_encode(
-					[
-						'modelName'        => $model,
-						'calledMethod'     => $method,
-						'methodProperties' => (object) $args,
-						'apiKey'           => $this->settings->api_key(),
-					]
+					apply_filters(
+						'shipping_nova_poshta_for_woocommerce_request_body',
+						[
+							'modelName'        => $model,
+							'calledMethod'     => $method,
+							'methodProperties' => (object) $args,
+							'apiKey'           => $this->settings->api_key(),
+						],
+						$model,
+						$method
+					)
 				),
 				'data_format' => 'body',
 				'timeout'     => 30,

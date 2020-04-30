@@ -86,6 +86,9 @@ class Test_API extends Test_Case {
 		WP_Mock::userFunction( 'is_wp_error' )->
 		once()->
 		andReturn( false );
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
+		with( 'json' )->
+		reply( 'json' );
 
 		$api = new API( $db, $settings );
 
@@ -211,6 +214,9 @@ class Test_API extends Test_Case {
 		once()->
 		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
 		andReturn( [ 'body' => json_encode( $request ) ] );
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
+		with( 'json' )->
+		reply( 'json' );
 		WP_Mock::userFunction( 'is_wp_error' )->
 		once()->
 		andReturn( false );
@@ -282,6 +288,9 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'api_key' )
 			->once()
 			->andReturn( false );
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
+		with( 'json' )->
+		reply( 'json' );
 
 		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
 
@@ -395,6 +404,9 @@ class Test_API extends Test_Case {
 				'body' => json_encode( [] ),
 			]
 		);
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
+		with( 'json' )->
+		reply( 'json' );
 
 		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
 
@@ -563,6 +575,9 @@ class Test_API extends Test_Case {
 				'body' => json_encode( [ 'success' => false ] ),
 			]
 		);
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
+		with( 'json' )->
+		reply( 'json' );
 
 		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
 
@@ -825,6 +840,9 @@ class Test_API extends Test_Case {
 				),
 			]
 		);
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
+		with( 'json' )->
+		reply( 'json' );
 		WP_Mock::userFunction( 'is_wp_error' )->
 		times( 4 )->
 		andReturn( false );
@@ -1101,6 +1119,9 @@ class Test_API extends Test_Case {
 				),
 			]
 		);
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
+		with( 'json' )->
+		reply( 'json' );
 		WP_Mock::userFunction( 'is_wp_error' )->
 		times( 4 )->
 		andReturn( false );
@@ -1144,6 +1165,9 @@ class Test_API extends Test_Case {
 		)->
 		once()->
 		andReturn( false );
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
+		with( 'json' )->
+		reply( 'json' );
 		WP_Mock::userFunction( 'is_wp_error' )->
 		once()->
 		andReturn( true );
@@ -1193,6 +1217,9 @@ class Test_API extends Test_Case {
 				),
 			]
 		);
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
+		with( 'json' )->
+		reply( 'json' );
 		WP_Mock::userFunction( 'is_wp_error' )->
 		once()->
 		andReturn( false );

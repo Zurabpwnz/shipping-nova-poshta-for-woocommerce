@@ -300,9 +300,13 @@ class Test_Admin extends Test_Case {
 	 * Test page option tab create invoice
 	 */
 	public function test_page_options_create_invoice() {
+		$user_id = 10;
 		WP_Mock::userFunction( 'plugin_dir_path' )->twice();
 		WP_Mock::userFunction( 'get_admin_url' )->once();
 		WP_Mock::userFunction( 'submit_button' )->once();
+		WP_Mock::userFunction( 'get_current_user_id' )->
+		once()->
+		andReturn( $user_id );
 		WP_Mock::userFunction( 'wp_nonce_field' )->
 		with( Main::PLUGIN_SLUG . '-invoice', Main::PLUGIN_SLUG . '_nonce', false )->
 		once();
