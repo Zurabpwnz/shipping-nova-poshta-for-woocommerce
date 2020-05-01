@@ -4,7 +4,7 @@ Donate link: https://www.liqpay.ua/api/3/checkout?data=eyJ2ZXJzaW9uIjozLCJhY3Rpb
 Tags: Нова пошта, новая почта, nova poshta, novaposhta
 Requires at least: 5.1
 Tested up to: 5.4
-Stable tag: 1.1.1
+Stable tag: 1.2.0
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -72,6 +72,11 @@ Please do not change the code, otherwise it will be lost during the next update.
 = 1.1.1 =
 * Update documentation
 * Add hooks
+
+= 1.2.0 =
+* Clear cache after deactivate plugin
+* Delete plugin tables after deactivate plugin
+* UX enhancements upon plugin activation
 
 == Upgrade Notice ==
 

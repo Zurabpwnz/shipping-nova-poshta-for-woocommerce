@@ -13,7 +13,6 @@ use Exception;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
 use stdClass;
-use tad\FunctionMocker\FunctionMocker;
 use WP_Mock;
 
 /**
@@ -24,27 +23,58 @@ use WP_Mock;
 class Test_API extends Test_Case {
 
 	/**
+	 * Test hooks
+	 */
+	public function test_hooks() {
+		WP_Mock::userFunction( 'plugin_dir_path' )->
+		once();
+		WP_Mock::userFunction( 'plugin_basename' )->
+		once()->
+		andReturn( 'path/to/main-file' );
+		WP_Mock::userFunction( 'register_activation_hook' )->
+		once();
+		$db              = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$settings        = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api->hooks();
+	}
+
+	/**
+	 * Test activate API actions
+	 */
+	public function test_activate_with_api_key() {
+		$db              = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$settings        = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'api_key' )
+			->once()
+			->andReturn( 'api-key' );
+
+		$api = Mockery::mock( 'Nova_Poshta\Core\API[cities]', [ $db, $object_cache, $transient_cache, $settings ] );
+		$api
+			->shouldReceive( 'cities' )
+			->once();
+		$api->activate();
+	}
+
+	/**
 	 * Test search cities
 	 */
 	public function test_cities() {
-		$api_key        = 'api-key';
-		$day_in_seconds = 86400;
-		$search         = 'search';
-		$limit          = 11;
-		$cities         = [ 'City 1', 'City 2' ];
-		$request        = [
+		$api_key = 'api-key';
+		$search  = 'search';
+		$limit   = 11;
+		$cities  = [ 'City 1', 'City 2' ];
+		$request = [
 			'success' => true,
 			'data'    => [ 'some-data' ],
 		];
-		$mock_constant  = FunctionMocker::replace( 'constant', $day_in_seconds );
-		WP_Mock::userFunction( 'get_transient' )->
-		withArgs( [ Main::PLUGIN_SLUG . '-cities' ] )->
-		once()->
-		andReturn( false );
-		WP_Mock::userFunction( 'set_transient' )->
-		withArgs( [ Main::PLUGIN_SLUG . '-cities', 1, $day_in_seconds ] )->
-		once();
-		$db = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$db      = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'update_cities' )
 			->with( $request['data'] )
@@ -89,12 +119,19 @@ class Test_API extends Test_Case {
 		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
 		with( 'json' )->
 		reply( 'json' );
+		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$transient_cache
+			->shouldReceive( 'get' )
+			->with( 'cities' )
+			->andReturn( false );
+		$transient_cache
+			->shouldReceive( 'set' )
+			->with( 'cities', 1 );
 
-		$api = new API( $db, $settings );
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$this->assertSame( $cities, $api->cities( $search, $limit ) );
-
-		$mock_constant->wasCalledWithOnce( [ 'DAY_IN_SECONDS' ] );
 	}
 
 	/**
@@ -109,9 +146,11 @@ class Test_API extends Test_Case {
 			->withArgs( [ $city_id ] )
 			->once()
 			->andReturn( $city_name );
-		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings        = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 
-		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$this->assertSame( $city_name, $api->city( $city_id ) );
 	}
@@ -128,9 +167,11 @@ class Test_API extends Test_Case {
 			->withArgs( [ $city_id ] )
 			->once()
 			->andReturn( $area_name );
-		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings        = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 
-		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$this->assertSame( $area_name, $api->area( $city_id ) );
 	}
@@ -147,9 +188,11 @@ class Test_API extends Test_Case {
 			->withArgs( [ $warehouse_id ] )
 			->once()
 			->andReturn( $warehouse_name );
-		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings        = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 
-		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$this->assertSame( $warehouse_name, $api->warehouse( $warehouse_id ) );
 	}
@@ -158,23 +201,14 @@ class Test_API extends Test_Case {
 	 * Test warehouse by city_id
 	 */
 	public function test_warehouses() {
-		$day_in_seconds = 86400;
-		$api_key        = 'api-key';
-		$city_id        = 'city_id';
-		$warehouses     = [ 'Warehouse 1', 'Warehouse 2' ];
-		$request        = [
+		$api_key    = 'api-key';
+		$city_id    = 'city_id';
+		$warehouses = [ 'Warehouse 1', 'Warehouse 2' ];
+		$request    = [
 			'success' => true,
 			'data'    => [ 'some-data' ],
 		];
-		$mock_constant  = FunctionMocker::replace( 'constant', $day_in_seconds );
-		WP_Mock::userFunction( 'wp_cache_get' )->
-		with( Main::PLUGIN_SLUG . '-warehouse-' . $city_id, Main::PLUGIN_SLUG )->
-		once()->
-		andReturn( false );
-		WP_Mock::userFunction( 'wp_cache_set' )->
-		withArgs( [ Main::PLUGIN_SLUG . '-warehouse-' . $city_id, 1, Main::PLUGIN_SLUG, $day_in_seconds ] )->
-		once();
-		$db = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$db         = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'update_warehouses' )
 			->with( $request['data'] )
@@ -220,12 +254,21 @@ class Test_API extends Test_Case {
 		WP_Mock::userFunction( 'is_wp_error' )->
 		once()->
 		andReturn( false );
+		$object_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$object_cache
+			->shouldReceive( 'get' )
+			->with( 'warehouse-' . $city_id )
+			->once()
+			->andReturn( false );
+		$object_cache
+			->shouldReceive( 'set' )
+			->with( 'warehouse-' . $city_id, 1 )
+			->once();
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 
-		$api = new API( $db, $settings );
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$this->assertSame( $warehouses, $api->warehouses( $city_id ) );
-
-		$mock_constant->wasCalledWithOnce( [ 'DAY_IN_SECONDS' ] );
 	}
 
 	/**
@@ -250,8 +293,10 @@ class Test_API extends Test_Case {
 		$settings
 			->shouldReceive( 'warehouse_id' )
 			->once();
+		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 
-		$api = new API( $db, $settings );
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count );
 	}
@@ -291,8 +336,10 @@ class Test_API extends Test_Case {
 		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
 		with( 'json' )->
 		reply( 'json' );
+		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 
-		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count );
 	}
@@ -407,8 +454,10 @@ class Test_API extends Test_Case {
 		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
 		with( 'json' )->
 		reply( 'json' );
+		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 
-		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count );
 	}
@@ -578,8 +627,10 @@ class Test_API extends Test_Case {
 		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
 		with( 'json' )->
 		reply( 'json' );
+		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 
-		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count );
 	}
@@ -846,8 +897,10 @@ class Test_API extends Test_Case {
 		WP_Mock::userFunction( 'is_wp_error' )->
 		times( 4 )->
 		andReturn( false );
+		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 
-		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$this->assertSame(
 			$internet_document,
@@ -1125,8 +1178,10 @@ class Test_API extends Test_Case {
 		WP_Mock::userFunction( 'is_wp_error' )->
 		times( 4 )->
 		andReturn( false );
+		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 
-		$api = Mockery::mock( 'Nova_Poshta\Core\API', [ $db, $settings ] )->makePartial();
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$this->assertSame(
 			$internet_document,
@@ -1171,8 +1226,10 @@ class Test_API extends Test_Case {
 		WP_Mock::userFunction( 'is_wp_error' )->
 		once()->
 		andReturn( true );
+		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 
-		$api = new API( $db, $settings );
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$this->assertFalse( $api->validate( $api_key ) );
 	}
@@ -1223,8 +1280,10 @@ class Test_API extends Test_Case {
 		WP_Mock::userFunction( 'is_wp_error' )->
 		once()->
 		andReturn( false );
+		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 
-		$api = new API( $db, $settings );
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$this->assertFalse( $api->validate( $api_key ) );
 	}
@@ -1272,8 +1331,10 @@ class Test_API extends Test_Case {
 		WP_Mock::userFunction( 'is_wp_error' )->
 		once()->
 		andReturn( false );
+		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 
-		$api = new API( $db, $settings );
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$this->assertTrue( $api->validate( $api_key ) );
 	}

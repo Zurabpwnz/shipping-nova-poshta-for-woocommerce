@@ -15,6 +15,9 @@ namespace Nova_Poshta\Core;
 use DateTime;
 use DateTimeZone;
 use Exception;
+use Nova_Poshta\Core\Cache\Cache;
+use Nova_Poshta\Core\Cache\Object_Cache;
+use Nova_Poshta\Core\Cache\Transient_Cache;
 
 /**
  * Class API
@@ -39,16 +42,51 @@ class API {
 	 * @var DB
 	 */
 	private $db;
+	/**
+	 * Object cache
+	 *
+	 * @var Object_Cache
+	 */
+	private $object_cache;
+	/**
+	 * Transient cache
+	 *
+	 * @var Transient_Cache
+	 */
+	private $transient_cache;
 
 	/**
 	 * API constructor.
 	 *
-	 * @param DB       $db       Database.
-	 * @param Settings $settings Plugin settings.
+	 * @param DB              $db              Database.
+	 * @param Object_Cache    $object_cache    Object cache.
+	 * @param Transient_Cache $transient_cache Transient cache.
+	 * @param Settings        $settings        Plugin settings.
 	 */
-	public function __construct( DB $db, Settings $settings ) {
-		$this->settings = $settings;
-		$this->db       = $db;
+	public function __construct( DB $db, Object_Cache $object_cache, Transient_Cache $transient_cache, Settings $settings ) {
+		$this->settings        = $settings;
+		$this->object_cache    = $object_cache;
+		$this->transient_cache = $transient_cache;
+		$this->db              = $db;
+	}
+
+	/**
+	 * Add hooks
+	 */
+	public function hooks() {
+		register_activation_hook(
+			plugin_dir_path( __DIR__ ) . dirname( plugin_basename( __DIR__ ) ) . '.php',
+			[ $this, 'activate' ]
+		);
+	}
+
+	/**
+	 * On activate plugin
+	 */
+	public function activate() {
+		if ( $this->settings->api_key() ) {
+			$this->cities();
+		}
 	}
 
 	/**
@@ -60,11 +98,11 @@ class API {
 	 * @return array
 	 */
 	public function cities( string $search = '', int $limit = 10 ): array {
-		if ( ! get_transient( Main::PLUGIN_SLUG . '-cities' ) ) {
+		if ( ! $this->transient_cache->get( 'cities' ) ) {
 			$response = $this->request( 'Address', 'getCities' );
 			if ( $response['success'] ) {
 				$this->db->update_cities( $response['data'] );
-				set_transient( Main::PLUGIN_SLUG . '-cities', 1, constant( 'DAY_IN_SECONDS' ) );
+				$this->transient_cache->set( 'cities', 1 );
 			}
 			unset( $response );
 		}
@@ -113,7 +151,7 @@ class API {
 	 * @return array
 	 */
 	public function warehouses( string $city_id ): array {
-		if ( ! wp_cache_get( Main::PLUGIN_SLUG . '-warehouse-' . $city_id, Main::PLUGIN_SLUG ) ) {
+		if ( ! $this->object_cache->get( 'warehouse-' . $city_id ) ) {
 			$response = $this->request(
 				'AddressGeneral',
 				'getWarehouses',
@@ -123,7 +161,7 @@ class API {
 			);
 			if ( $response['success'] ) {
 				$this->db->update_warehouses( $response['data'] );
-				wp_cache_set( Main::PLUGIN_SLUG . '-warehouse-' . $city_id, 1, Main::PLUGIN_SLUG, constant( 'DAY_IN_SECONDS' ) );
+				$this->object_cache->set( 'warehouse-' . $city_id, 1 );
 			}
 			unset( $response );
 		}

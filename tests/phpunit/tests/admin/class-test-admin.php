@@ -219,7 +219,10 @@ class Test_Admin extends Test_Case {
 			->andReturn( [ 'Warehuse #1' ] );
 		WP_Mock::userFunction( 'selected' )->once();
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$settings->shouldReceive( 'api_key' )->twice();
+		$settings
+			->shouldReceive( 'api_key' )
+			->twice()
+			->andReturn( 'api-key' );
 		$settings->shouldReceive( 'phone' )->once();
 		$settings
 			->shouldReceive( 'city_id' )
@@ -359,10 +362,6 @@ class Test_Admin extends Test_Case {
 			->once()
 			->withArgs( [ $key ] )
 			->andReturn( true );
-		$api
-			->shouldReceive( 'cities' )
-			->once()
-			->with();
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 		$admin    = new Admin( $api, $settings );
 

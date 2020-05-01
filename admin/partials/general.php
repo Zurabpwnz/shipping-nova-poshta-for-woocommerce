@@ -32,7 +32,8 @@ use Nova_Poshta\Core\Main;
 		);
 		?>
 	</p>
-	<div<?php echo ! $this->settings->api_key() ? ' style="display: none;"' : ''; ?>>
+	<?php if ( $this->settings->api_key() ) { ?>
+	<div>
 		<p>
 			<label>
 				<?php esc_attr_e( 'Phone', 'shipping-nova-poshta-for-woocommerce' ); ?><br>
@@ -76,5 +77,6 @@ use Nova_Poshta\Core\Main;
 			</label>
 		</p>
 	</div>
+	<?php } ?>
 	<?php submit_button(); ?>
 </form>

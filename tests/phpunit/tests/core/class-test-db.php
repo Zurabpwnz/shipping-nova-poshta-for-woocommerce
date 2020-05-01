@@ -20,22 +20,46 @@ use WP_Mock\Functions;
 class Test_DB extends Test_Case {
 
 	/**
+	 * Test drop databases
+	 */
+	public function test_drop() {
+		global $wpdb;
+		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wpdb         = Mockery::mock( 'wpdb' );
+		$wpdb->prefix = 'prefix_';
+		$wpdb
+			->shouldReceive( 'query' )
+			->with( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'np_warehouses' )
+			->once();
+		$wpdb
+			->shouldReceive( 'query' )
+			->with( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'np_cities' )
+			->once();
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+
+		$db = new DB( $language );
+
+		$db->drop();
+	}
+
+	/**
 	 * Test including hooks
 	 */
 	public function test_hooks() {
 		WP_Mock::userFunction( 'plugin_dir_path' )->
-		once();
+		twice();
 		WP_Mock::userFunction( 'plugin_basename' )->
-		once()->
+		twice()->
 		andReturn( 'path/to/main-file' );
 		WP_Mock::userFunction( 'register_activation_hook' )->
+		once();
+		WP_Mock::userFunction( 'register_deactivation_hook' )->
 		once();
 		global $wpdb;
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wpdb         = Mockery::mock( 'wpdb' );
 		$wpdb->prefix = 'prefix_';
-
-		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$language     = Mockery::mock( 'Nova_Poshta\Core\Language' );
 
 		$db = new DB( $language );
 

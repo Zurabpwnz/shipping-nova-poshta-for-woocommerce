@@ -13,6 +13,7 @@
 namespace Nova_Poshta\Core;
 
 use Nova_Poshta\Admin\Notice;
+use Nova_Poshta\Core\Cache\Object_Cache;
 
 /**
  * Class Shipping
@@ -33,14 +34,22 @@ class Shipping {
 	 * @var Notice
 	 */
 	private $notice;
+	/**
+	 * Object cache
+	 *
+	 * @var Object_Cache
+	 */
+	private $object_cache;
 
 	/**
 	 * Shipping constructor.
 	 *
-	 * @param Notice $notice Plugin notices.
+	 * @param Notice       $notice       Plugin notices.
+	 * @param Object_Cache $object_cache Object cache.
 	 */
-	public function __construct( Notice $notice ) {
-		$this->notice = $notice;
+	public function __construct( Notice $notice, Object_Cache $object_cache ) {
+		$this->notice       = $notice;
+		$this->object_cache = $object_cache;
 		$this->notices();
 	}
 
@@ -101,7 +110,8 @@ class Shipping {
 	 */
 	private function is_active(): bool {
 		global $wpdb;
-		$is_active = wp_cache_get( self::METHOD_NAME . '_active' );
+		//phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
+		$is_active = $this->object_cache->get( self::METHOD_NAME . '_active' );
 		if ( ! $is_active ) {
 			//phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$is_active = (bool) $wpdb->get_var(
@@ -111,8 +121,10 @@ class Shipping {
 					self::METHOD_NAME
 				)
 			);
-			wp_cache_set( self::METHOD_NAME . '_active', $is_active );
+			$this->object_cache->set( self::METHOD_NAME . '_active', $is_active );
 		}
+
+		//phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		return $is_active;
 	}

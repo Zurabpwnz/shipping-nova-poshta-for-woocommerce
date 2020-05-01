@@ -181,9 +181,10 @@ class Admin {
 	 * @return array
 	 */
 	public function validate( array $value ): array {
-		if ( isset( $value['api_key'] ) && $this->api->validate( $value['api_key'] ) ) {
-			$this->api->cities();
-		} else {
+		if (
+			! isset( $value['api_key'] )
+			|| ( isset( $value['api_key'] ) && ! $this->api->validate( $value['api_key'] ) )
+		) {
 			add_settings_error( Main::PLUGIN_SLUG, 403, __( 'Invalid api key', 'shipping-nova-poshta-for-woocommerce' ) );
 			unset( $value['api_key'] );
 		}

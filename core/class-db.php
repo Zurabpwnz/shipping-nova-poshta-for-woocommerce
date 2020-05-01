@@ -58,6 +58,27 @@ class DB {
 			plugin_dir_path( __DIR__ ) . dirname( plugin_basename( __DIR__ ) ) . '.php',
 			[ $this, 'create' ]
 		);
+		register_deactivation_hook(
+			plugin_dir_path( __DIR__ ) . dirname( plugin_basename( __DIR__ ) ) . '.php',
+			[ $this, 'drop' ]
+		);
+	}
+
+	/**
+	 * Delete tables
+	 */
+	public function drop() {
+		global $wpdb;
+		//phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+		//phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
+		//phpcs:disable WordPress.DB.DirectDatabaseQuery.SchemaChange
+		//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query( 'DROP TABLE IF EXISTS ' . $this->warehouses_table );
+		$wpdb->query( 'DROP TABLE IF EXISTS ' . $this->cities_table );
+		//phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery
+		//phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching
+		//phpcs:enable WordPress.DB.DirectDatabaseQuery.SchemaChange
+		//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
