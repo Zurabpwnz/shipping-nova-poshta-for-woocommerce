@@ -42,6 +42,9 @@ class Test_API extends Test_Case {
 		$api->hooks();
 	}
 
+	/**
+	 * Test activate API actions
+	 */
 	public function test_activate_with_api_key() {
 		$db              = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
