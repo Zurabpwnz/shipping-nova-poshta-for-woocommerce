@@ -37,7 +37,7 @@ class Test_Abstract_Cache extends Test_Case {
 			 *
 			 * @param string $key Key name.
 			 */
-			public function delete( $key ) {
+			public function delete( string $key ) {
 				global $times;
 				$times ++;
 			}
@@ -79,7 +79,39 @@ class Test_Abstract_Cache extends Test_Case {
 		WP_Mock::userFunction( 'wp_cache_get' )->
 		with( 'prefix-keys', Main::PLUGIN_SLUG )->
 		once();
-		$stub = $this->getMockForAbstractClass( 'Nova_Poshta\Core\Cache\Abstract_Cache', [ 'prefix' ] );
+		$stub = new class( 'prefix' ) extends Abstract_Cache {
+
+			/**
+			 * Delete cache by key name.
+			 *
+			 * @param string $key Key name.
+			 */
+			public function delete( string $key ) {
+				// TODO: Implement delete() method.
+			}
+
+			/**
+			 * Set value for cache with key.
+			 *
+			 * @param string $key   Key name.
+			 * @param mixed  $value Value.
+			 */
+			public function set( string $key, $value ) {
+				// TODO: Implement set() method.
+			}
+
+			/**
+			 * Get cache value by name
+			 *
+			 * @param string $key Key name.
+			 *
+			 * @return bool|mixed
+			 */
+			public function get( string $key ) {
+				return false;
+			}
+
+		};
 		WP_Mock::userFunction( 'plugin_dir_path' )->
 		once();
 		WP_Mock::userFunction( 'plugin_basename' )->
