@@ -28,14 +28,48 @@ class Test_Abstract_Cache extends Test_Case {
 		WP_Mock::userFunction( 'wp_cache_get' )->
 		with( 'prefix-keys', Main::PLUGIN_SLUG )->
 		once();
-		$stub = $this->getMockForAbstractClass( 'Nova_Poshta\Core\Cache\Abstract_Cache', [ 'prefix' ] );
+		global $times;
+		$times = 0;
+		$stub  = new class( 'prefix' ) extends Abstract_Cache {
+
+			/**
+			 * Delete cache by key name.
+			 *
+			 * @param string $key Key name.
+			 */
+			public function delete( $key ) {
+				global $times;
+				$times ++;
+			}
+
+			/**
+			 * Set value for cache with key.
+			 *
+			 * @param string $key   Key name.
+			 * @param mixed  $value Value.
+			 */
+			public function set( string $key, $value ) {
+				// TODO: Implement set() method.
+			}
+
+			/**
+			 * Get cache value by name
+			 *
+			 * @param string $key Key name.
+			 *
+			 * @return bool|mixed
+			 */
+			public function get( string $key ) {
+				return false;
+			}
+
+		};
 		$this->update_inaccessible_property( $stub, 'keys', [ 'key-1', 'key-2' ] );
-		$stub
-			->expects( $this->exactly( 3 ) )
-			->method( 'delete' )
-			->withAnyParameters();
 
 		$stub->flush();
+
+		$this->assertSame( 3, $times );
+		unset( $times );
 	}
 
 	/**
