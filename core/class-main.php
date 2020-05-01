@@ -15,6 +15,9 @@ namespace Nova_Poshta\Core;
 use Nova_Poshta\Admin\Admin;
 use Nova_Poshta\Admin\Notice;
 use Nova_Poshta\Admin\User;
+use Nova_Poshta\Core\Cache\Cache;
+use Nova_Poshta\Core\Cache\Object_Cache;
+use Nova_Poshta\Core\Cache\Transient_Cache;
 use Nova_Poshta\Front\Front;
 
 /**
@@ -48,34 +51,17 @@ class Main {
 	 * @var API
 	 */
 	private $api;
+	/**
+	 * Notice
+	 *
+	 * @var Notice
+	 */
+	private $notice;
 
 	/**
 	 * Init plugin hooks
 	 */
 	public function init() {
-
-		$notice = new Notice();
-		$notice->hooks();
-		if ( ! $this->is_woocommerce_active() ) {
-			$notice->add(
-				'error',
-				sprintf(
-				/* translators: 1: Plugin name */
-					__(
-						'<strong>%s</strong> extends WooCommerce functionality and does not work without it.',
-						'shipping-nova-poshta-for-woocommerce'
-					),
-					self::PLUGIN_NAME
-				)
-			);
-
-			return;
-		}
-
-		$this->settings = new Settings( $notice );
-		$shipping       = new Shipping( $notice );
-
-		$shipping->hooks();
 		$this->define_hooks_without_api_key();
 
 		if ( $this->settings->api_key() ) {
@@ -102,11 +88,38 @@ class Main {
 	 * Define hooks without API key
 	 */
 	private function define_hooks_without_api_key() {
+		$this->notice = new Notice();
+		$this->notice->hooks();
+		if ( ! $this->is_woocommerce_active() ) {
+			$this->notice->add(
+				'error',
+				sprintf(
+				/* translators: 1: Plugin name */
+					__(
+						'<strong>%s</strong> extends WooCommerce functionality and does not work without it.',
+						'shipping-nova-poshta-for-woocommerce'
+					),
+					self::PLUGIN_NAME
+				)
+			);
+		}
+
+		$object_cache = new Object_Cache();
+		$object_cache->hooks();
+
+		$transient_cache = new Transient_Cache();
+		$transient_cache->hooks();
+
+		$this->settings = new Settings( $this->notice );
+		$shipping       = new Shipping( $this->notice, $object_cache );
+		$shipping->hooks();
+
 		$language = new Language();
 		$db       = new DB( $language );
 		$db->hooks();
 
-		$this->api = new API( $db, $this->settings );
+		$this->api = new API( $db, $object_cache, $transient_cache, $this->settings );
+		$this->api->hooks();
 
 		$admin = new Admin( $this->api, $this->settings );
 		$admin->hooks();

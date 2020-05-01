@@ -18,34 +18,6 @@ use Nova_Poshta\Tests\Test_Case;
 class Test_Main extends Test_Case {
 
 	/**
-	 * Test init without WooCommerce
-	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
-	 */
-	public function test_init_without_woocommerce() {
-		$notice = Mockery::mock( 'overload:Nova_Poshta\Admin\Notice' );
-		$notice
-			->shouldReceive( 'add' )
-			->with(
-				'error',
-				'<strong>' . Main::PLUGIN_NAME . '</strong> extends WooCommerce functionality and does not work without it.'
-			)
-			->once();
-		$notice
-			->shouldReceive( 'hooks' )
-			->once();
-		\WP_Mock::userFunction( 'is_plugin_active' )->
-		with( 'woocommerce/woocommerce.php' )->
-		once()->
-		andReturn( false );
-
-		$main = new Main();
-
-		$main->init();
-	}
-
-	/**
 	 * Test init all hooks
 	 *
 	 * @runInSeparateProcess
@@ -55,9 +27,21 @@ class Test_Main extends Test_Case {
 		\WP_Mock::userFunction( 'is_plugin_active' )->
 		with( 'woocommerce/woocommerce.php' )->
 		once()->
-		andReturn( true );
+		andReturn( false );
 		$notice = Mockery::mock( 'overload:Nova_Poshta\Admin\Notice' );
 		$notice
+			->shouldReceive( 'add' )
+			->with( 'error', '<strong>' . Main::PLUGIN_NAME . '</strong> extends WooCommerce functionality and does not work without it.' )
+			->once();
+		$notice
+			->shouldReceive( 'hooks' )
+			->once();
+		$object_cache = Mockery::mock( 'overload:Nova_Poshta\Core\Cache\Object_Cache' );
+		$object_cache
+			->shouldReceive( 'hooks' )
+			->once();
+		$transient_cache = Mockery::mock( 'overload:Nova_Poshta\Core\Cache\Transient_Cache' );
+		$transient_cache
 			->shouldReceive( 'hooks' )
 			->once();
 		$settings = Mockery::mock( 'overload:Nova_Poshta\Core\Settings' );
@@ -67,6 +51,10 @@ class Test_Main extends Test_Case {
 			->andReturn( 'api-key' );
 		$db = Mockery::mock( 'overload:Nova_Poshta\Core\DB' );
 		$db
+			->shouldReceive( 'hooks' )
+			->once();
+		$api = Mockery::mock( 'overload:Nova_Poshta\Core\API' );
+		$api
 			->shouldReceive( 'hooks' )
 			->once();
 		$ajax = Mockery::mock( 'overload:Nova_Poshta\Core\AJAX' );

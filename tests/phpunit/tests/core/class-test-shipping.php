@@ -22,13 +22,15 @@ class Test_Shipping extends Test_Case {
 	 * Test adding hooks
 	 */
 	public function test_hooks() {
-		WP_Mock::userFunction( 'wp_cache_get' )->
-		with( Shipping::METHOD_NAME . '_active' )->
-		once()->
-		andReturn( true );
-		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice       = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$object_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$object_cache
+			->shouldReceive( 'get' )
+			->with( Shipping::METHOD_NAME . '_active' )
+			->once()
+			->andReturn( true );
 
-		$shipping = new Shipping( $notice );
+		$shipping = new Shipping( $notice, $object_cache );
 
 		WP_Mock::expectActionAdded( 'woocommerce_shipping_init', [ $shipping, 'require_methods' ] );
 		WP_Mock::expectFilterAdded( 'woocommerce_shipping_methods', [ $shipping, 'register_methods' ] );
@@ -40,13 +42,15 @@ class Test_Shipping extends Test_Case {
 	 * Test register_methods
 	 */
 	public function test_register_methods() {
-		WP_Mock::userFunction( 'wp_cache_get' )->
-		with( Shipping::METHOD_NAME . '_active' )->
-		once()->
-		andReturn( true );
-		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice       = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$object_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$object_cache
+			->shouldReceive( 'get' )
+			->with( Shipping::METHOD_NAME . '_active' )
+			->once()
+			->andReturn( true );
 
-		$shipping = new Shipping( $notice );
+		$shipping = new Shipping( $notice, $object_cache );
 
 		$this->assertSame(
 			[
@@ -60,10 +64,6 @@ class Test_Shipping extends Test_Case {
 	 * Check active nova poshta shipping method
 	 */
 	public function test_notices() {
-		WP_Mock::userFunction( 'wp_cache_get' )->
-		with( Shipping::METHOD_NAME . '_active' )->
-		once()->
-		andReturn( false );
 		global $wpdb;
 		$request = false;
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -87,10 +87,6 @@ class Test_Shipping extends Test_Case {
 			->withArgs( [ $sql ] )
 			->once()
 			->andReturn( $request );
-
-		WP_Mock::userFunction( 'wp_cache_set' )->
-		with( 'shipping_nova_poshta_for_woocommerce_active', $request )->
-		once();
 		WP_Mock::userFunction( 'get_admin_url' )->
 		with( null, 'admin.php?page=wc-settings&tab=shipping' )->
 		once()->
@@ -103,8 +99,18 @@ class Test_Shipping extends Test_Case {
 				'You must add the "New Delivery Method" delivery method <a href="url">in the WooCommerce settings</a>'
 			)
 			->once();
+		$object_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$object_cache
+			->shouldReceive( 'get' )
+			->with( Shipping::METHOD_NAME . '_active' )
+			->once()
+			->andReturn( false );
+		$object_cache
+			->shouldReceive( 'set' )
+			->with( Shipping::METHOD_NAME . '_active', $request )
+			->once();
 
-		new Shipping( $notice );
+		new Shipping( $notice, $object_cache );
 	}
 
 }
