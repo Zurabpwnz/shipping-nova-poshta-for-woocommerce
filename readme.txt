@@ -79,7 +79,7 @@ Please do not change the code, otherwise it will be lost during the next update.
 * UX enhancements upon plugin activation
 
 = 1.2.1 =
-* Fix default city for Ukrainian language
+* Fix default city for the Ukrainian language
 * Add translates of select2
 * Fix js ajax complete
 
