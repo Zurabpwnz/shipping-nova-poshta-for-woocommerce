@@ -82,12 +82,15 @@ class Test_Admin extends Test_Case {
 		$current_screen       = new stdClass();
 		$current_screen->base = 'toplevel_page_' . Main::PLUGIN_SLUG;
 		WP_Mock::userFunction( 'plugin_dir_url' )->
-		twice();
+		times( 3 );
 		WP_Mock::userFunction( 'wp_enqueue_style' )->
 		with( 'select2', Functions::type( 'string' ), [], Main::VERSION, 'all' )->
 		once();
 		WP_Mock::userFunction( 'wp_enqueue_style' )->
 		with( Main::PLUGIN_SLUG, Functions::type( 'string' ), [ 'select2' ], Main::VERSION, 'all' )->
+		once();
+		WP_Mock::userFunction( 'wp_enqueue_style' )->
+		with( Main::PLUGIN_SLUG . '-front', Functions::type( 'string' ), [ 'select2' ], Main::VERSION, 'all' )->
 		once();
 
 		$admin = $this->instance();
@@ -224,6 +227,7 @@ class Test_Admin extends Test_Case {
 			->twice()
 			->andReturn( 'api-key' );
 		$settings->shouldReceive( 'phone' )->once();
+		$settings->shouldReceive( 'description' )->once();
 		$settings
 			->shouldReceive( 'city_id' )
 			->once()

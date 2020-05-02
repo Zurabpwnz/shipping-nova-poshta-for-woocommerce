@@ -38,7 +38,7 @@ class Main {
 	/**
 	 * Plugin version
 	 */
-	const VERSION = '1.0.0';
+	const VERSION = '1.2.1';
 	/**
 	 * Plugin settings
 	 *
@@ -114,8 +114,10 @@ class Main {
 		$shipping       = new Shipping( $this->notice, $object_cache );
 		$shipping->hooks();
 
-		$language = new Language();
-		$db       = new DB( $language );
+		$this->language = new Language();
+		$this->language->hooks();
+
+		$db = new DB( $this->language );
 		$db->hooks();
 
 		$this->api = new API( $db, $object_cache, $transient_cache, $this->settings );
@@ -135,7 +137,7 @@ class Main {
 		$checkout = new Checkout();
 		$checkout->hooks();
 
-		$front = new Front();
+		$front = new Front( $this->language );
 		$front->hooks();
 
 		$order = new Order( $this->api );

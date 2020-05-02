@@ -511,6 +511,35 @@ class Test_Order extends Test_Case {
 	 *
 	 * @throws Exception Invalid DateTime.
 	 */
+	public function test_NOT_create_invoice_repeatedly() {
+		$internet_document      = '1234 5678 9012 3456';
+		$api                    = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$wc_order_item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
+		$wc_order_item_shipping
+			->shouldReceive( 'get_meta' )
+			->with( 'internet_document' )
+			->once()
+			->andReturn( $internet_document );
+		$wc_order_item_shipping
+			->shouldReceive( 'get_method_id' )
+			->once()
+			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
+		$wc_order = Mockery::mock( 'WC_Order' );
+		$wc_order
+			->shouldReceive( 'get_shipping_methods' )
+			->once()
+			->andReturn( [ $wc_order_item_shipping ] );
+
+		$order = new Order( $api );
+
+		$order->create_internet_document( $wc_order );
+	}
+
+	/**
+	 * Create internet document
+	 *
+	 * @throws Exception Invalid DateTime.
+	 */
 	public function test_create_invoice() {
 		$first_name        = 'First name';
 		$last_name         = 'Last name';
@@ -536,6 +565,11 @@ class Test_Order extends Test_Case {
 			->once()
 			->andReturn( $internet_document );
 		$wc_order_item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
+		$wc_order_item_shipping
+			->shouldReceive( 'get_meta' )
+			->with( 'internet_document' )
+			->once()
+			->andReturn( false );
 		$wc_order_item_shipping
 			->shouldReceive( 'get_method_id' )
 			->once()
@@ -592,6 +626,10 @@ class Test_Order extends Test_Case {
 			->shouldReceive( 'get_items' )
 			->once()
 			->andReturn( [ $wc_order_item_1, $wc_order_item_2 ] );
+		$wc_order
+			->shouldReceive( 'add_order_note' )
+			->with( 'Created Internet document for Nova Poshta' )
+			->once();
 
 		$order = new Order( $api );
 

@@ -208,6 +208,9 @@ class Order {
 		if ( ! $shipping_item ) {
 			return;
 		}
+		if ( $shipping_item->get_meta( 'internet_document' ) ) {
+			return;
+		}
 		$internet_document = $this->api->internet_document(
 			$order->get_billing_first_name(),
 			$order->get_billing_last_name(),
@@ -220,6 +223,9 @@ class Order {
 		if ( $internet_document ) {
 			$shipping_item->add_meta_data( 'internet_document', $internet_document, true );
 			$shipping_item->save_meta_data();
+			$order->add_order_note(
+				__( 'Created Internet document for Nova Poshta', 'shipping-nova-poshta-for-woocommerce' )
+			);
 		}
 	}
 

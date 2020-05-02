@@ -90,6 +90,9 @@ class Test_Main extends Test_Case {
 			->shouldReceive( 'hooks' )
 			->once();
 		$language = Mockery::mock( 'overload:Nova_Poshta\Core\Language' );
+		$language
+			->shouldReceive( 'hooks' )
+			->once();
 
 		$main = new Main();
 

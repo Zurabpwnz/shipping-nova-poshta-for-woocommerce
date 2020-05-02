@@ -7,6 +7,7 @@
 
 namespace Nova_Poshta\Front;
 
+use Mockery;
 use Nova_Poshta\Core\Main;
 use Nova_Poshta\Tests\Test_Case;
 use WP_Mock;
@@ -22,7 +23,8 @@ class Test_Front extends Test_Case {
 	 * Test adding hooks
 	 */
 	public function test_hooks() {
-		$front = new Front();
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$front    = new Front( $language );
 
 		WP_Mock::expectActionAdded( 'wp_enqueue_scripts', [ $front, 'enqueue_styles' ] );
 		WP_Mock::expectActionAdded( 'wp_enqueue_scripts', [ $front, 'enqueue_scripts' ] );
@@ -40,7 +42,8 @@ class Test_Front extends Test_Case {
 		WP_Mock::userFunction( 'is_cart' )->
 		andReturn( false )->
 		once();
-		$front = new Front();
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$front    = new Front( $language );
 
 		$front->enqueue_styles();
 	}
@@ -57,12 +60,13 @@ class Test_Front extends Test_Case {
 		twice()->
 		andReturn( $plugin_url );
 		WP_Mock::userFunction( 'wp_enqueue_style' )->
-		withArgs( [ 'select2', $plugin_url . 'assets/css/select2.min.css', [], Main::VERSION, 'all' ] )->
+		with( 'select2', $plugin_url . 'assets/css/select2.min.css', [], Main::VERSION, 'all' )->
 		once();
 		WP_Mock::userFunction( 'wp_enqueue_style' )->
-		withArgs( [ Main::PLUGIN_SLUG, $plugin_url . 'assets/css/main.css', [ 'select2' ], Main::VERSION, 'all' ] )->
+		with( Main::PLUGIN_SLUG, $plugin_url . 'assets/css/main.css', [ 'select2' ], Main::VERSION, 'all' )->
 		once();
-		$front = new Front();
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$front    = new Front( $language );
 
 		$front->enqueue_styles();
 	}
@@ -74,7 +78,8 @@ class Test_Front extends Test_Case {
 		WP_Mock::userFunction( 'is_checkout' )->
 		andReturn( false )->
 		once();
-		$front = new Front();
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$front    = new Front( $language );
 
 		$front->enqueue_scripts();
 	}
@@ -83,6 +88,7 @@ class Test_Front extends Test_Case {
 	 * Test scripts on checkout page
 	 */
 	public function test_enqueue_scripts() {
+		$locale     = 'ua';
 		$plugin_url = 'https://site.com/wp-content/plugins/shipping-nova-poshta-for-woocommerce/';
 		$admin_ajax = 'https://site.com/admin-ajax.php';
 		$nonce      = 'nonce';
@@ -90,44 +96,59 @@ class Test_Front extends Test_Case {
 		andReturn( true )->
 		once();
 		WP_Mock::userFunction( 'plugin_dir_url' )->
-		twice()->
+		times( 3 )->
 		andReturn( $plugin_url );
 		WP_Mock::userFunction( 'wp_enqueue_script' )->
-		withArgs( [ 'select2', $plugin_url . 'assets/js/select2.min.js', [ 'jquery' ], Main::VERSION, true ] )->
+		with(
+			'select2-i18n-' . $locale,
+			$plugin_url . 'assets/js/i18n/' . $locale . '.js',
+			[ 'jquery' ],
+			Main::VERSION,
+			true
+		)->
 		once();
 		WP_Mock::userFunction( 'wp_enqueue_script' )->
-		withArgs(
-			[
-				Main::PLUGIN_SLUG,
-				$plugin_url . 'assets/js/main.js',
-				[ 'jquery', 'select2' ],
-				Main::VERSION,
-				true,
-			]
+		with(
+			'select2',
+			$plugin_url . 'assets/js/select2.min.js',
+			[ 'jquery', 'select2-i18n-' . $locale ],
+			Main::VERSION,
+			true
+		)->
+		once();
+		WP_Mock::userFunction( 'wp_enqueue_script' )->
+		with(
+			Main::PLUGIN_SLUG,
+			$plugin_url . 'assets/js/main.js',
+			[ 'jquery', 'select2' ],
+			Main::VERSION,
+			true
 		)->
 		once();
 		WP_Mock::userFunction( 'admin_url' )->
-		withArgs( [ 'admin-ajax.php' ] )->
+		with( 'admin-ajax.php' )->
 		once()->
 		andReturn( $admin_ajax );
 		WP_Mock::userFunction( 'wp_create_nonce' )->
-		withArgs( [ Main::PLUGIN_SLUG ] )->
+		with( Main::PLUGIN_SLUG )->
 		once()->
 		andReturn( $nonce );
 		WP_Mock::userFunction( 'wp_localize_script' )->
-		withArgs(
+		with(
+			Main::PLUGIN_SLUG,
+			'shipping_nova_poshta_for_woocommerce',
 			[
-				Main::PLUGIN_SLUG,
-				'shipping_nova_poshta_for_woocommerce',
-				[
-					'url'   => $admin_ajax,
-					'nonce' => $nonce,
-				],
+				'url'   => $admin_ajax,
+				'nonce' => $nonce,
 			]
 		)->
 		once();
-
-		$front = new Front();
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$language
+			->shouldReceive( 'get_current_language' )
+			->times( 3 )
+			->andReturn( $locale );
+		$front = new Front( $language );
 
 		$front->enqueue_scripts();
 	}
