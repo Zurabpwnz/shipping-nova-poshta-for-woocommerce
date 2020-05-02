@@ -83,6 +83,15 @@ class Settings {
 	}
 
 	/**
+	 * Package description
+	 *
+	 * @return string
+	 */
+	public function description(): string {
+		return $this->options['description'] ?? 'Товар';
+	}
+
+	/**
 	 * Admin city_id
 	 *
 	 * @return string

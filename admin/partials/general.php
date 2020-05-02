@@ -44,6 +44,15 @@ use Nova_Poshta\Core\Main;
 			</label>
 		</p>
 		<p>
+			<label>
+				<?php esc_attr_e( 'Description of your products', 'shipping-nova-poshta-for-woocommerce' ); ?><br>
+				<input
+						type="tel"
+						name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[description]"
+						value="<?php echo esc_attr( $this->settings->description() ); ?>"/>
+			</label>
+		</p>
+		<p>
 			<?php
 			$current_city_id = $this->settings->city_id();
 			$current_city    = $current_city_id ? $this->api->city( $current_city_id ) : '';
