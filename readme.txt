@@ -78,6 +78,11 @@ Please do not change the code, otherwise it will be lost during the next update.
 * Delete plugin tables after deactivate plugin
 * UX enhancements upon plugin activation
 
+= 1.2.1 =
+* Fix default city for Ukrainian language
+* Add translates of select2
+* Fix js ajax complete
+
 == Upgrade Notice ==
 
 = 1.0.0 =
