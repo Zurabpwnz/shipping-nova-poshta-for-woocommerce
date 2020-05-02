@@ -1,4 +1,4 @@
-jQuery(document).ready(function ($) {
+(function ($) {
 	function init() {
 		$('#shipping_nova_poshta_for_woocommerce_city').select2({
 			minimumInputLength: 1,
@@ -47,13 +47,18 @@ jQuery(document).ready(function ($) {
 		$('#shipping_nova_poshta_for_woocommerce_warehouse').select2();
 	}
 
-	if ($('#shipping_nova_poshta_for_woocommerce_city, #shipping_nova_poshta_for_woocommerce_warehouse').length) {
-		init();
-	}
-
-	$(document).ajaxComplete(function (event, xhr, settings) {
-		if ('/?wc-ajax=update_order_review' === settings.url) {
+	$(function () {
+		if ($('#shipping_nova_poshta_for_woocommerce_city, #shipping_nova_poshta_for_woocommerce_warehouse').length) {
 			init();
 		}
 	});
-});
+	$(document).ajaxComplete(function (event, xhr, settings) {
+		if (settings.url.indexOf('?wc-ajax=update_order_review') + 1) {
+			console.log('krya');
+			init();
+		}
+	});
+	$(window).load(function () {
+		init();
+	});
+})(jQuery);

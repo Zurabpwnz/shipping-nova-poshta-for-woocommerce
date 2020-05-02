@@ -12,6 +12,7 @@
 
 namespace Nova_Poshta\Front;
 
+use Nova_Poshta\Core\Language;
 use Nova_Poshta\Core\Main;
 
 /**
@@ -20,6 +21,22 @@ use Nova_Poshta\Core\Main;
  * @package Nova_Poshta\Front
  */
 class Front {
+
+	/**
+	 * Language
+	 *
+	 * @var Language
+	 */
+	private $language;
+
+	/**
+	 * Front constructor.
+	 *
+	 * @param Language $language Language.
+	 */
+	public function __construct( Language $language ) {
+		$this->language = $language;
+	}
 
 	/**
 	 * Add hooks
@@ -48,9 +65,16 @@ class Front {
 			return;
 		}
 		wp_enqueue_script(
+			'select2-i18n-' . $this->language->get_current_language(),
+			plugin_dir_url( __FILE__ ) . 'assets/js/i18n/' . $this->language->get_current_language() . '.js',
+			[ 'jquery' ],
+			Main::VERSION,
+			true
+		);
+		wp_enqueue_script(
 			'select2',
 			plugin_dir_url( __FILE__ ) . 'assets/js/select2.min.js',
-			[ 'jquery' ],
+			[ 'jquery', 'select2-i18n-' . $this->language->get_current_language() ],
 			Main::VERSION,
 			true
 		);
