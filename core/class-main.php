@@ -115,7 +115,9 @@ class Main {
 		$shipping->hooks();
 
 		$this->language = new Language();
-		$db             = new DB( $this->language );
+		$this->language->hooks();
+
+		$db = new DB( $this->language );
 		$db->hooks();
 
 		$this->api = new API( $db, $object_cache, $transient_cache, $this->settings );

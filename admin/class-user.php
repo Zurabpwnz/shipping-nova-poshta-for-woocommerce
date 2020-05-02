@@ -61,7 +61,7 @@ class User {
 			$city         = $this->api->cities(
 				apply_filters(
 					'shipping_nova_poshta_for_woocommerce_default_city',
-					'Киев',
+					'',
 					$user_id
 				),
 				1
