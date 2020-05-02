@@ -57,6 +57,12 @@ class Main {
 	 * @var Notice
 	 */
 	private $notice;
+	/**
+	 * Language
+	 *
+	 * @var Language
+	 */
+	private $language;
 
 	/**
 	 * Init plugin hooks
@@ -123,7 +129,7 @@ class Main {
 		$this->api = new API( $db, $object_cache, $transient_cache, $this->settings );
 		$this->api->hooks();
 
-		$admin = new Admin( $this->api, $this->settings );
+		$admin = new Admin( $this->api, $this->settings, $this->language );
 		$admin->hooks();
 	}
 
@@ -146,7 +152,7 @@ class Main {
 		$thank_you = new Thank_You( $this->api );
 		$thank_you->hooks();
 
-		$user = new User( $this->api );
+		$user = new User( $this->api, $this->language );
 		$user->hooks();
 	}
 

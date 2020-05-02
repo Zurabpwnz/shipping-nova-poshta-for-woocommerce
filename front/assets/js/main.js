@@ -1,6 +1,7 @@
 (function ($) {
 	function init() {
 		$('#shipping_nova_poshta_for_woocommerce_city').select2({
+			language: shipping_nova_poshta_for_woocommerce.language,
 			minimumInputLength: 1,
 			ajax: {
 				url: shipping_nova_poshta_for_woocommerce.url,
@@ -44,7 +45,9 @@
 				}
 			});
 		});
-		$('#shipping_nova_poshta_for_woocommerce_warehouse').select2();
+		$('#shipping_nova_poshta_for_woocommerce_warehouse').select2({
+			language: shipping_nova_poshta_for_woocommerce.language
+		});
 	}
 
 	$(function () {
@@ -54,7 +57,6 @@
 	});
 	$(document).ajaxComplete(function (event, xhr, settings) {
 		if (settings.url.indexOf('?wc-ajax=update_order_review') + 1) {
-			console.log('krya');
 			init();
 		}
 	});

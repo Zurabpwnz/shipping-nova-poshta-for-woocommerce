@@ -121,10 +121,11 @@ class Test_Admin extends Test_Case {
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen       = new stdClass();
 		$current_screen->base = 'toplevel_page_' . Main::PLUGIN_SLUG;
+		$locale               = 'uk';
 		$admin_url            = '/admin-url/';
 		$nonce                = 'nonce123';
 		WP_Mock::userFunction( 'plugin_dir_url' )->
-		twice();
+		times( 3 );
 		WP_Mock::userFunction( 'admin_url' )->
 		once()->
 		andReturn( $admin_url );
@@ -133,6 +134,9 @@ class Test_Admin extends Test_Case {
 		andReturn( $nonce );
 		WP_Mock::userFunction( 'wp_enqueue_script' )->
 		with( 'select2', Functions::type( 'string' ), [ 'jquery' ], Main::VERSION, true )->
+		once();
+		WP_Mock::userFunction( 'wp_enqueue_script' )->
+		with( 'select2-i18n-uk', Functions::type( 'string' ), [ 'jquery', 'select2' ], Main::VERSION, true )->
 		once();
 		WP_Mock::userFunction( 'wp_enqueue_script' )->
 		with( Main::PLUGIN_SLUG, Functions::type( 'string' ), [ 'jquery', 'select2' ], Main::VERSION, true )->
@@ -144,14 +148,22 @@ class Test_Admin extends Test_Case {
 					Main::PLUGIN_SLUG,
 					'shipping_nova_poshta_for_woocommerce',
 					[
-						'url'   => $admin_url,
-						'nonce' => $nonce,
+						'url'      => $admin_url,
+						'nonce'    => $nonce,
+						'language' => $locale,
 					],
 				],
 			]
 		);
+		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$language
+			->shouldReceive( 'get_current_language' )
+			->times( 3 )
+			->andReturn( $locale );
 
-		$admin = $this->instance();
+		$admin = new Admin( $api, $settings, $language );
 
 		$admin->enqueue_scripts();
 	}
@@ -239,7 +251,8 @@ class Test_Admin extends Test_Case {
 		WP_Mock::userFunction( 'wp_kses_post' )->
 		with( 'If you do not have an API key, then you can get it in the <a href="https://new.novaposhta.ua/#/1/settings/developers" target="_blank">personal account of Nova Poshta</a>' )->
 		once();
-		$admin = new Admin( $api, $settings );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$admin    = new Admin( $api, $settings, $language );
 
 		ob_start();
 		$admin->page_options();
@@ -274,7 +287,8 @@ class Test_Admin extends Test_Case {
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 		WP_Mock::userFunction( 'plugin_dir_path' )->once();
 		WP_Mock::userFunction( 'get_admin_url' )->once();
-		$admin = new Admin( $api, $settings );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$admin    = new Admin( $api, $settings, $language );
 		ob_start();
 
 		$admin->page_options();
@@ -308,6 +322,7 @@ class Test_Admin extends Test_Case {
 	 */
 	public function test_page_options_create_invoice() {
 		$user_id = 10;
+		$locale  = 'uk';
 		WP_Mock::userFunction( 'plugin_dir_path' )->twice();
 		WP_Mock::userFunction( 'get_admin_url' )->once();
 		WP_Mock::userFunction( 'submit_button' )->once();
@@ -317,6 +332,9 @@ class Test_Admin extends Test_Case {
 		WP_Mock::userFunction( 'wp_nonce_field' )->
 		with( Main::PLUGIN_SLUG . '-invoice', Main::PLUGIN_SLUG . '_nonce', false )->
 		once();
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_default_city' )->
+		with( '', $user_id, $locale )->
+		reply( 'city' );
 		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
 			->shouldReceive( 'cities' )
@@ -327,8 +345,12 @@ class Test_Admin extends Test_Case {
 			->once()
 			->andReturn( [ 'warehouse-id' => 'warehouse-info' ] );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$admin    = new Admin( $api, $settings );
-
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$language
+			->shouldReceive( 'get_current_language' )
+			->once()
+			->andReturn( $locale );
+		$admin = new Admin( $api, $settings, $language );
 		FunctionMocker::replace( 'filter_input', 'internet_document' );
 		ob_start();
 		$admin->page_options();
@@ -350,7 +372,8 @@ class Test_Admin extends Test_Case {
 		WP_Mock::userFunction( 'add_settings_error' )->
 		with( Main::PLUGIN_SLUG, 403, Functions::type( 'string' ) )->
 		once();
-		$admin = new Admin( $api, $settings );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$admin    = new Admin( $api, $settings, $language );
 
 		$admin->validate( [ 'api_key' => $key ] );
 	}
@@ -367,7 +390,8 @@ class Test_Admin extends Test_Case {
 			->withArgs( [ $key ] )
 			->andReturn( true );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$admin    = new Admin( $api, $settings );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$admin    = new Admin( $api, $settings, $language );
 
 		$admin->validate( [ 'api_key' => $key ] );
 	}
@@ -380,8 +404,9 @@ class Test_Admin extends Test_Case {
 	private function instance(): Admin {
 		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
 
-		return new Admin( $api, $settings );
+		return new Admin( $api, $settings, $language );
 	}
 
 }

@@ -30,6 +30,7 @@ jQuery(document).ready(function ($) {
 			return;
 		}
 		$('#shipping_nova_poshta_for_woocommerce_city').select2({
+			language: shipping_nova_poshta_for_woocommerce.language,
 			minimumInputLength: 1,
 			ajax: {
 				url: shipping_nova_poshta_for_woocommerce.url,
@@ -51,7 +52,9 @@ jQuery(document).ready(function ($) {
 		$('#shipping_nova_poshta_for_woocommerce_city').on('select2:select', function (e) {
 			update_warehouses();
 		});
-		$('#shipping_nova_poshta_for_woocommerce_warehouse').select2();
+		$('#shipping_nova_poshta_for_woocommerce_warehouse').select2({
+			language: shipping_nova_poshta_for_woocommerce.language
+		});
 	}
 
 

@@ -83,6 +83,9 @@ Please do not change the code, otherwise it will be lost during the next update.
 * Add translates of select2
 * Fix js ajax complete
 
+= 1.2.2 =
+* Add translates of select2
+
 == Upgrade Notice ==
 
 = 1.0.0 =
