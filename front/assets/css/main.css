@@ -1,0 +1,12 @@
+#shipping_nova_poshta_for_woocommerce_city,
+#shipping_nova_poshta_for_woocommerce_warehouse {
+    transition: .3s ease;
+}
+
+#shipping_nova_poshta_for_woocommerce_city.inactive,
+#shipping_nova_poshta_for_woocommerce_warehouse.inactive,
+#shipping_nova_poshta_for_woocommerce_city.inactive + .select2,
+#shipping_nova_poshta_for_woocommerce_warehouse.inactive + .select2 {
+    cursor: no-drop;
+    opacity: .75;
+}
