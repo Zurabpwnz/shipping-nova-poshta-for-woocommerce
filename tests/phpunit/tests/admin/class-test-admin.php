@@ -224,6 +224,7 @@ class Test_Admin extends Test_Case {
 			->twice()
 			->andReturn( 'api-key' );
 		$settings->shouldReceive( 'phone' )->once();
+		$settings->shouldReceive( 'description' )->once();
 		$settings
 			->shouldReceive( 'city_id' )
 			->once()

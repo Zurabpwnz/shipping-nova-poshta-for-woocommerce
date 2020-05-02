@@ -88,7 +88,7 @@ class Settings {
 	 * @return string
 	 */
 	public function description(): string {
-		return $this->options['description'] ?? 'Товар';
+		return $this->options['description'] ?? 'Product';
 	}
 
 	/**
