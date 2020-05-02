@@ -651,6 +651,7 @@ class Test_API extends Test_Case {
 		$price              = '100.5';
 		$count              = '10';
 		$admin_phone        = '987654321';
+		$description        = 'Product';
 		$admin_city_id      = 'admin-city-id';
 		$admin_warehouse_id = 'admin-warehouse-id';
 		$sender             = 'sender';
@@ -668,6 +669,10 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'phone' )
 			->once()
 			->andReturn( $admin_phone );
+		$settings
+			->shouldReceive( 'description' )
+			->once()
+			->andReturn( $description );
 		$settings
 			->shouldReceive( 'city_id' )
 			->once()
@@ -819,6 +824,9 @@ class Test_API extends Test_Case {
 			]
 		);
 		$date = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_document_description' )->
+		with( $description )->
+		reply( $description );
 		WP_Mock::userFunction( 'wp_json_encode' )->
 		with(
 			[
@@ -854,7 +862,7 @@ class Test_API extends Test_Case {
 							'weight'           => ( $count * .5 ) - .01,
 						],
 					],
-					'Description'      => 'Взуття',
+					'Description'      => $description,
 					'Weight'           => ( $count * .5 ) - .01,
 					'CargoType'        => 'Parcel',
 					'DateTime'         => $date->format( 'd.m.Y' ),
@@ -918,6 +926,7 @@ class Test_API extends Test_Case {
 		$first_name         = 'First Name';
 		$last_name          = 'Last Name';
 		$phone              = '123456789';
+		$description        = 'Product';
 		$city_id            = 'city-id';
 		$warehouse_id       = 'warehouse-id';
 		$area_id            = 'area-id';
@@ -942,6 +951,10 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'phone' )
 			->once()
 			->andReturn( $admin_phone );
+		$settings
+			->shouldReceive( 'description' )
+			->once()
+			->andReturn( $description );
 		$settings
 			->shouldReceive( 'city_id' )
 			->once()
@@ -1093,6 +1106,9 @@ class Test_API extends Test_Case {
 			]
 		);
 		$date = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_document_description' )->
+		with( $description )->
+		reply( $description );
 		WP_Mock::userFunction( 'wp_json_encode' )->
 		with(
 			[
@@ -1128,7 +1144,7 @@ class Test_API extends Test_Case {
 							'weight'           => ( $count * .5 ) - .01,
 						],
 					],
-					'Description'          => 'Взуття',
+					'Description'          => $description,
 					'Weight'               => ( $count * .5 ) - .01,
 					'CargoType'            => 'Parcel',
 					'DateTime'             => $date->format( 'd.m.Y' ),

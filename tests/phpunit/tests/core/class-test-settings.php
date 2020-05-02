@@ -97,6 +97,46 @@ class Test_Settings extends Test_Case {
 		$this->assertSame( '', $settings->phone() );
 	}
 
+
+	/**
+	 * Test get description
+	 */
+	public function test_description() {
+		$api_key     = 'api-key';
+		$description = 'description';
+		WP_Mock::userFunction( 'get_option' )->
+		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
+		once()->
+		andReturn(
+			[
+				'api_key'     => $api_key,
+				'description' => $description,
+			]
+		);
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+
+		$settings = new Settings( $notice );
+
+		$this->assertSame( $description, $settings->description() );
+	}
+
+
+	/**
+	 * Test get empty phone
+	 */
+	public function test_empty_description() {
+		$api_key = 'api-key';
+		WP_Mock::userFunction( 'get_option' )->
+		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
+		once()->
+		andReturn( [ 'api_key' => $api_key ] );
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+
+		$settings = new Settings( $notice );
+
+		$this->assertSame( 'Товар', $settings->description() );
+	}
+
 	/**
 	 * Test get city_id
 	 */

@@ -213,7 +213,7 @@ class API {
 					'weight'           => ( $count * .5 ) - .01, // TODO: Calculate weight.
 				],
 			],
-			'Description'   => 'Взуття', // TODO: Field with deliver.
+			'Description'   => apply_filters( 'shipping_nova_poshta_for_woocommerce_document_description', $this->settings->description() ),
 			'Weight'        => ( $count * .5 ) - .01, // TODO: Calculate weight.
 			'CargoType'     => 'Parcel',
 			'DateTime'      => $date->format( 'd.m.Y' ),
