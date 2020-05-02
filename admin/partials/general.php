@@ -49,7 +49,8 @@ use Nova_Poshta\Core\Main;
 				<input
 						type="tel"
 						name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[description]"
-						value="<?php echo esc_attr( $this->settings->description() ); ?>"/>
+						value="<?php echo esc_attr( $this->settings->description() ); ?>"
+						required="required"/>
 			</label>
 		</p>
 		<p>
