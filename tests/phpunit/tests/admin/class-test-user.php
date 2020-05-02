@@ -24,8 +24,9 @@ class Test_User extends Test_Case {
 	 * Test adding hooks
 	 */
 	public function test_hooks() {
-		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$user = new User( $api );
+		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$user     = new User( $api, $language );
 
 		WP_Mock::expectActionAdded( 'shipping_nova_poshta_for_woocommerce_user_fields', [ $user, 'fields' ] );
 		WP_Mock::expectActionAdded( 'woocommerce_checkout_create_order_shipping_item', [ $user, 'checkout' ], 10, 4 );
@@ -48,6 +49,7 @@ class Test_User extends Test_Case {
 		$user_id      = 10;
 		$city_id      = 'city-id';
 		$city         = 'City';
+		$locale       = 'uk';
 		$warehouse_id = 'warehouse-id-2';
 		$warehouses   = [
 			'warehouse-id-1' => 'Warehouse',
@@ -99,9 +101,14 @@ class Test_User extends Test_Case {
 			'after_shipping_nova_poshta_for_woocommerce_field',
 			'shipping_nova_poshta_for_woocommerce_warehouse'
 		);
-
 		WP_Mock::userFunction( 'woocommerce_form_field', [ 'times' => 2 ] );
-		$user = new User( $api );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$language
+			->shouldReceive( 'get_current_language' )
+			->once()
+			->andReturn( $locale );
+
+		$user = new User( $api, $language );
 
 		$user->fields();
 	}
@@ -113,8 +120,9 @@ class Test_User extends Test_Case {
 		WP_Mock::userFunction( 'get_current_user_id' )->
 		once();
 
-		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$user = new User( $api );
+		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$user     = new User( $api, $language );
 
 		$user->checkout();
 	}
@@ -130,8 +138,9 @@ class Test_User extends Test_Case {
 		once()->
 		andReturn( 1 );
 
-		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$user = new User( $api );
+		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$user     = new User( $api, $language );
 
 		$user->checkout();
 	}
@@ -147,8 +156,9 @@ class Test_User extends Test_Case {
 		once()->
 		andReturn( true );
 
-		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$user = new User( $api );
+		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$user     = new User( $api, $language );
 
 		$user->checkout();
 	}
@@ -198,8 +208,9 @@ class Test_User extends Test_Case {
 			]
 		);
 
-		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$user = new User( $api );
+		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$user     = new User( $api, $language );
 
 		$user->checkout();
 
@@ -233,8 +244,9 @@ class Test_User extends Test_Case {
 		once()->
 		andReturn( $city_id );
 
-		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$user = new User( $api );
+		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$user     = new User( $api, $language );
 
 		$this->assertSame( $city_id, $user->city( $city_id ) );
 	}
@@ -254,8 +266,9 @@ class Test_User extends Test_Case {
 		once()->
 		andReturn( $user_city_id );
 
-		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$user = new User( $api );
+		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$user     = new User( $api, $language );
 
 		$this->assertSame( $user_city_id, $user->city( $city_id ) );
 	}
@@ -274,8 +287,9 @@ class Test_User extends Test_Case {
 		once()->
 		andReturn( false );
 
-		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$user = new User( $api );
+		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$user     = new User( $api, $language );
 
 		$this->assertSame( $city_id, $user->city( $city_id ) );
 	}
@@ -286,8 +300,9 @@ class Test_User extends Test_Case {
 	public function test_warehouse_id_not_auth_user() {
 		$warehouse_id = 'warehouse-id';
 
-		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$user = new User( $api );
+		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$user     = new User( $api, $language );
 
 		$this->assertSame( $warehouse_id, $user->warehouse( $warehouse_id ) );
 	}
@@ -307,8 +322,9 @@ class Test_User extends Test_Case {
 		once()->
 		andReturn( $user_warehouse_id );
 
-		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$user = new User( $api );
+		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$user     = new User( $api, $language );
 
 		$this->assertSame( $user_warehouse_id, $user->warehouse( $warehouse_id ) );
 	}
@@ -327,8 +343,9 @@ class Test_User extends Test_Case {
 		once()->
 		andReturn( false );
 
-		$api  = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$user = new User( $api );
+		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$user     = new User( $api, $language );
 
 		$this->assertSame( $warehouse_id, $user->warehouse( $warehouse_id ) );
 	}

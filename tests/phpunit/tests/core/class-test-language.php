@@ -32,6 +32,7 @@ class Test_Language extends Test_Case {
 		$language = new Language();
 
 		$this->assertSame( $current_lang, $language->get_current_language() );
+		$this->assertSame( $current_lang, $language->get_current_language() );
 	}
 
 	/**
@@ -53,9 +54,6 @@ class Test_Language extends Test_Case {
 	 * Test hooks added
 	 */
 	public function test_hooks() {
-		WP_Mock::userFunction( 'get_locale' )->
-		once()->
-		andReturn( false );
 		$language = new Language();
 		WP_Mock::expectFilterAdded(
 			'shipping_nova_poshta_for_woocommerce_default_city',

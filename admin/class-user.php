@@ -13,6 +13,7 @@
 namespace Nova_Poshta\Admin;
 
 use Nova_Poshta\Core\API;
+use Nova_Poshta\Core\Language;
 use Nova_Poshta\Core\Main;
 
 /**
@@ -28,14 +29,22 @@ class User {
 	 * @var API
 	 */
 	private $api;
+	/**
+	 * Plugin language
+	 *
+	 * @var Language
+	 */
+	private $language;
 
 	/**
 	 * User constructor.
 	 *
-	 * @param API $api API for Nova Poshta.
+	 * @param API      $api      API for Nova Poshta.
+	 * @param Language $language Plugin language.
 	 */
-	public function __construct( API $api ) {
-		$this->api = $api;
+	public function __construct( API $api, Language $language ) {
+		$this->api      = $api;
+		$this->language = $language;
 	}
 
 	/**
@@ -62,7 +71,8 @@ class User {
 				apply_filters(
 					'shipping_nova_poshta_for_woocommerce_default_city',
 					'',
-					$user_id
+					$user_id,
+					$this->language->get_current_language()
 				),
 				1
 			);

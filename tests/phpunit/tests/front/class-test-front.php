@@ -100,8 +100,8 @@ class Test_Front extends Test_Case {
 		andReturn( $plugin_url );
 		WP_Mock::userFunction( 'wp_enqueue_script' )->
 		with(
-			'select2-i18n-' . $locale,
-			$plugin_url . 'assets/js/i18n/' . $locale . '.js',
+			'select2',
+			$plugin_url . 'assets/js/select2.min.js',
 			[ 'jquery' ],
 			Main::VERSION,
 			true
@@ -109,9 +109,9 @@ class Test_Front extends Test_Case {
 		once();
 		WP_Mock::userFunction( 'wp_enqueue_script' )->
 		with(
-			'select2',
-			$plugin_url . 'assets/js/select2.min.js',
-			[ 'jquery', 'select2-i18n-' . $locale ],
+			'select2-i18n-' . $locale,
+			$plugin_url . 'assets/js/i18n/' . $locale . '.js',
+			[ 'jquery', 'select2' ],
 			Main::VERSION,
 			true
 		)->
@@ -138,8 +138,9 @@ class Test_Front extends Test_Case {
 			Main::PLUGIN_SLUG,
 			'shipping_nova_poshta_for_woocommerce',
 			[
-				'url'   => $admin_ajax,
-				'nonce' => $nonce,
+				'url'      => $admin_ajax,
+				'nonce'    => $nonce,
+				'language' => $locale,
 			]
 		)->
 		once();

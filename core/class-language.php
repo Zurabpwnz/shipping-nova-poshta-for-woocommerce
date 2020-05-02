@@ -27,14 +27,6 @@ class Language {
 	private $current_language;
 
 	/**
-	 * Language constructor.
-	 */
-	public function __construct() {
-		$current_language       = apply_filters( 'shipping_nova_poshta_for_woocommerce_current_language', get_locale() );
-		$this->current_language = in_array( $current_language, [ 'uk_UA', 'uk' ], true ) ? 'ua' : 'ru';
-	}
-
-	/**
 	 * Add hooks
 	 */
 	public function hooks() {
@@ -45,6 +37,12 @@ class Language {
 	 * Get current language
 	 */
 	public function get_current_language() {
+		if ( $this->current_language ) {
+			return $this->current_language;
+		}
+		$current_language       = apply_filters( 'shipping_nova_poshta_for_woocommerce_current_language', get_locale() );
+		$this->current_language = in_array( $current_language, [ 'uk_UA', 'uk' ], true ) ? 'ua' : 'ru';
+
 		return $this->current_language;
 	}
 
@@ -54,7 +52,7 @@ class Language {
 	 * @return string
 	 */
 	public function default_city() {
-		return 'ua' === $this->current_language ? 'Київ' : 'Киев';
+		return 'ua' === $this->get_current_language() ? 'Київ' : 'Киев';
 	}
 
 }

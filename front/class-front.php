@@ -65,16 +65,16 @@ class Front {
 			return;
 		}
 		wp_enqueue_script(
-			'select2-i18n-' . $this->language->get_current_language(),
-			plugin_dir_url( __FILE__ ) . 'assets/js/i18n/' . $this->language->get_current_language() . '.js',
+			'select2',
+			plugin_dir_url( __FILE__ ) . 'assets/js/select2.min.js',
 			[ 'jquery' ],
 			Main::VERSION,
 			true
 		);
 		wp_enqueue_script(
-			'select2',
-			plugin_dir_url( __FILE__ ) . 'assets/js/select2.min.js',
-			[ 'jquery', 'select2-i18n-' . $this->language->get_current_language() ],
+			'select2-i18n-' . $this->language->get_current_language(),
+			plugin_dir_url( __FILE__ ) . 'assets/js/i18n/' . $this->language->get_current_language() . '.js',
+			[ 'jquery', 'select2' ],
 			Main::VERSION,
 			true
 		);
@@ -92,8 +92,9 @@ class Front {
 			Main::PLUGIN_SLUG,
 			'shipping_nova_poshta_for_woocommerce',
 			[
-				'url'   => admin_url( 'admin-ajax.php' ),
-				'nonce' => wp_create_nonce( Main::PLUGIN_SLUG ),
+				'url'      => admin_url( 'admin-ajax.php' ),
+				'nonce'    => wp_create_nonce( Main::PLUGIN_SLUG ),
+				'language' => $this->language->get_current_language(),
 			]
 		);
 	}

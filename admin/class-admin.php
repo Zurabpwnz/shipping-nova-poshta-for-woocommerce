@@ -14,6 +14,7 @@ namespace Nova_Poshta\Admin;
 
 use Exception;
 use Nova_Poshta\Core\API;
+use Nova_Poshta\Core\Language;
 use Nova_Poshta\Core\Main;
 use Nova_Poshta\Core\Settings;
 
@@ -36,16 +37,24 @@ class Admin {
 	 * @var API
 	 */
 	private $api;
+	/**
+	 * Plugin language.
+	 *
+	 * @var Language
+	 */
+	private $language;
 
 	/**
 	 * Admin constructor.
 	 *
 	 * @param API      $api      API for Nova Poshta API.
 	 * @param Settings $settings Plugin settings.
+	 * @param Language $language Plugin language.
 	 */
-	public function __construct( API $api, Settings $settings ) {
+	public function __construct( API $api, Settings $settings, Language $language ) {
 		$this->settings = $settings;
 		$this->api      = $api;
+		$this->language = $language;
 	}
 
 	/**
@@ -86,6 +95,13 @@ class Admin {
 			true
 		);
 		wp_enqueue_script(
+			'select2-i18n-' . $this->language->get_current_language(),
+			plugin_dir_url( __DIR__ ) . 'front/assets/js/i18n/' . $this->language->get_current_language() . '.js',
+			[ 'jquery', 'select2' ],
+			Main::VERSION,
+			true
+		);
+		wp_enqueue_script(
 			Main::PLUGIN_SLUG,
 			plugin_dir_url( __FILE__ ) . '/assets/js/main.js',
 			[
@@ -99,8 +115,9 @@ class Admin {
 			Main::PLUGIN_SLUG,
 			'shipping_nova_poshta_for_woocommerce',
 			[
-				'url'   => admin_url( 'admin-ajax.php' ),
-				'nonce' => wp_create_nonce( Main::PLUGIN_SLUG ),
+				'url'      => admin_url( 'admin-ajax.php' ),
+				'nonce'    => wp_create_nonce( Main::PLUGIN_SLUG ),
+				'language' => $this->language->get_current_language(),
 			]
 		);
 	}
