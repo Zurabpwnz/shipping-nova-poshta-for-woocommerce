@@ -68,6 +68,7 @@ class Admin {
 		}
 		wp_enqueue_style( 'select2', plugin_dir_url( __DIR__ ) . 'front/assets/css/select2.min.css', [], Main::VERSION, 'all' );
 		wp_enqueue_style( Main::PLUGIN_SLUG, plugin_dir_url( __FILE__ ) . '/assets/css/main.css', [ 'select2' ], Main::VERSION, 'all' );
+		wp_enqueue_style( Main::PLUGIN_SLUG . '-front', plugin_dir_url( __DIR__ ) . '/front/assets/css/main.css', [ 'select2' ], Main::VERSION, 'all' );
 	}
 
 	/**
