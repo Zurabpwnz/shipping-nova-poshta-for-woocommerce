@@ -92,7 +92,6 @@ use Nova_Poshta\Core\Main;
 				</label>
 			</p>
 		</div>
-		>>>>>>> dev
 	<?php } ?>
 	<?php submit_button(); ?>
 </form>
