@@ -108,14 +108,14 @@ class Test_DB extends Test_Case {
 			->andReturn( $esc_search );
 		$wpdb
 			->shouldReceive( 'prepare' )
-			->withArgs( [ ' WHERE description_ru LIKE %s', '%' . $esc_search . '%' ] )
+			->withArgs( [ ' WHERE description_ru LIKE %s OR description_ua LIKE %s', '%' . $esc_search . '%', '%' . $esc_search . '%' ] )
 			->once()
-			->andReturn( ' WHERE description_ru LIKE "%' . $esc_search . '%"' );
+			->andReturn( ' WHERE description_ru LIKE "%' . $esc_search . '%" OR description_ua LIKE "%' . $esc_search . '%"' );
 		$wpdb
 			->shouldReceive( 'remove_placeholder_escape' )
-			->withArgs( [ ' WHERE description_ru LIKE "%' . $esc_search . '%"' ] )
+			->withArgs( [ ' WHERE description_ru LIKE "%' . $esc_search . '%" OR description_ua LIKE "%' . $esc_search . '%"' ] )
 			->once()
-			->andReturn( ' WHERE description_ru LIKE "%' . $esc_search . '%"' );
+			->andReturn( ' WHERE description_ru LIKE "%' . $esc_search . '%" OR description_ua LIKE "%' . $esc_search . '%"' );
 		$wpdb
 			->shouldReceive( 'prepare' )
 			->withArgs( [ ' LIMIT %d', $limit ] )
@@ -127,6 +127,7 @@ class Test_DB extends Test_Case {
 				[
 					'SELECT * FROM ' . $wpdb->prefix . 'np_cities' .
 					' WHERE description_ru LIKE "%' . $esc_search . '%"' .
+					' OR description_ua LIKE "%' . $esc_search . '%"' .
 					' ORDER BY LENGTH(`description_ru`), `description_ru`' .
 					' LIMIT ' . $limit,
 				]
