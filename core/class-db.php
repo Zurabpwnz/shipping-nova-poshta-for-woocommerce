@@ -141,7 +141,11 @@ class DB {
 		if ( $search ) {
 			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 			$sql .= $wpdb->remove_placeholder_escape(
-				$wpdb->prepare( ' WHERE ' . $field_name . ' LIKE %s', '%' . $wpdb->esc_like( $search ) . '%' )
+				$wpdb->prepare(
+					' WHERE description_ru LIKE %s OR description_ua LIKE %s',
+					'%' . $wpdb->esc_like( $search ) . '%',
+					'%' . $wpdb->esc_like( $search ) . '%'
+				)
 			);
 			//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 		}
