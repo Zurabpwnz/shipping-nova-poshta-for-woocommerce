@@ -109,7 +109,6 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 			$rate = array(
 				'id'       => $this->id,
 				'label'    => $this->title,
-				'cost'     => '0',
 				'calc_tax' => 'per_item',
 			);
 

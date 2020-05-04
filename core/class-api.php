@@ -159,7 +159,7 @@ class API {
 					'CityRef' => $city_id,
 				]
 			);
-			if ( $response['success'] ) {
+			if ( ! empty( $response['success'] ) ) {
 				$this->db->update_warehouses( $response['data'] );
 				$this->object_cache->set( 'warehouse-' . $city_id, 1 );
 			}
@@ -167,6 +167,43 @@ class API {
 		}
 
 		return $this->db->warehouses( $city_id );
+	}
+
+	/**
+	 * Shipping cost
+	 *
+	 * @param string $city_id Recipient City ID.
+	 *
+	 * @return int
+	 * @throws Exception Invalid DateTime.
+	 */
+	public function shipping_cost( string $city_id, float $weight, float $volume ): int {
+		$cost = $this->request(
+			'InternetDocument',
+			'getDocumentPrice',
+			[
+				'CitySender'    => $this->settings->city_id(),
+				'CityRecipient' => $city_id,
+				'CargoType'     => 'Parcel',
+				'DateTime'      => $this->get_current_date(),
+				'VolumeGeneral' => max( 0.0004, $volume ),
+				'Weight'        => max( 0.1, $weight ),
+			]
+		);
+
+		return $cost['success'] ? $cost['data'][0]['CostWarehouseWarehouse'] : '';
+	}
+
+	/**
+	 * Get current date
+	 *
+	 * @return string
+	 * @throws Exception Invalid DateTime.
+	 */
+	private function get_current_date(): string {
+		$date = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
+
+		return $date->format( 'd.m.Y' );
 	}
 
 	/**
@@ -197,7 +234,6 @@ class API {
 		if ( empty( $recipient ) ) {
 			return '';
 		}
-		$date = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
 		$info = [
 			'ServiceType'   => 'WarehouseWarehouse',
 			'PaymentMethod' => 'Cash',
@@ -216,7 +252,7 @@ class API {
 			'Description'   => apply_filters( 'shipping_nova_poshta_for_woocommerce_document_description', $this->settings->description() ),
 			'Weight'        => ( $count * .5 ) - .01, // TODO: Calculate weight.
 			'CargoType'     => 'Parcel',
-			'DateTime'      => $date->format( 'd.m.Y' ),
+			'DateTime'      => $this->get_current_date(),
 		];
 		if ( $redelivery ) {
 			$info['BackwardDeliveryData'] = [

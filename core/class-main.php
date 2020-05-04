@@ -140,6 +140,9 @@ class Main {
 		$ajax = new AJAX( $this->api );
 		$ajax->hooks();
 
+//		$cart = new Cart();
+//		$cart->hooks();
+
 		$checkout = new Checkout();
 		$checkout->hooks();
 

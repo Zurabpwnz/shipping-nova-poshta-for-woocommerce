@@ -59,6 +59,9 @@
 		if (settings.url.indexOf('?wc-ajax=update_order_review') + 1) {
 			init();
 		}
+		if (settings.url.indexOf('?wc-ajax=update_shipping_method') + 1) {
+			init();
+		}
 	});
 	$(window).load(function () {
 		init();

@@ -6,7 +6,9 @@
  */
 
 use Nova_Poshta\Core\Main;
-
+//var_dump( $this->api->shipping_cost( 'db5c88f5-391c-11dd-90d9-001a92567626' ) );
+$k = new \Nova_Poshta\Core\Calculation\Calculation( '15 * [qty] * 7 - 3 + 47', 2 );
+var_dump( $k->result() );
 ?>
 <h2><?php esc_attr_e( 'General', 'shipping-nova-poshta-for-woocommerce' ); ?></h2>
 <form action="options.php" method="POST" class="shipping-nova-poshta-for-woocommerce-form">

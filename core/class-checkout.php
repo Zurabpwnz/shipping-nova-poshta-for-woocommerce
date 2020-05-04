@@ -35,6 +35,10 @@ class Checkout {
 	 * @param WC_Shipping_Rate $shipping_rate Shipping rate.
 	 */
 	public function fields( WC_Shipping_Rate $shipping_rate ) {
+		// The same hook work on cart page.
+		if ( ! is_checkout() ) {
+			return;
+		}
 		$shipping_method = filter_input( INPUT_POST, 'shipping_method', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
 		$shipping_method = isset( $shipping_method[0] ) ? preg_replace( '/:[0-9]{1,10}$/', '', $shipping_method[0] ) : [];
 		if ( 'shipping_nova_poshta_for_woocommerce' === $shipping_method && 'shipping_nova_poshta_for_woocommerce' === $shipping_rate->get_method_id() ) {
