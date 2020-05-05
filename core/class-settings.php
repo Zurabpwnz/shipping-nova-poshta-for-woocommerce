@@ -109,4 +109,48 @@ class Settings {
 		return $this->options['warehouse_id'] ?? '';
 	}
 
+	/**
+	 * Default formula for calculate weight of products in order
+	 *
+	 * TODO: Add field
+	 *
+	 * @return string
+	 */
+	public function default_weight_formula(): string {
+		return '[qty] * 0.5 - 0.01';
+	}
+
+	/**
+	 * Default formula for calculate width of products in order
+	 *
+	 * TODO: Add field
+	 *
+	 * @return string
+	 */
+	public function default_width_formula(): string {
+		return '[qty] * 0.26';
+	}
+
+	/**
+	 * Default formula for calculate length of products in order
+	 *
+	 * TODO: Add field
+	 *
+	 * @return string
+	 */
+	public function default_length_formula(): string {
+		return '[qty] * 0.145';
+	}
+
+	/**
+	 * Default formula for calculate height of products in order
+	 *
+	 * TODO: Add field
+	 *
+	 * @return string
+	 */
+	public function default_height_formula(): string {
+		return '[qty] * 0.1';
+	}
+
 }

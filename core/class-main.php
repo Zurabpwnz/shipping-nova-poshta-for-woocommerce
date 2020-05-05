@@ -137,11 +137,11 @@ class Main {
 	 * Define hooks with API key
 	 */
 	private function define_hooks_with_api_key() {
-		$ajax = new AJAX( $this->api );
-		$ajax->hooks();
+		$calculator    = new Calculator();
+		$shipping_cost = new Shipping_Cost( $this->api, $this->settings, $calculator );
 
-//		$cart = new Cart();
-//		$cart->hooks();
+		$ajax = new AJAX( $this->api, $shipping_cost );
+		$ajax->hooks();
 
 		$checkout = new Checkout();
 		$checkout->hooks();

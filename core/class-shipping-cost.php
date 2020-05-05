@@ -12,7 +12,8 @@
 
 namespace Nova_Poshta\Core;
 
-use WC_Order_Item_Product;
+use Exception;
+use WC_Product;
 
 /**
  * Class Shipping_Cost
@@ -34,62 +35,104 @@ class Shipping_Cost {
 	 */
 	private $settings;
 	/**
-	 * Calculation formula
+	 * Calculator
 	 *
-	 * @var Calculation
+	 * @var Calculator
 	 */
-	private $calculation;
+	private $calculator;
 
-	public function __construct( API $api, Settings $settings, Calculation $calculation ) {
-		$this->api         = $api;
-		$this->settings    = $settings;
-		$this->calculation = $calculation;
+	/**
+	 * Shipping_Cost constructor.
+	 *
+	 * @param API        $api        API.
+	 * @param Settings   $settings   Plugin settings.
+	 * @param Calculator $calculator Calculator of math strings.
+	 */
+	public function __construct( API $api, Settings $settings, Calculator $calculator ) {
+		$this->api        = $api;
+		$this->settings   = $settings;
+		$this->calculator = $calculator;
 	}
 
-	public function calculate( string $recipient_city_id ) {
+	/**
+	 * Calculate shipping cost
+	 *
+	 * @param string $recipient_city_id Recipient city ID.
+	 *
+	 * @return float
+	 * @throws Exception Invalid DateTime.
+	 */
+	public function calculate( string $recipient_city_id ): float {
 		global $woocommerce;
-		$cart = $woocommerce->cart;
-		var_dump( $cart->get_cart_contents() );
-//		$items  = '???';
-//		$weight = 0;
-//		$volume = 0;
-//		foreach ( $items as $item ) {
-//			$weight += $this->get_weight( $item );
-//			$volume += $this->get_volume( $item );
-//		}
-//		$this->api->shipping_cost( $recipient_city_id, $this->get_weight(), $this->get_volume() );
+		$cart   = $woocommerce->cart;
+		$items  = $cart->get_cart_contents();
+		$weight = 0;
+		$volume = 0;
+		foreach ( $items as $item ) {
+			$weight += $this->get_weight( $item['data'], $item['quantity'] );
+			$volume += $this->get_volume( $item['data'], $item['quantity'] );
+		}
+
+		return $this->api->shipping_cost( $recipient_city_id, $weight, $volume );
 	}
 
-	private function get_weight( WC_Order_Item_Product $item ): float {
-		$formula = $this->get_current_formula( $item, 'weight' );
+	/**
+	 * Get products weight
+	 *
+	 * @param WC_Product $product  Product.
+	 * @param int        $quantity Quantity of this products.
+	 *
+	 * @return float
+	 */
+	private function get_weight( WC_Product $product, int $quantity ): float {
+		$formula = $this->get_current_formula( $product, 'weight' );
 
-		return $this->calculation->result( $formula, $item->get_quantity() );
+		return $this->calculator->result( $formula, $quantity );
 	}
 
-	private function get_volume( WC_Order_Item_Product $item ): float {
-		$width   = $this->get_current_formula( $item, 'width' );
-		$length  = $this->get_current_formula( $item, 'length' );
-		$height  = $this->get_current_formula( $item, 'height' );
+	/**
+	 * Get products volume
+	 *
+	 * @param WC_Product $product  Product.
+	 * @param int        $quantity Quantity of this products.
+	 *
+	 * @return int
+	 */
+	private function get_volume( WC_Product $product, int $quantity ): int {
+		$width   = $this->get_current_formula( $product, 'width' );
+		$length  = $this->get_current_formula( $product, 'length' );
+		$height  = $this->get_current_formula( $product, 'height' );
 		$formula = '(' . $width . ') * (' . $length . ') * (' . $height . ')';
 
-		return $this->calculation->result( $formula, $item->get_quantity() );
+		return $this->calculator->result( $formula, $quantity );
 	}
 
-	private function get_current_formula( WC_Order_Item_Product $item, string $key ) {
-		$product = $item->get_product();
-		$weight  = $product->get_meta( 'default_' . $key );
-		if ( $weight ) {
-			return '';
+	/**
+	 * Get current formula.
+	 *
+	 * @param WC_Product $product Product.
+	 * @param string     $key     Key.
+	 *
+	 * @return string
+	 */
+	private function get_current_formula( WC_Product $product, string $key ): string {
+		// Get parent product for variation products.
+		$product = $product->get_parent_id() ? wc_get_product( $product->get_parent_id() ) : $product;
+		$formula = $product->get_meta( 'default_' . $key . '_formula' );
+		if ( $formula ) {
+			return $formula;
 		}
 		$category_id = ! empty( $product->get_category_ids()[0] ) ? $product->get_category_ids()[0] : 0;
 		if ( $category_id ) {
-			$weight = get_term_meta( $category_id, 'default_' . $key, true );
-			if ( $weight ) {
-				return '';
+			$formula = get_term_meta( $category_id, 'default_' . $key . '_formula', true );
+			if ( $formula ) {
+				return $formula;
 			}
 		}
 
-		return $this->settings->default_{$key}();
+		$method_name = 'default_' . $key . '_formula';
+
+		return $this->settings->{$method_name}();
 	}
 
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Calculation dimensions
+ * Calculator dimensions
  *
  * @package   Shipping-Nova-Poshta-For-Woocommerce
  * @author    Maksym Denysenko
@@ -15,12 +15,20 @@ namespace Nova_Poshta\Core;
 use WC_Eval_Math;
 
 /**
- * Class AJAX
+ * Class Calculator
  *
  * @package Nova_Poshta\Core\Calculation
  */
-class Calculation {
+class Calculator {
 
+	/**
+	 * Calculate formula
+	 *
+	 * @param string $formula  Math formula.
+	 * @param int    $quantity Quantity of products.
+	 *
+	 * @return float
+	 */
 	public function result( string $formula, int $quantity ): float {
 		// Remove whitespace from string.
 		include_once WC()->plugin_path() . '/includes/libraries/class-wc-eval-math.php';

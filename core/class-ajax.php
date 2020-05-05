@@ -25,14 +25,22 @@ class AJAX {
 	 * @var API
 	 */
 	private $api;
+	/**
+	 * Calculate a shipping cost
+	 *
+	 * @var Shipping_Cost
+	 */
+	private $shipping_cost;
 
 	/**
 	 * AJAX constructor.
 	 *
-	 * @param API $api API for Nova Poshta.
+	 * @param API           $api           API for Nova Poshta.
+	 * @param Shipping_Cost $shipping_cost Calculate a shipping cost.
 	 */
-	public function __construct( API $api ) {
-		$this->api = $api;
+	public function __construct( API $api, Shipping_Cost $shipping_cost ) {
+		$this->api           = $api;
+		$this->shipping_cost = $shipping_cost;
 	}
 
 	/**
@@ -75,6 +83,19 @@ class AJAX {
 			];
 		}
 		wp_send_json( array_values( $warehouses ) );
+	}
+
+	/**
+	 * Shipping cost
+	 */
+	public function shipping_cost() {
+		check_ajax_referer( Main::PLUGIN_SLUG, 'nonce' );
+		$city   = filter_input( INPUT_POST, 'city', FILTER_SANITIZE_STRING );
+		$result = 0;
+		if ( $city ) {
+			$result = $this->shipping_cost->calculate( $city );
+		}
+		wp_send_json( $result );
 	}
 
 }
