@@ -149,7 +149,7 @@ class Main {
 		$front = new Front( $this->language );
 		$front->hooks();
 
-		$order = new Order( $this->api );
+		$order = new Order( $this->api, $shipping_cost );
 		$order->hooks();
 
 		$thank_you = new Thank_You( $this->api );
