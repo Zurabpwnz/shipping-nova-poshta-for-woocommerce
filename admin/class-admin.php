@@ -75,9 +75,9 @@ class Admin {
 		if ( ! $this->is_plugin_page() ) {
 			return;
 		}
-		wp_enqueue_style( 'select2', plugin_dir_url( __DIR__ ) . 'front/assets/css/select2.min.css', [], Main::VERSION, 'all' );
-		wp_enqueue_style( Main::PLUGIN_SLUG, plugin_dir_url( __FILE__ ) . '/assets/css/main.css', [ 'select2' ], Main::VERSION, 'all' );
-		wp_enqueue_style( Main::PLUGIN_SLUG . '-front', plugin_dir_url( __DIR__ ) . '/front/assets/css/main.css', [ 'select2' ], Main::VERSION, 'all' );
+		wp_enqueue_style( 'np-select2', plugin_dir_url( __DIR__ ) . 'front/assets/css/select2.min.css', [], Main::VERSION, 'all' );
+		wp_enqueue_style( Main::PLUGIN_SLUG, plugin_dir_url( __FILE__ ) . '/assets/css/main.css', [ 'np-select2' ], Main::VERSION, 'all' );
+		wp_enqueue_style( Main::PLUGIN_SLUG . '-front', plugin_dir_url( __DIR__ ) . '/front/assets/css/main.css', [ 'np-select2' ], Main::VERSION, 'all' );
 	}
 
 	/**
@@ -88,7 +88,7 @@ class Admin {
 			return;
 		}
 		wp_enqueue_script(
-			'select2',
+			'np-select2',
 			plugin_dir_url( __DIR__ ) . 'front/assets/js/select2.min.js',
 			[ 'jquery' ],
 			Main::VERSION,
@@ -97,7 +97,7 @@ class Admin {
 		wp_enqueue_script(
 			'select2-i18n-' . $this->language->get_current_language(),
 			plugin_dir_url( __DIR__ ) . 'front/assets/js/i18n/' . $this->language->get_current_language() . '.js',
-			[ 'jquery', 'select2' ],
+			[ 'jquery', 'np-select2' ],
 			Main::VERSION,
 			true
 		);
@@ -106,7 +106,7 @@ class Admin {
 			plugin_dir_url( __FILE__ ) . '/assets/js/main.js',
 			[
 				'jquery',
-				'select2',
+				'np-select2',
 			],
 			Main::VERSION,
 			true

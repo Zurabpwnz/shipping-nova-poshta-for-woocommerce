@@ -60,10 +60,10 @@ class Test_Front extends Test_Case {
 		twice()->
 		andReturn( $plugin_url );
 		WP_Mock::userFunction( 'wp_enqueue_style' )->
-		with( 'select2', $plugin_url . 'assets/css/select2.min.css', [], Main::VERSION, 'all' )->
+		with( 'np-select2', $plugin_url . 'assets/css/select2.min.css', [], Main::VERSION, 'all' )->
 		once();
 		WP_Mock::userFunction( 'wp_enqueue_style' )->
-		with( Main::PLUGIN_SLUG, $plugin_url . 'assets/css/main.css', [ 'select2' ], Main::VERSION, 'all' )->
+		with( Main::PLUGIN_SLUG, $plugin_url . 'assets/css/main.css', [ 'np-select2' ], Main::VERSION, 'all' )->
 		once();
 		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
 		$front    = new Front( $language );
@@ -100,7 +100,7 @@ class Test_Front extends Test_Case {
 		andReturn( $plugin_url );
 		WP_Mock::userFunction( 'wp_enqueue_script' )->
 		with(
-			'select2',
+			'np-select2',
 			$plugin_url . 'assets/js/select2.min.js',
 			[ 'jquery' ],
 			Main::VERSION,
@@ -111,7 +111,7 @@ class Test_Front extends Test_Case {
 		with(
 			'select2-i18n-' . $locale,
 			$plugin_url . 'assets/js/i18n/' . $locale . '.js',
-			[ 'jquery', 'select2' ],
+			[ 'jquery', 'np-select2' ],
 			Main::VERSION,
 			true
 		)->
@@ -120,7 +120,7 @@ class Test_Front extends Test_Case {
 		with(
 			Main::PLUGIN_SLUG,
 			$plugin_url . 'assets/js/main.js',
-			[ 'jquery', 'select2' ],
+			[ 'jquery', 'np-select2' ],
 			Main::VERSION,
 			true
 		)->

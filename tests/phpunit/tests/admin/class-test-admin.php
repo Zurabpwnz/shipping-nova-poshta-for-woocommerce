@@ -84,13 +84,13 @@ class Test_Admin extends Test_Case {
 		WP_Mock::userFunction( 'plugin_dir_url' )->
 		times( 3 );
 		WP_Mock::userFunction( 'wp_enqueue_style' )->
-		with( 'select2', Functions::type( 'string' ), [], Main::VERSION, 'all' )->
+		with( 'np-select2', Functions::type( 'string' ), [], Main::VERSION, 'all' )->
 		once();
 		WP_Mock::userFunction( 'wp_enqueue_style' )->
-		with( Main::PLUGIN_SLUG, Functions::type( 'string' ), [ 'select2' ], Main::VERSION, 'all' )->
+		with( Main::PLUGIN_SLUG, Functions::type( 'string' ), [ 'np-select2' ], Main::VERSION, 'all' )->
 		once();
 		WP_Mock::userFunction( 'wp_enqueue_style' )->
-		with( Main::PLUGIN_SLUG . '-front', Functions::type( 'string' ), [ 'select2' ], Main::VERSION, 'all' )->
+		with( Main::PLUGIN_SLUG . '-front', Functions::type( 'string' ), [ 'np-select2' ], Main::VERSION, 'all' )->
 		once();
 
 		$admin = $this->instance();
@@ -133,13 +133,13 @@ class Test_Admin extends Test_Case {
 		once()->
 		andReturn( $nonce );
 		WP_Mock::userFunction( 'wp_enqueue_script' )->
-		with( 'select2', Functions::type( 'string' ), [ 'jquery' ], Main::VERSION, true )->
+		with( 'np-select2', Functions::type( 'string' ), [ 'jquery' ], Main::VERSION, true )->
 		once();
 		WP_Mock::userFunction( 'wp_enqueue_script' )->
-		with( 'select2-i18n-uk', Functions::type( 'string' ), [ 'jquery', 'select2' ], Main::VERSION, true )->
+		with( 'select2-i18n-uk', Functions::type( 'string' ), [ 'jquery', 'np-select2' ], Main::VERSION, true )->
 		once();
 		WP_Mock::userFunction( 'wp_enqueue_script' )->
-		with( Main::PLUGIN_SLUG, Functions::type( 'string' ), [ 'jquery', 'select2' ], Main::VERSION, true )->
+		with( Main::PLUGIN_SLUG, Functions::type( 'string' ), [ 'jquery', 'np-select2' ], Main::VERSION, true )->
 		once();
 		WP_Mock::userFunction(
 			'wp_localize_script',
