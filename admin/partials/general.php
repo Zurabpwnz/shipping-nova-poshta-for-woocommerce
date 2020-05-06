@@ -6,9 +6,7 @@
  */
 
 use Nova_Poshta\Core\Main;
-//var_dump( $this->api->shipping_cost( 'db5c88f5-391c-11dd-90d9-001a92567626' ) );
-$k = new \Nova_Poshta\Core\Calculation\Calculation( '15 * [qty] * 7 - 3 + 47', 2 );
-var_dump( $k->result() );
+
 ?>
 <h2><?php esc_attr_e( 'General', 'shipping-nova-poshta-for-woocommerce' ); ?></h2>
 <form action="options.php" method="POST" class="shipping-nova-poshta-for-woocommerce-form">
@@ -93,6 +91,54 @@ var_dump( $k->result() );
 					</select>
 				</label>
 			</p>
+			<hr>
+			<div class="cost-formula-fields">
+				<h2><?php esc_attr_e( 'Cost calculate formulas', 'shipping-nova-poshta-for-woocommerce' ); ?></h2>
+				<p>
+					<label>
+						<?php esc_attr_e( 'Default weight formula', 'shipping-nova-poshta-for-woocommerce' ); ?>
+						<br>
+						<input
+							type="text"
+							name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[default_weight_formula]"
+							value="<?php echo esc_attr( $this->settings->default_weight_formula() ); ?>"
+							required="required"/>
+					</label>
+				</p>
+				<p>
+					<label>
+						<?php esc_attr_e( 'Default width formula', 'shipping-nova-poshta-for-woocommerce' ); ?>
+						<br>
+						<input
+							type="text"
+							name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[default_width_formula]"
+							value="<?php echo esc_attr( $this->settings->default_width_formula() ); ?>"
+							required="required"/>
+					</label>
+				</p>
+				<p>
+					<label>
+						<?php esc_attr_e( 'Default lenght formula', 'shipping-nova-poshta-for-woocommerce' ); ?>
+						<br>
+						<input
+							type="text"
+							name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[default_length_formula]"
+							value="<?php echo esc_attr( $this->settings->default_length_formula() ); ?>"
+							required="required"/>
+					</label>
+				</p>
+				<p>
+					<label>
+						<?php esc_attr_e( 'Default height formula', 'shipping-nova-poshta-for-woocommerce' ); ?>
+						<br>
+						<input
+							type="text"
+							name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[default_height_formula]"
+							value="<?php echo esc_attr( $this->settings->default_height_formula() ); ?>"
+							required="required"/>
+					</label>
+				</p>
+			</div>
 		</div>
 	<?php } ?>
 	<?php submit_button(); ?>
