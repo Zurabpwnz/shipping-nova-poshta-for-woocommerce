@@ -5,9 +5,8 @@
  * @package Nova_Posta\Admin\Partials
  */
 
-use Nova_Poshta\Core\Main;
-
 ?>
+
 <?php
 $weight_formula = get_term_meta( $term->term_id, 'weight_formula', true );
 $width_formula  = get_term_meta( $term->term_id, 'width_formula', true );

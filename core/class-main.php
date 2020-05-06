@@ -15,6 +15,7 @@ namespace Nova_Poshta\Core;
 use Nova_Poshta\Admin\Admin;
 use Nova_Poshta\Admin\Notice;
 use Nova_Poshta\Admin\Product_Category_Metabox;
+use Nova_Poshta\Admin\Product_Metabox;
 use Nova_Poshta\Admin\User;
 use Nova_Poshta\Core\Cache\Cache;
 use Nova_Poshta\Core\Cache\Object_Cache;
@@ -133,8 +134,11 @@ class Main {
 		$admin = new Admin( $this->api, $this->settings, $this->language );
 		$admin->hooks();
 
-		$product_category = new Product_Category_Metabox();
-		$product_category->hooks();
+		$product_cat_metabox = new Product_Category_Metabox();
+		$product_cat_metabox->hooks();
+
+		$product_metabox = new Product_Metabox();
+		$product_metabox->hooks();
 	}
 
 	/**
