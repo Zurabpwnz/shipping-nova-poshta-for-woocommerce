@@ -112,7 +112,8 @@ class Test_Order extends Test_Case {
 	 * Test don't save with bad nonce
 	 */
 	public function test_do_NOT_save_with_bad_nonce() {
-		$nonce                                               = 'nonce';
+		$nonce = 'nonce';
+
 		$_POST['shipping_nova_poshta_for_woocommerce_nonce'] = $nonce;
 		WP_Mock::userFunction( 'wp_unslash' )->
 		withArgs( [ $nonce ] )->
@@ -138,7 +139,8 @@ class Test_Order extends Test_Case {
 	 * Test don't save for other shipping method
 	 */
 	public function test_do_NOT_save_for_other_shipping_method() {
-		$nonce                                               = 'nonce';
+		$nonce = 'nonce';
+
 		$_POST['shipping_nova_poshta_for_woocommerce_nonce'] = $nonce;
 		WP_Mock::userFunction( 'wp_unslash' )->
 		withArgs( [ $nonce ] )->
@@ -169,7 +171,8 @@ class Test_Order extends Test_Case {
 	 * Test don't save with not enough dating
 	 */
 	public function test_do_NOT_save_with_empty_city_or_warehouse() {
-		$nonce                                               = 'nonce';
+		$nonce = 'nonce';
+
 		$_POST['shipping_nova_poshta_for_woocommerce_nonce'] = $nonce;
 		WP_Mock::userFunction( 'wp_unslash' )->
 		withArgs( [ $nonce ] )->

@@ -115,7 +115,7 @@ class Settings {
 	 * @return string
 	 */
 	public function default_weight_formula(): string {
-		return $this->options['default_weight_formula'] ?? '[qty] * 0.5 - 0.01';
+		return $this->options['default_weight_formula'] ?? '[qty] * 0.5';
 	}
 
 	/**
@@ -142,7 +142,7 @@ class Settings {
 	 * @return string
 	 */
 	public function default_height_formula(): string {
-		return $this->options['default_length_formula'] ?? '[qty] * 0.1';
+		return $this->options['default_height_formula'] ?? '[qty] * 0.1';
 	}
 
 }

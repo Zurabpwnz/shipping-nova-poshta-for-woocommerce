@@ -95,6 +95,14 @@ class Test_Main extends Test_Case {
 		$user
 			->shouldReceive( 'hooks' )
 			->once();
+		$product_cat_metabox = Mockery::mock( 'overload:Nova_Poshta\Admin\Product_Category_Metabox' );
+		$product_cat_metabox
+			->shouldReceive( 'hooks' )
+			->once();
+		$product_metabox = Mockery::mock( 'overload:Nova_Poshta\Admin\Product_Metabox' );
+		$product_metabox
+			->shouldReceive( 'hooks' )
+			->once();
 
 		$main = new Main();
 

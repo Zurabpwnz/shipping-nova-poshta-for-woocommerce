@@ -1,4 +1,14 @@
 <?php
+/**
+ * Product Category Metabox
+ *
+ * @package   Shipping-Nova-Poshta-For-Woocommerce
+ * @author    Maksym Denysenko
+ * @link      https://github.com/wppunk/shipping-nova-poshta-for-woocommerce
+ * @copyright Copyright (c) 2020
+ * @license   GPL-2.0+
+ * @wordpress-plugin
+ */
 
 namespace Nova_Poshta\Admin;
 
@@ -12,20 +22,28 @@ use Nova_Poshta\Core\Main;
 class Product_Category_Metabox {
 
 	/**
+	 * Nonce
+	 */
+	const NONCE = Main::PLUGIN_SLUG . '-product-cat-formulas';
+	/**
+	 * Nonce field name
+	 */
+	const NONCE_FIELD = Main::PLUGIN_SLUG . '_nonce';
+
+	/**
 	 * Add hooks
 	 */
 	public function hooks() {
-		add_action( 'product_cat_add_form_fields', [ $this, 'add_metabox_html' ] );
-		add_action( 'product_cat_edit_form_fields', [ $this, 'edit_metabox_html' ] );
-
-		add_action( 'edited_product_cat', [ $this, 'save_metabox' ] );
-		add_action( 'create_product_cat', [ $this, 'save_metabox' ] );
+		add_action( 'product_cat_add_form_fields', [ $this, 'add' ] );
+		add_action( 'product_cat_edit_form_fields', [ $this, 'edit' ] );
+		add_action( 'edited_product_cat', [ $this, 'save' ] );
+		add_action( 'create_product_cat', [ $this, 'save' ] );
 	}
 
 	/**
 	 * Add metabox html on product_cat add page
 	 */
-	public function add_metabox_html() {
+	public function add() {
 		require plugin_dir_path( __FILE__ ) . 'partials/metaboxes/product-cat-add.php';
 	}
 
@@ -34,7 +52,7 @@ class Product_Category_Metabox {
 	 *
 	 * @param object $term current term.
 	 */
-	public function edit_metabox_html( $term ) {
+	public function edit( $term ) {
 		$weight_formula = get_term_meta( $term->term_id, 'weight_formula', true );
 		$width_formula  = get_term_meta( $term->term_id, 'width_formula', true );
 		$length_formula = get_term_meta( $term->term_id, 'length_formula', true );
@@ -46,14 +64,13 @@ class Product_Category_Metabox {
 	/**
 	 * Save product_cat fields to Database
 	 *
-	 * @param integer $term_id current term.
+	 * @param int $term_id current term.
 	 */
-	public function save_metabox( $term_id ) {
-		$nonce = filter_input( INPUT_POST, Main::PLUGIN_SLUG . '_nonce', FILTER_SANITIZE_STRING );
-		if ( ! wp_verify_nonce( $nonce, Main::PLUGIN_SLUG . '-product-cat-formulas' ) ) {
+	public function save( int $term_id ) {
+		$nonce = filter_input( INPUT_POST, self::NONCE_FIELD, FILTER_SANITIZE_STRING );
+		if ( ! wp_verify_nonce( $nonce, self::NONCE ) ) {
 			return;
 		}
-
 		$weight_formula = filter_input( INPUT_POST, 'weight_formula', FILTER_SANITIZE_STRING );
 		$width_formula  = filter_input( INPUT_POST, 'width_formula', FILTER_SANITIZE_STRING );
 		$length_formula = filter_input( INPUT_POST, 'length_formula', FILTER_SANITIZE_STRING );

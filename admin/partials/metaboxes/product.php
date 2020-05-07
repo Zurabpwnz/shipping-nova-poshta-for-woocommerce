@@ -6,9 +6,11 @@
  * @var WC_Product $product
  */
 
-use Nova_Poshta\Core\Main;
+use Nova_Poshta\Admin\Product_Metabox;
 
 echo '</div><div class="options_group">';
+
+wp_nonce_field( Product_Metabox::NONCE, Product_Metabox::NONCE_FIELD, false );
 
 woocommerce_wp_text_input(
 	[
@@ -54,4 +56,3 @@ woocommerce_wp_text_input(
 	]
 );
 
-wp_nonce_field( Main::PLUGIN_SLUG . '-product-formulas', Main::PLUGIN_SLUG . '_nonce', false );

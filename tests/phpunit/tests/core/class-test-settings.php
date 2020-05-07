@@ -97,7 +97,6 @@ class Test_Settings extends Test_Case {
 		$this->assertSame( '', $settings->phone() );
 	}
 
-
 	/**
 	 * Test get description
 	 */
@@ -119,7 +118,6 @@ class Test_Settings extends Test_Case {
 
 		$this->assertSame( $description, $settings->description() );
 	}
-
 
 	/**
 	 * Test get empty phone
@@ -211,6 +209,174 @@ class Test_Settings extends Test_Case {
 		$settings = new Settings( $notice );
 
 		$this->assertSame( '', $settings->warehouse_id() );
+	}
+
+	/**
+	 * Test get default_weight_formula
+	 */
+	public function test_default_weight_formula() {
+		$api_key        = 'api-key';
+		$weight_formula = 'weight-formula';
+		WP_Mock::userFunction( 'get_option' )->
+		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
+		once()->
+		andReturn(
+			[
+				'api_key'                => $api_key,
+				'default_weight_formula' => $weight_formula,
+			]
+		);
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+
+		$settings = new Settings( $notice );
+
+		$this->assertSame( $weight_formula, $settings->default_weight_formula() );
+	}
+
+	/**
+	 * Test get empty default_weight_formula
+	 */
+	public function test_empty_default_weight_formula() {
+		$api_key = 'api-key';
+		WP_Mock::userFunction( 'get_option' )->
+		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
+		once()->
+		andReturn(
+			[
+				'api_key' => $api_key,
+			]
+		);
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+
+		$settings = new Settings( $notice );
+
+		$this->assertSame( '[qty] * 0.5', $settings->default_weight_formula() );
+	}
+
+	/**
+	 * Test get default_width_formula
+	 */
+	public function test_default_width_formula() {
+		$api_key       = 'api-key';
+		$width_formula = 'width-formula';
+		WP_Mock::userFunction( 'get_option' )->
+		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
+		once()->
+		andReturn(
+			[
+				'api_key'               => $api_key,
+				'default_width_formula' => $width_formula,
+			]
+		);
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+
+		$settings = new Settings( $notice );
+
+		$this->assertSame( $width_formula, $settings->default_width_formula() );
+	}
+
+	/**
+	 * Test get empty default_width_formula
+	 */
+	public function test_empty_default_width_formula() {
+		$api_key = 'api-key';
+		WP_Mock::userFunction( 'get_option' )->
+		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
+		once()->
+		andReturn(
+			[
+				'api_key' => $api_key,
+			]
+		);
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+
+		$settings = new Settings( $notice );
+
+		$this->assertSame( '[qty] * 0.26', $settings->default_width_formula() );
+	}
+
+	/**
+	 * Test get default_height_formula
+	 */
+	public function test_default_height_formula() {
+		$api_key        = 'api-key';
+		$height_formula = 'height-formula';
+		WP_Mock::userFunction( 'get_option' )->
+		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
+		once()->
+		andReturn(
+			[
+				'api_key'                => $api_key,
+				'default_height_formula' => $height_formula,
+			]
+		);
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+
+		$settings = new Settings( $notice );
+
+		$this->assertSame( $height_formula, $settings->default_height_formula() );
+	}
+
+	/**
+	 * Test get empty default_height_formula
+	 */
+	public function test_empty_default_height_formula() {
+		$api_key = 'api-key';
+		WP_Mock::userFunction( 'get_option' )->
+		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
+		once()->
+		andReturn(
+			[
+				'api_key' => $api_key,
+			]
+		);
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+
+		$settings = new Settings( $notice );
+
+		$this->assertSame( '[qty] * 0.1', $settings->default_height_formula() );
+	}
+
+	/**
+	 * Test get default_length_formula
+	 */
+	public function test_default_length_formula() {
+		$api_key        = 'api-key';
+		$length_formula = 'length-formula';
+		WP_Mock::userFunction( 'get_option' )->
+		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
+		once()->
+		andReturn(
+			[
+				'api_key'                => $api_key,
+				'default_length_formula' => $length_formula,
+			]
+		);
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+
+		$settings = new Settings( $notice );
+
+		$this->assertSame( $length_formula, $settings->default_length_formula() );
+	}
+
+	/**
+	 * Test get empty default_length_formula
+	 */
+	public function test_empty_default_length_formula() {
+		$api_key = 'api-key';
+		WP_Mock::userFunction( 'get_option' )->
+		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
+		once()->
+		andReturn(
+			[
+				'api_key' => $api_key,
+			]
+		);
+		$notice = \Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+
+		$settings = new Settings( $notice );
+
+		$this->assertSame( '[qty] * 0.145', $settings->default_length_formula() );
 	}
 
 }

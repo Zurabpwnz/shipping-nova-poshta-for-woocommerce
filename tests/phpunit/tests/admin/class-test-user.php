@@ -14,7 +14,7 @@ use tad\FunctionMocker\FunctionMocker;
 use WP_Mock;
 
 /**
- * Class Test_Notice
+ * Class Test_User
  *
  * @package Nova_Poshta\Admin
  */
@@ -27,7 +27,6 @@ class Test_User extends Test_Case {
 		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
 		$user     = new User( $api, $language );
-
 		WP_Mock::expectActionAdded( 'shipping_nova_poshta_for_woocommerce_user_fields', [ $user, 'fields' ] );
 		WP_Mock::expectActionAdded( 'woocommerce_checkout_create_order_shipping_item', [ $user, 'checkout' ], 10, 4 );
 		WP_Mock::expectFilterAdded( 'shipping_nova_poshta_for_woocommerce_default_city_id', [ $user, 'city' ] );

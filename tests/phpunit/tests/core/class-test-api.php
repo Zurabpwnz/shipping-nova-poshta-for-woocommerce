@@ -273,7 +273,7 @@ class Test_API extends Test_Case {
 	/**
 	 * Shipping cost
 	 *
-	 * @throws Exception
+	 * @throws Exception Invalid DateTime.
 	 */
 	public function test_shipping_cost() {
 		$city_id       = 'city-id';
