@@ -2,6 +2,8 @@
 
 namespace Nova_Poshta\Admin;
 
+use Nova_Poshta\Core\Main;
+
 /**
  * Class Product_Category_Metabox
  *
@@ -47,6 +49,10 @@ class Product_Category_Metabox {
 	 * @param integer $term_id current term.
 	 */
 	public function save_metabox( $term_id ) {
+		$nonce = filter_input( INPUT_POST, Main::PLUGIN_SLUG . '_nonce', FILTER_SANITIZE_STRING );
+		if ( ! wp_verify_nonce( $nonce, Main::PLUGIN_SLUG . '-product-cat-formulas' ) ) {
+			return;
+		}
 
 		$weight_formula = filter_input( INPUT_POST, 'weight_formula', FILTER_SANITIZE_STRING );
 		$width_formula  = filter_input( INPUT_POST, 'width_formula', FILTER_SANITIZE_STRING );
