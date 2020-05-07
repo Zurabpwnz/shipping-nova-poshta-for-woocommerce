@@ -45,7 +45,7 @@ class Test_User extends Test_Case {
 	/**
 	 * Test fields
 	 */
-	public function test_fields() {
+	public function test_fields_for_NOT_registered_users() {
 		$user_id      = 10;
 		$city_id      = 'city-id';
 		$city         = 'City';
@@ -68,6 +68,9 @@ class Test_User extends Test_Case {
 		WP_Mock::userFunction( 'get_current_user_id' )->
 		once()->
 		andReturn( $user_id );
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_default_city_id' )->
+		with( '', $user_id )->
+		reply( '' );
 		WP_Mock::userFunction(
 			'wp_nonce_field',
 			[
@@ -107,6 +110,77 @@ class Test_User extends Test_Case {
 			->shouldReceive( 'get_current_language' )
 			->once()
 			->andReturn( $locale );
+
+		$user = new User( $api, $language );
+
+		$user->fields();
+	}
+
+	/**
+	 * Test fields
+	 */
+	public function test_fields_for_registered_users_or_with_POST_request() {
+		$user_id      = 10;
+		$city_id      = 'city-id';
+		$city         = 'City';
+		$locale       = 'uk';
+		$warehouse_id = 'warehouse-id-2';
+		$warehouses   = [
+			'warehouse-id-1' => 'Warehouse',
+			$warehouse_id    => 'Warehouse 2',
+		];
+		$api          = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$api
+			->shouldReceive( 'city' )
+			->with( $city_id )
+			->once()
+			->andReturn( $city );
+		$api
+			->shouldReceive( 'warehouses' )
+			->once()
+			->withArgs( [ $city_id ] )
+			->andReturn( $warehouses );
+		WP_Mock::userFunction( 'get_current_user_id' )->
+		once()->
+		andReturn( $user_id );
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_default_city_id' )->
+		with( '', $user_id )->
+		reply( $city_id );
+		WP_Mock::userFunction(
+			'wp_nonce_field',
+			[
+				'args'  => [
+					Main::PLUGIN_SLUG . '-shipping',
+					'shipping_nova_poshta_for_woocommerce_nonce',
+					false,
+				],
+				'times' => 1,
+			]
+		);
+		WP_Mock::expectAction(
+			'before_shipping_nova_poshta_for_woocommerce_field',
+			'shipping_nova_poshta_for_woocommerce_city'
+		);
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_default_city' )->
+		with( $city, $user_id )->
+		reply( $city );
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_default_warehouse_id' )->
+		with( $warehouse_id, $user_id, $city )->
+		reply( $warehouse_id );
+		WP_Mock::expectAction(
+			'after_shipping_nova_poshta_for_woocommerce_field',
+			'shipping_nova_poshta_for_woocommerce_city'
+		);
+		WP_Mock::expectAction(
+			'before_shipping_nova_poshta_for_woocommerce_field',
+			'shipping_nova_poshta_for_woocommerce_warehouse'
+		);
+		WP_Mock::expectAction(
+			'after_shipping_nova_poshta_for_woocommerce_field',
+			'shipping_nova_poshta_for_woocommerce_warehouse'
+		);
+		WP_Mock::userFunction( 'woocommerce_form_field', [ 'times' => 2 ] );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
 
 		$user = new User( $api, $language );
 

@@ -7,6 +7,7 @@
 
 namespace Nova_Poshta\Core;
 
+use Mockery;
 use Nova_Poshta\Tests\Test_Case;
 use tad\FunctionMocker\FunctionMocker;
 use WP_Mock;
@@ -35,8 +36,11 @@ class Test_Checkout extends Test_Case {
 	 * Test fields action
 	 */
 	public function test_fields() {
-		$filter_input  = FunctionMocker::replace( 'filter_input', [ 'shipping_nova_poshta_for_woocommerce' ] );
-		$shipping_rate = \Mockery::mock( 'WC_Shipping_Rate' );
+		$filter_input = FunctionMocker::replace( 'filter_input', [ 'shipping_nova_poshta_for_woocommerce' ] );
+		WP_Mock::userFunction( 'is_checkout' )->
+		once()->
+		andReturn( true );
+		$shipping_rate = Mockery::mock( 'WC_Shipping_Rate' );
 		$shipping_rate
 			->shouldReceive( 'get_method_id' )
 			->once()
@@ -54,6 +58,19 @@ class Test_Checkout extends Test_Case {
 				FILTER_REQUIRE_ARRAY,
 			]
 		);
+	}
+
+	/**
+	 * Test fields action
+	 */
+	public function test_fields_on_NOT_checkout_page() {
+		WP_Mock::userFunction( 'is_checkout' )->
+		once()->
+		andReturn( false );
+		$shipping_rate = Mockery::mock( 'WC_Shipping_Rate' );
+		$checkout      = new Checkout();
+
+		$checkout->fields( $shipping_rate );
 	}
 
 	/**

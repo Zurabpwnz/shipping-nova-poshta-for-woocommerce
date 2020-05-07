@@ -44,6 +44,19 @@
 					$('#shipping_nova_poshta_for_woocommerce_warehouse').removeClass('inactive');
 				}
 			});
+			$.ajax({
+				url: shipping_nova_poshta_for_woocommerce.url,
+				type: 'POST',
+				data: {
+					'nonce': shipping_nova_poshta_for_woocommerce.nonce,
+					'action': 'shipping_nova_poshta_for_woocommerce_shipping_cost',
+					'city': $('#shipping_nova_poshta_for_woocommerce_city').val(),
+				},
+				success: function (data) {
+					var price = $('input[value=shipping_nova_poshta_for_woocommerce]').parent().find('.woocommerce-Price-amount');
+					price.replaceWith(data);
+				},
+			})
 		});
 		$('#shipping_nova_poshta_for_woocommerce_warehouse').select2({
 			language: shipping_nova_poshta_for_woocommerce.language

@@ -10,6 +10,7 @@ namespace Nova_Poshta\Core;
 use Exception;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
+use stdClass;
 use tad\FunctionMocker\FunctionMocker;
 use WP_Mock;
 
@@ -33,10 +34,12 @@ class Test_Order extends Test_Case {
 	 * Test adding hooks
 	 */
 	public function test_hooks() {
-		$api   = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$order = new Order( $api );
+		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
-		WP_Mock::expectActionAdded( 'woocommerce_checkout_create_order_shipping_item', [ $order, 'save' ], 10, 4 );
+		WP_Mock::expectActionAdded( 'woocommerce_checkout_create_order_shipping_item', [ $order, 'create' ], 10, 4 );
+		WP_Mock::expectActionAdded( 'woocommerce_before_order_item_object_save', [ $order, 'save' ] );
 		WP_Mock::expectActionAdded( 'woocommerce_checkout_update_customer', [ $order, 'update_nonce_for_new_users' ] );
 		WP_Mock::expectActionAdded( 'woocommerce_order_actions', [ $order, 'register_order_actions' ] );
 		WP_Mock::expectActionAdded(
@@ -73,9 +76,10 @@ class Test_Order extends Test_Case {
 		withArgs( [ Main::PLUGIN_SLUG . '-shipping' ] )->
 		once()->
 		andReturn( $new_nonce );
-		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
 
-		$order = new Order( $api );
+		$order = new Order( $api, $shipping_cost );
 
 		$order->update_nonce_for_new_users();
 		//phpcs:disable WordPress.Security.NonceVerification.Missing
@@ -98,17 +102,17 @@ class Test_Order extends Test_Case {
 		$package_key   = 10;
 		$package       = [];
 		$wc_order      = Mockery::mock( 'WC_Order' );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
-		$order = new Order( $api );
-
-		$order->save( $item_shipping, $package_key, $package, $wc_order );
+		$order->create( $item_shipping, $package_key, $package, $wc_order );
 	}
 
 	/**
 	 * Test don't save with bad nonce
 	 */
 	public function test_do_NOT_save_with_bad_nonce() {
-		$nonce = 'nonce';
+		$nonce                                               = 'nonce';
 		$_POST['shipping_nova_poshta_for_woocommerce_nonce'] = $nonce;
 		WP_Mock::userFunction( 'wp_unslash' )->
 		withArgs( [ $nonce ] )->
@@ -124,17 +128,17 @@ class Test_Order extends Test_Case {
 		$package_key   = 10;
 		$package       = [];
 		$wc_order      = Mockery::mock( 'WC_Order' );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
-		$order = new Order( $api );
-
-		$order->save( $item_shipping, $package_key, $package, $wc_order );
+		$order->create( $item_shipping, $package_key, $package, $wc_order );
 	}
 
 	/**
 	 * Test don't save for other shipping method
 	 */
 	public function test_do_NOT_save_for_other_shipping_method() {
-		$nonce = 'nonce';
+		$nonce                                               = 'nonce';
 		$_POST['shipping_nova_poshta_for_woocommerce_nonce'] = $nonce;
 		WP_Mock::userFunction( 'wp_unslash' )->
 		withArgs( [ $nonce ] )->
@@ -151,20 +155,21 @@ class Test_Order extends Test_Case {
 			->shouldReceive( 'get_method_id' )
 			->once()
 			->andReturn( 'no_shipping_nova_poshta_for_woocommerce' );
-		$package_key = 10;
-		$package     = [];
-		$wc_order    = Mockery::mock( 'WC_Order' );
+		$package_key   = 10;
+		$package       = [];
+		$wc_order      = Mockery::mock( 'WC_Order' );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
 
-		$order = new Order( $api );
+		$order = new Order( $api, $shipping_cost );
 
-		$order->save( $item_shipping, $package_key, $package, $wc_order );
+		$order->create( $item_shipping, $package_key, $package, $wc_order );
 	}
 
 	/**
 	 * Test don't save with not enough dating
 	 */
 	public function test_do_NOT_save_with_empty_city_or_warehouse() {
-		$nonce = 'nonce';
+		$nonce                                               = 'nonce';
 		$_POST['shipping_nova_poshta_for_woocommerce_nonce'] = $nonce;
 		WP_Mock::userFunction( 'wp_unslash' )->
 		withArgs( [ $nonce ] )->
@@ -181,23 +186,24 @@ class Test_Order extends Test_Case {
 			->shouldReceive( 'get_method_id' )
 			->once()
 			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
-		$package_key = 10;
-		$package     = [];
-		$wc_order    = Mockery::mock( 'WC_Order' );
+		$package_key   = 10;
+		$package       = [];
+		$wc_order      = Mockery::mock( 'WC_Order' );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
-		$order = new Order( $api );
-
-		$order->save( $item_shipping, $package_key, $package, $wc_order );
+		$order->create( $item_shipping, $package_key, $package, $wc_order );
 	}
 
 	/**
 	 * Test save with fail nonce
 	 */
-	public function test_save() {
+	public function test_create() {
 		global $city_id, $warehouse_id;
+		$nonce        = 'nonce';
 		$city_id      = 'city-id';
 		$warehouse_id = 'warehouse-id';
-		$nonce        = 'nonce';
+
 		$_POST['shipping_nova_poshta_for_woocommerce_nonce'] = $nonce;
 		WP_Mock::userFunction( 'wp_unslash' )->
 		withArgs( [ $nonce ] )->
@@ -233,13 +239,156 @@ class Test_Order extends Test_Case {
 			->shouldReceive( 'add_meta_data' )
 			->withArgs( [ 'warehouse_id', $warehouse_id, true ] )
 			->once();
-		$package_key = 10;
-		$package     = [];
-		$wc_order    = Mockery::mock( 'WC_Order' );
+		$package_key   = 10;
+		$package       = [];
+		$wc_order      = Mockery::mock( 'WC_Order' );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
-		$order = new Order( $api );
+		$order->create( $item_shipping, $package_key, $package, $wc_order );
+	}
 
-		$order->save( $item_shipping, $package_key, $package, $wc_order );
+	/**
+	 * Don't save in not admin area
+	 */
+	public function test_save_in_NOT_admin_area() {
+		WP_Mock::userFunction( 'is_admin' )->
+		once()->
+		andReturn( false );
+		$order_item    = Mockery::mock( 'WC_Order_Item' );
+		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
+
+		$order->save( $order_item );
+	}
+
+	/**
+	 * Don't save on not shipping method WC_Order_Item_Shipping
+	 */
+	public function test_save_NOT_shipping_method() {
+		WP_Mock::userFunction( 'is_admin' )->
+		once()->
+		andReturn( true );
+		$order_item    = Mockery::mock( 'WC_Order_Item' );
+		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
+
+		$order->save( $order_item );
+	}
+
+	/**
+	 *  Don't save with othe shipping method
+	 */
+	public function test_save_NOT_poshta_shipping_method() {
+		WP_Mock::userFunction( 'is_admin' )->
+		once()->
+		andReturn( true );
+		FunctionMocker::replace( 'is_a', true );
+		$order_item = Mockery::mock( 'WC_Order_Item' );
+		$order_item
+			->shouldReceive( 'get_method_id' )
+			->once()
+			->andReturn( 'other-shipping-method' );
+		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
+
+		$order->save( $order_item );
+	}
+
+	/**
+	 * Don't save without order shipping city
+	 */
+	public function test_save_without_city() {
+		WP_Mock::userFunction( 'is_admin' )->
+		once()->
+		andReturn( true );
+		FunctionMocker::replace( 'is_a', true );
+		$order_item = Mockery::mock( 'WC_Order_Item' );
+		$order_item
+			->shouldReceive( 'get_method_id' )
+			->once()
+			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
+		$order_item
+			->shouldReceive( 'get_meta' )
+			->with( 'city_id', true )
+			->once()
+			->andReturn( false );
+		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
+
+		$order->save( $order_item );
+	}
+
+	/**
+	 * Don't save without global $woocommerce->cart
+	 */
+	public function test_save_without_cart() {
+		$city_id = 'city-id';
+		WP_Mock::userFunction( 'is_admin' )->
+		once()->
+		andReturn( true );
+		FunctionMocker::replace( 'is_a', true );
+		$order_item = Mockery::mock( 'WC_Order_Item' );
+		$order_item
+			->shouldReceive( 'get_method_id' )
+			->once()
+			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
+		$order_item
+			->shouldReceive( 'get_meta' )
+			->with( 'city_id', true )
+			->once()
+			->andReturn( $city_id );
+		global $woocommerce;
+		$woocommerce       = new stdClass();
+		$woocommerce->cart = null;
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order             = new Order( $api, $shipping_cost );
+
+		$order->save( $order_item );
+	}
+
+	/**
+	 * Test calculate shipping on save order
+	 */
+	public function test_save() {
+		$city_id = 'city-id';
+		$cost    = 48;
+		WP_Mock::userFunction( 'is_admin' )->
+		once()->
+		andReturn( true );
+		FunctionMocker::replace( 'is_a', true );
+		$order_item = Mockery::mock( 'WC_Order_Item' );
+		$order_item
+			->shouldReceive( 'get_method_id' )
+			->once()
+			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
+		$order_item
+			->shouldReceive( 'get_meta' )
+			->with( 'city_id', true )
+			->once()
+			->andReturn( $city_id );
+		$order_item
+			->shouldReceive( 'set_total' )
+			->with( $cost );
+		$cart = Mockery::mock( 'WC_Cart' );
+		global $woocommerce;
+		$woocommerce       = new stdClass();
+		$woocommerce->cart = $cart;
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$shipping_cost
+			->shouldReceive( 'calculate' )
+			->with( $city_id, $cart )
+			->once()
+			->andReturn( $cost );
+		$order = new Order( $api, $shipping_cost );
+
+		$order->save( $order_item );
 	}
 
 	/**
@@ -284,7 +433,8 @@ class Test_Order extends Test_Case {
 			->withArgs( [ 'key' ] )
 			->between( 1, 3 )
 			->andReturn( $key );
-		$order = new Order( $api );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
 		$this->assertSame( $result, $order->labels( $key, $wc_meta_data ) );
 	}
@@ -313,7 +463,8 @@ class Test_Order extends Test_Case {
 			->withArgs( [ 'value' ] )
 			->twice()
 			->andReturn( $value );
-		$order = new Order( $api );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
 		$this->assertSame( $city_name, $order->values( $value, $wc_meta_data ) );
 	}
@@ -342,7 +493,8 @@ class Test_Order extends Test_Case {
 			->withArgs( [ 'value' ] )
 			->twice()
 			->andReturn( $value );
-		$order = new Order( $api );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
 		$this->assertSame( $warehouse_name, $order->values( $value, $wc_meta_data ) );
 	}
@@ -360,7 +512,8 @@ class Test_Order extends Test_Case {
 			->withArgs( [ 'key' ] )
 			->twice()
 			->andReturn( $key );
-		$order = new Order( $api );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
 		$this->assertSame( $value, $order->values( $value, $wc_meta_data ) );
 	}
@@ -369,9 +522,10 @@ class Test_Order extends Test_Case {
 	 * Test default fileds for not shipping order item
 	 */
 	public function test_default_fields_for_order_item() {
-		$api   = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$item  = Mockery::mock( '\WC_Order_Item' );
-		$order = new Order( $api );
+		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$item          = Mockery::mock( '\WC_Order_Item' );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
 		$order->default_fields_for_shipping_item( 10, $item );
 	}
@@ -387,7 +541,8 @@ class Test_Order extends Test_Case {
 			->once()
 			->andReturn( 'other_shipping_nova_poshta_for_woocommerce' );
 		FunctionMocker::replace( 'is_a', true );
-		$order = new Order( $api );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
 		$order->default_fields_for_shipping_item( 10, $item );
 	}
@@ -440,7 +595,8 @@ class Test_Order extends Test_Case {
 			->shouldReceive( 'save_meta_data' )
 			->once();
 		FunctionMocker::replace( 'is_a', true );
-		$order = new Order( $api );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
 		$order->default_fields_for_shipping_item( 10, $item );
 	}
@@ -449,8 +605,9 @@ class Test_Order extends Test_Case {
 	 * Test adding new order actions
 	 */
 	public function test_register_order_actions() {
-		$api   = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$order = new Order( $api );
+		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
 		$this->assertSame(
 			[ 'nova_poshta_create_internet_document' => 'Create Nova Poshta Internet Document' ],
@@ -465,9 +622,10 @@ class Test_Order extends Test_Case {
 		WP_Mock::userFunction( 'current_user_can' )->
 		once()->
 		andReturn( false );
-		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$wc_order = Mockery::mock( 'WC_Order' );
-		$order    = new Order( $api );
+		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$wc_order      = Mockery::mock( 'WC_Order' );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
 		$order->processing_status( 10, $wc_order );
 	}
@@ -479,9 +637,10 @@ class Test_Order extends Test_Case {
 		WP_Mock::userFunction( 'current_user_can' )->
 		once()->
 		andReturn( true );
-		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$wc_order = Mockery::mock( 'WC_Order' );
-		$stub     = Mockery::mock( 'Nova_Poshta\Core\Order[create_internet_document]', [ $api ] );
+		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$wc_order      = Mockery::mock( 'WC_Order' );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$stub          = Mockery::mock( 'Nova_Poshta\Core\Order[create_internet_document]', [ $api, $shipping_cost ] );
 		$stub
 			->shouldReceive( 'create_internet_document' )
 			->once();
@@ -501,7 +660,8 @@ class Test_Order extends Test_Case {
 			->shouldReceive( 'get_shipping_methods' )
 			->once()
 			->andReturn( [] );
-		$order = new Order( $api );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
 		$order->create_internet_document( $wc_order );
 	}
@@ -529,8 +689,8 @@ class Test_Order extends Test_Case {
 			->shouldReceive( 'get_shipping_methods' )
 			->once()
 			->andReturn( [ $wc_order_item_shipping ] );
-
-		$order = new Order( $api );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
 		$order->create_internet_document( $wc_order );
 	}
@@ -630,8 +790,8 @@ class Test_Order extends Test_Case {
 			->shouldReceive( 'add_order_note' )
 			->with( 'Created Internet document for Nova Poshta' )
 			->once();
-
-		$order = new Order( $api );
+		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$order         = new Order( $api, $shipping_cost );
 
 		$order->create_internet_document( $wc_order );
 	}

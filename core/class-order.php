@@ -111,9 +111,6 @@ class Order {
 		}
 		$item->add_meta_data( 'city_id', $city_id, true );
 		$item->add_meta_data( 'warehouse_id', $warehouse_id, true );
-		$item->set_total(
-			$this->shipping_cost->calculate( $city_id )
-		);
 	}
 
 	/**
@@ -125,7 +122,10 @@ class Order {
 	 * @throws Exception Invalid DateTime.
 	 */
 	public function save( WC_Order_Item $item ) {
-		if ( ! $item instanceof WC_Order_Item_Shipping ) {
+		if ( ! is_admin() ) {
+			return;
+		}
+		if ( ! is_a( $item, 'WC_Order_Item_Shipping' ) ) {
 			return;
 		}
 		if ( 'shipping_nova_poshta_for_woocommerce' !== $item->get_method_id() ) {
@@ -135,8 +135,13 @@ class Order {
 		if ( ! $city_id ) {
 			return;
 		}
+		global $woocommerce;
+		$cart = $woocommerce->cart;
+		if ( ! $cart ) {
+			return;
+		}
 		$item->set_total(
-			$this->shipping_cost->calculate( $city_id )
+			$this->shipping_cost->calculate( $city_id, $cart )
 		);
 	}
 

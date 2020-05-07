@@ -13,6 +13,7 @@
 namespace Nova_Poshta\Core;
 
 use Exception;
+use WC_Cart;
 use WC_Product;
 
 /**
@@ -57,14 +58,13 @@ class Shipping_Cost {
 	/**
 	 * Calculate shipping cost
 	 *
-	 * @param string $recipient_city_id Recipient city ID.
+	 * @param string  $recipient_city_id Recipient city ID.
+	 * @param WC_Cart $cart              WooCommerce Cart.
 	 *
 	 * @return float
 	 * @throws Exception Invalid DateTime.
 	 */
-	public function calculate( string $recipient_city_id ): float {
-		global $woocommerce;
-		$cart   = $woocommerce->cart;
+	public function calculate( string $recipient_city_id, WC_Cart $cart ): float {
 		$items  = $cart->get_cart_contents();
 		$weight = 0;
 		$volume = 0;
@@ -85,6 +85,11 @@ class Shipping_Cost {
 	 * @return float
 	 */
 	private function get_weight( WC_Product $product, int $quantity ): float {
+		$weight = $this->get_product_weight( $product );
+		if ( $weight ) {
+			return $weight * $quantity;
+		}
+
 		$formula = $this->get_current_formula( $product, 'weight' );
 
 		return $this->calculator->result( $formula, $quantity );
@@ -99,10 +104,30 @@ class Shipping_Cost {
 	 * @return int
 	 */
 	private function get_volume( WC_Product $product, int $quantity ): int {
-		$width   = $this->get_current_formula( $product, 'width' );
-		$length  = $this->get_current_formula( $product, 'length' );
-		$height  = $this->get_current_formula( $product, 'height' );
+		$width   = $this->get_dimension( $product, $quantity, 'width' );
+		$length  = $this->get_dimension( $product, $quantity, 'length' );
+		$height  = $this->get_dimension( $product, $quantity, 'height' );
 		$formula = '(' . $width . ') * (' . $length . ') * (' . $height . ')';
+
+		return $this->calculator->result( $formula, $quantity );
+	}
+
+	/**
+	 * Get dimension
+	 *
+	 * @param WC_Product $product        Product.
+	 * @param int        $quantity       Quantity.
+	 * @param string     $dimension_name Dimension name.
+	 *
+	 * @return float
+	 */
+	private function get_dimension( WC_Product $product, int $quantity, string $dimension_name ): float {
+		$dimension = $this->get_product_dimension( $product, $dimension_name );
+		if ( $dimension ) {
+			return $dimension * $quantity;
+		}
+
+		$formula = $this->get_current_formula( $product, $dimension_name );
 
 		return $this->calculator->result( $formula, $quantity );
 	}
@@ -118,13 +143,13 @@ class Shipping_Cost {
 	private function get_current_formula( WC_Product $product, string $key ): string {
 		// Get parent product for variation products.
 		$product = $product->get_parent_id() ? wc_get_product( $product->get_parent_id() ) : $product;
-		$formula = $product->get_meta( 'default_' . $key . '_formula' );
+		$formula = $product->get_meta( $key . '_formula', true );
 		if ( $formula ) {
 			return $formula;
 		}
 		$category_id = ! empty( $product->get_category_ids()[0] ) ? $product->get_category_ids()[0] : 0;
 		if ( $category_id ) {
-			$formula = get_term_meta( $category_id, 'default_' . $key . '_formula', true );
+			$formula = get_term_meta( $category_id, $key . '_formula', true );
 			if ( $formula ) {
 				return $formula;
 			}
@@ -133,6 +158,47 @@ class Shipping_Cost {
 		$method_name = 'default_' . $key . '_formula';
 
 		return $this->settings->{$method_name}();
+	}
+
+	/**
+	 * Get product dimension
+	 *
+	 * @param WC_Product $product        Product.
+	 * @param string     $dimension_name Dimension name.
+	 *
+	 * @return float
+	 */
+	private function get_product_dimension( WC_Product $product, string $dimension_name ): float {
+		$method    = 'get_' . $dimension_name;
+		$dimension = (float) $product->{$method}();
+		if ( $dimension ) {
+			return wc_get_dimension( $dimension, 'm', get_option( 'woocommerce_dimension_unit' ) );
+		}
+		if ( $product->get_parent_id() ) {
+			return $this->get_product_dimension( wc_get_product( $product->get_parent_id() ), $dimension_name );
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Get product weight
+	 *
+	 * @param WC_Product $product Product.
+	 *
+	 * @return float
+	 */
+	private function get_product_weight( WC_Product $product ): float {
+		$weight = $product->get_weight();
+		if ( $weight ) {
+			return wc_get_weight( (float) $weight, 'kg', get_option( 'woocommerce_weight_unit' ) );
+		}
+		// If in variation product haven't a weight try get in parent product.
+		if ( $product->get_parent_id() ) {
+			return $this->get_product_weight( wc_get_product( $product->get_parent_id() ) );
+		}
+
+		return 0;
 	}
 
 }

@@ -30,9 +30,13 @@ class Calculator {
 	 * @return float
 	 */
 	public function result( string $formula, int $quantity ): float {
-		// Remove whitespace from string.
-		include_once WC()->plugin_path() . '/includes/libraries/class-wc-eval-math.php';
+		if ( ! class_exists( 'WC_Eval_Math' ) ) {
+			// @codeCoverageIgnoreStart
+			include_once WC()->plugin_path() . '/includes/libraries/class-wc-eval-math.php';
+			// @codeCoverageIgnoreEnd
+		}
 		$sum = str_replace( '[qty]', $quantity, $formula );
+		// Remove whitespace from string.
 		$sum = preg_replace( '/\s+/', '', $sum );
 
 		$locale   = localeconv();

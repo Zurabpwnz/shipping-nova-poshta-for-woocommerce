@@ -173,6 +173,8 @@ class API {
 	 * Shipping cost
 	 *
 	 * @param string $city_id Recipient City ID.
+	 * @param float  $weight  Weight.
+	 * @param float  $volume  Volume weight.
 	 *
 	 * @return int
 	 * @throws Exception Invalid DateTime.
