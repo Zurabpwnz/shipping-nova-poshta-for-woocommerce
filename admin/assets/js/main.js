@@ -29,7 +29,7 @@ jQuery(document).ready(function ($) {
 		if (!$('#shipping_nova_poshta_for_woocommerce_city, #shipping_nova_poshta_for_woocommerce_warehouse').length) {
 			return;
 		}
-		$('#shipping_nova_poshta_for_woocommerce_city').select2({
+		$('#shipping_nova_poshta_for_woocommerce_city').np_select2({
 			language: shipping_nova_poshta_for_woocommerce.language,
 			minimumInputLength: 1,
 			ajax: {
@@ -48,11 +48,10 @@ jQuery(document).ready(function ($) {
 					};
 				}
 			}
-		});
-		$('#shipping_nova_poshta_for_woocommerce_city').on('select2:select', function (e) {
+		}).on('select2:select', function (e) {
 			update_warehouses();
 		});
-		$('#shipping_nova_poshta_for_woocommerce_warehouse').select2({
+		$('#shipping_nova_poshta_for_woocommerce_warehouse').np_select2({
 			language: shipping_nova_poshta_for_woocommerce.language
 		});
 	}
