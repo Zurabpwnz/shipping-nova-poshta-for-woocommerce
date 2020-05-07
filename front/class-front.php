@@ -53,8 +53,8 @@ class Front {
 		if ( ! is_checkout() && ! is_cart() ) {
 			return;
 		}
-		wp_enqueue_style( 'select2', plugin_dir_url( __FILE__ ) . 'assets/css/select2.min.css', [], Main::VERSION, 'all' );
-		wp_enqueue_style( Main::PLUGIN_SLUG, plugin_dir_url( __FILE__ ) . 'assets/css/main.css', [ 'select2' ], Main::VERSION, 'all' );
+		wp_enqueue_style( 'np-select2', plugin_dir_url( __FILE__ ) . 'assets/css/select2.min.css', [], Main::VERSION, 'all' );
+		wp_enqueue_style( Main::PLUGIN_SLUG, plugin_dir_url( __FILE__ ) . 'assets/css/main.css', [ 'np-select2' ], Main::VERSION, 'all' );
 	}
 
 	/**
@@ -65,7 +65,7 @@ class Front {
 			return;
 		}
 		wp_enqueue_script(
-			'select2',
+			'np-select2',
 			plugin_dir_url( __FILE__ ) . 'assets/js/select2.min.js',
 			[ 'jquery' ],
 			Main::VERSION,
@@ -74,7 +74,7 @@ class Front {
 		wp_enqueue_script(
 			'select2-i18n-' . $this->language->get_current_language(),
 			plugin_dir_url( __FILE__ ) . 'assets/js/i18n/' . $this->language->get_current_language() . '.js',
-			[ 'jquery', 'select2' ],
+			[ 'jquery', 'np-select2' ],
 			Main::VERSION,
 			true
 		);
@@ -83,7 +83,7 @@ class Front {
 			plugin_dir_url( __FILE__ ) . 'assets/js/main.js',
 			[
 				'jquery',
-				'select2',
+				'np-select2',
 			],
 			Main::VERSION,
 			true
