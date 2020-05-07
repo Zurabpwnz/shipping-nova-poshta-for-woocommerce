@@ -238,8 +238,6 @@ class Test_Admin extends Test_Case {
 			->shouldReceive( 'api_key' )
 			->twice()
 			->andReturn( 'api-key' );
-		$settings->shouldReceive( 'phone' )->once();
-		$settings->shouldReceive( 'description' )->once();
 		$settings
 			->shouldReceive( 'city_id' )
 			->once()
@@ -248,6 +246,16 @@ class Test_Admin extends Test_Case {
 			->shouldReceive( 'warehouse_id' )
 			->once()
 			->andReturn( $warehouse_id );
+		$settings
+			->shouldReceive(
+				'phone',
+				'description',
+				'default_weight_formula',
+				'default_width_formula',
+				'default_height_formula',
+				'default_length_formula'
+			)
+			->once();
 		WP_Mock::userFunction( 'wp_kses_post' )->
 		with( 'If you do not have an API key, then you can get it in the <a href="https://new.novaposhta.ua/#/1/settings/developers" target="_blank">personal account of Nova Poshta</a>' )->
 		once();

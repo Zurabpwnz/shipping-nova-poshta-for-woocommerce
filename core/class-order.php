@@ -13,8 +13,10 @@
 namespace Nova_Poshta\Core;
 
 use Exception;
+use WC_Data_Exception;
 use WC_Meta_Data;
 use WC_Order;
+use WC_Order_Item;
 use WC_Order_Item_Shipping;
 
 /**
@@ -30,21 +32,30 @@ class Order {
 	 * @var API
 	 */
 	private $api;
+	/**
+	 * Calculate a shipping cost
+	 *
+	 * @var Shipping_Cost
+	 */
+	private $shipping_cost;
 
 	/**
 	 * Order constructor.
 	 *
-	 * @param API $api API for Nova Poshta.
+	 * @param API           $api           API for Nova Poshta.
+	 * @param Shipping_Cost $shipping_cost Calculate a shipping cost.
 	 */
-	public function __construct( API $api ) {
-		$this->api = $api;
+	public function __construct( API $api, Shipping_Cost $shipping_cost ) {
+		$this->api           = $api;
+		$this->shipping_cost = $shipping_cost;
 	}
 
 	/**
 	 * Add hooks
 	 */
 	public function hooks() {
-		add_action( 'woocommerce_checkout_create_order_shipping_item', [ $this, 'save' ], 10, 4 );
+		add_action( 'woocommerce_checkout_create_order_shipping_item', [ $this, 'create' ], 10, 4 );
+		add_action( 'woocommerce_before_order_item_object_save', [ $this, 'save' ] );
 		add_action( 'woocommerce_checkout_update_customer', [ $this, 'update_nonce_for_new_users' ] );
 		add_action( 'woocommerce_order_actions', [ $this, 'register_order_actions' ] );
 		add_action(
@@ -78,8 +89,11 @@ class Order {
 	 * @param int                    $package_key Package key.
 	 * @param array                  $package     Package.
 	 * @param WC_Order               $order       Current order.
+	 *
+	 * @throws WC_Data_Exception Invalid total shipping cost.
+	 * @throws Exception Invalid DateTime.
 	 */
-	public function save( WC_Order_Item_Shipping $item, int $package_key, array $package, WC_Order $order ) {
+	public function create( WC_Order_Item_Shipping $item, int $package_key, array $package, WC_Order $order ) {
 		if ( empty( $_POST['shipping_nova_poshta_for_woocommerce_nonce'] ) ) {
 			return;
 		}
@@ -97,6 +111,38 @@ class Order {
 		}
 		$item->add_meta_data( 'city_id', $city_id, true );
 		$item->add_meta_data( 'warehouse_id', $warehouse_id, true );
+	}
+
+	/**
+	 * Save shipping method
+	 *
+	 * @param WC_Order_Item $item WC Order Item.
+	 *
+	 * @throws WC_Data_Exception Invalid total shipping cost.
+	 * @throws Exception Invalid DateTime.
+	 */
+	public function save( WC_Order_Item $item ) {
+		if ( ! is_admin() ) {
+			return;
+		}
+		if ( ! is_a( $item, 'WC_Order_Item_Shipping' ) ) {
+			return;
+		}
+		if ( 'shipping_nova_poshta_for_woocommerce' !== $item->get_method_id() ) {
+			return;
+		}
+		$city_id = $item->get_meta( 'city_id', true );
+		if ( ! $city_id ) {
+			return;
+		}
+		global $woocommerce;
+		$cart = $woocommerce->cart;
+		if ( ! $cart ) {
+			return;
+		}
+		$item->set_total(
+			$this->shipping_cost->calculate( $city_id, $cart )
+		);
 	}
 
 	/**
@@ -140,10 +186,10 @@ class Order {
 	/**
 	 * Default fields for shipping item
 	 *
-	 * @param int            $item_id Item ID.
-	 * @param \WC_Order_Item $item    Item.
+	 * @param int           $item_id Item ID.
+	 * @param WC_Order_Item $item    Item.
 	 */
-	public function default_fields_for_shipping_item( int $item_id, \WC_Order_Item $item ) {
+	public function default_fields_for_shipping_item( int $item_id, WC_Order_Item $item ) {
 		if ( ! is_a( $item, 'WC_Order_Item_Shipping' ) ) {
 			return;
 		}

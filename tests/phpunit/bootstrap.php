@@ -22,7 +22,7 @@ FunctionMocker::init(
 		'blacklist'             => [
 			realpath( $plugin_path ),
 		],
-		'redefinable-internals' => [ 'filter_input', 'filter_var', 'is_a', 'constant' ],
+		'redefinable-internals' => [ 'class_exists', 'filter_input', 'filter_var', 'is_a', 'constant' ],
 	]
 );
 

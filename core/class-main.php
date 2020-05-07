@@ -14,6 +14,8 @@ namespace Nova_Poshta\Core;
 
 use Nova_Poshta\Admin\Admin;
 use Nova_Poshta\Admin\Notice;
+use Nova_Poshta\Admin\Product_Category_Metabox;
+use Nova_Poshta\Admin\Product_Metabox;
 use Nova_Poshta\Admin\User;
 use Nova_Poshta\Core\Cache\Cache;
 use Nova_Poshta\Core\Cache\Object_Cache;
@@ -137,7 +139,10 @@ class Main {
 	 * Define hooks with API key
 	 */
 	private function define_hooks_with_api_key() {
-		$ajax = new AJAX( $this->api );
+		$calculator    = new Calculator();
+		$shipping_cost = new Shipping_Cost( $this->api, $this->settings, $calculator );
+
+		$ajax = new AJAX( $this->api, $shipping_cost );
 		$ajax->hooks();
 
 		$checkout = new Checkout();
@@ -146,7 +151,7 @@ class Main {
 		$front = new Front( $this->language );
 		$front->hooks();
 
-		$order = new Order( $this->api );
+		$order = new Order( $this->api, $shipping_cost );
 		$order->hooks();
 
 		$thank_you = new Thank_You( $this->api );
@@ -154,6 +159,12 @@ class Main {
 
 		$user = new User( $this->api, $this->language );
 		$user->hooks();
+
+		$product_cat_metabox = new Product_Category_Metabox();
+		$product_cat_metabox->hooks();
+
+		$product_metabox = new Product_Metabox();
+		$product_metabox->hooks();
 	}
 
 }

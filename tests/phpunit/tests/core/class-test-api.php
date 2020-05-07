@@ -265,10 +265,82 @@ class Test_API extends Test_Case {
 			->with( 'warehouse-' . $city_id, 1 )
 			->once();
 		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
-
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api             = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$this->assertSame( $warehouses, $api->warehouses( $city_id ) );
+	}
+
+	/**
+	 * Shipping cost
+	 *
+	 * @throws Exception Invalid DateTime.
+	 */
+	public function test_shipping_cost() {
+		$city_id       = 'city-id';
+		$admin_city_id = 'admin-city-id';
+		$api_key       = 'api-key';
+		$weight        = 5.37;
+		$volume        = 0.157;
+		$cost          = 48;
+		$date          = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
+		$response      = [
+			'success' => true,
+			'data'    => [
+				[
+					'CostWarehouseWarehouse' => $cost,
+				],
+			],
+		];
+		WP_Mock::userFunction( 'is_wp_error' )->
+		once()->
+		andReturn( false );
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'InternetDocument',
+				'calledMethod'     => 'getDocumentPrice',
+				'methodProperties' => (object) [
+					'CitySender'    => $admin_city_id,
+					'CityRecipient' => $city_id,
+					'CargoType'     => 'Parcel',
+					'DateTime'      => $date->format( 'd.m.Y' ),
+					'VolumeGeneral' => $volume,
+					'Weight'        => $weight,
+				],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+				'timeout'     => 30,
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn( [ 'body' => json_encode( $response ) ] );
+		WP_Mock::userFunction( 'wp_remote_post' );
+		$db              = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$settings        = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'city_id' )
+			->once()
+			->andReturn( $admin_city_id );
+		$settings
+			->shouldReceive( 'api_key' )
+			->twice()
+			->andReturn( $api_key );
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
+
+		$this->assertSame( $cost, $api->shipping_cost( $city_id, $weight, $volume ) );
 	}
 
 	/**

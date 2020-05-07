@@ -39,9 +39,6 @@ class Test_Front extends Test_Case {
 		WP_Mock::userFunction( 'is_checkout' )->
 		andReturn( false )->
 		once();
-		WP_Mock::userFunction( 'is_cart' )->
-		andReturn( false )->
-		once();
 		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
 		$front    = new Front( $language );
 
