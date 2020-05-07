@@ -3,15 +3,11 @@
  * Product category edit metabox html
  *
  * @package Nova_Posta\Admin\Partials
+ * @var string $weight_formula
+ * @var string $width_formula
+ * @var string $length_formula
+ * @var string $height_formula
  */
-
-?>
-
-<?php
-$weight_formula = get_term_meta( $term->term_id, 'weight_formula', true );
-$width_formula  = get_term_meta( $term->term_id, 'width_formula', true );
-$length_formula = get_term_meta( $term->term_id, 'length_formula', true );
-$height_formula = get_term_meta( $term->term_id, 'height_formula', true );
 
 ?>
 <div class="cost-formula-fields">

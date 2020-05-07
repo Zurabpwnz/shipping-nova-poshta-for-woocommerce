@@ -2,6 +2,11 @@
 
 namespace Nova_Poshta\Admin;
 
+/**
+ * Class Product_Metabox
+ *
+ * @package Nova_Poshta\Admin
+ */
 class Product_Metabox {
 
 	/**
@@ -13,16 +18,18 @@ class Product_Metabox {
 	}
 
 	/**
-	 * Super comment
+	 * Add metabox html on product page (Shipment tab)
 	 */
 	public function add_metabox_html() {
+		global $post;
+		$product = wc_get_product( $post->ID );
 		require plugin_dir_path( __FILE__ ) . 'partials/metaboxes/product.php';
 	}
 
 	/**
-	 * Super comment
+	 * Save metabox field in Database
 	 *
-	 * @param integer $post_id current term.
+	 * @param integer $post_id current product.
 	 */
 	public function save_metabox( $post_id ) {
 
@@ -31,10 +38,14 @@ class Product_Metabox {
 		$length_formula = filter_input( INPUT_POST, 'length_formula', FILTER_SANITIZE_STRING );
 		$height_formula = filter_input( INPUT_POST, 'height_formula', FILTER_SANITIZE_STRING );
 
-		update_post_meta( $post_id, 'weight_formula', (string) $weight_formula );
-		update_post_meta( $post_id, 'width_formula', (string) $width_formula );
-		update_post_meta( $post_id, 'length_formula', (string) $length_formula );
-		update_post_meta( $post_id, 'height_formula', (string) $height_formula );
+		$product = wc_get_product( $post_id );
+
+		$product->update_meta_data( 'weight_formula', (string) $weight_formula );
+		$product->update_meta_data( 'width_formula', (string) $width_formula );
+		$product->update_meta_data( 'length_formula', (string) $length_formula );
+		$product->update_meta_data( 'height_formula', (string) $height_formula );
+
+		$product->save();
 	}
 
 }

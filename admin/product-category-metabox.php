@@ -2,37 +2,47 @@
 
 namespace Nova_Poshta\Admin;
 
+/**
+ * Class Product_Category_Metabox
+ *
+ * @package Nova_Poshta\Admin
+ */
 class Product_Category_Metabox {
 
 	/**
 	 * Add hooks
 	 */
 	public function hooks() {
-		add_action( 'product_cat_add_form_fields', [ $this, 'add_metabox_html' ], 10, 1 );
-		add_action( 'product_cat_edit_form_fields', [ $this, 'edit_metabox_html' ], 10, 1 );
+		add_action( 'product_cat_add_form_fields', [ $this, 'add_metabox_html' ] );
+		add_action( 'product_cat_edit_form_fields', [ $this, 'edit_metabox_html' ] );
 
-		add_action( 'edited_product_cat', [ $this, 'save_metabox' ], 10, 1 );
-		add_action( 'create_product_cat', [ $this, 'save_metabox' ], 10, 1 );
+		add_action( 'edited_product_cat', [ $this, 'save_metabox' ] );
+		add_action( 'create_product_cat', [ $this, 'save_metabox' ] );
 	}
 
 	/**
-	 * Super comment
+	 * Add metabox html on product_cat add page
 	 */
 	public function add_metabox_html() {
 		require plugin_dir_path( __FILE__ ) . 'partials/metaboxes/product-cat-add.php';
 	}
 
 	/**
-	 * Super comment
+	 * Add metabox html on product_cat edit page
 	 *
 	 * @param object $term current term.
 	 */
 	public function edit_metabox_html( $term ) {
+		$weight_formula = get_term_meta( $term->term_id, 'weight_formula', true );
+		$width_formula  = get_term_meta( $term->term_id, 'width_formula', true );
+		$length_formula = get_term_meta( $term->term_id, 'length_formula', true );
+		$height_formula = get_term_meta( $term->term_id, 'height_formula', true );
+
 		require plugin_dir_path( __FILE__ ) . 'partials/metaboxes/product-cat-edit.php';
 	}
 
 	/**
-	 * Super comment
+	 * Save product_cat fields to Database
 	 *
 	 * @param integer $term_id current term.
 	 */
