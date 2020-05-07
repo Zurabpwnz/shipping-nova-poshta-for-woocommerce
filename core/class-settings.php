@@ -112,45 +112,37 @@ class Settings {
 	/**
 	 * Default formula for calculate weight of products in order
 	 *
-	 * TODO: Add field
-	 *
 	 * @return string
 	 */
 	public function default_weight_formula(): string {
-		return '[qty] * 0.5 - 0.01';
+		return $this->options['default_weight_formula'] ?? '[qty] * 0.5 - 0.01';
 	}
 
 	/**
 	 * Default formula for calculate width of products in order
 	 *
-	 * TODO: Add field
-	 *
 	 * @return string
 	 */
 	public function default_width_formula(): string {
-		return '[qty] * 0.26';
+		return $this->options['default_width_formula'] ?? '[qty] * 0.26';
 	}
 
 	/**
 	 * Default formula for calculate length of products in order
 	 *
-	 * TODO: Add field
-	 *
 	 * @return string
 	 */
 	public function default_length_formula(): string {
-		return '[qty] * 0.145';
+		return $this->options['default_length_formula'] ?? '[qty] * 0.145';
 	}
 
 	/**
 	 * Default formula for calculate height of products in order
 	 *
-	 * TODO: Add field
-	 *
 	 * @return string
 	 */
 	public function default_height_formula(): string {
-		return '[qty] * 0.1';
+		return $this->options['default_length_formula'] ?? '[qty] * 0.1';
 	}
 
 }
