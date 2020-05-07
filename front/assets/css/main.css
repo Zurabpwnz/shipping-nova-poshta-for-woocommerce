@@ -2,7 +2,7 @@
 #shipping_nova_poshta_for_woocommerce_warehouse {
     transition: .3s ease;
     display: block;
-    width: 100%;
+    max-width: 100%;
 }
 
 #shipping_nova_poshta_for_woocommerce_city.inactive,
