@@ -5,6 +5,8 @@
  * @package Nova_Posta\Admin\Partials
  */
 
+use Nova_Poshta\Core\Main;
+
 ?>
 <div class="cost-formula-fields">
 	<h2><?php esc_attr_e( 'Cost calculate formulas', 'shipping-nova-poshta-for-woocommerce' ); ?></h2>
@@ -36,4 +38,5 @@
 				name="height_formula"/>
 		</label>
 	</div>
+	<?php wp_nonce_field( Main::PLUGIN_SLUG . '-product-cat-formulas', Main::PLUGIN_SLUG . '_nonce', false ); ?>
 </div>

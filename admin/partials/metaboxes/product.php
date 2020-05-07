@@ -6,6 +6,8 @@
  * @var WC_Product $product
  */
 
+use Nova_Poshta\Core\Main;
+
 echo '</div><div class="options_group">';
 
 woocommerce_wp_text_input(
@@ -51,3 +53,5 @@ woocommerce_wp_text_input(
 		'value'       => $product->get_meta( 'height_formula', true ),
 	]
 );
+
+wp_nonce_field( Main::PLUGIN_SLUG . '-product-formulas', Main::PLUGIN_SLUG . '_nonce', false );

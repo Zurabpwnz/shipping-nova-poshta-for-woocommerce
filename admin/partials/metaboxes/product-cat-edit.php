@@ -9,6 +9,8 @@
  * @var string $height_formula
  */
 
+use Nova_Poshta\Core\Main;
+
 ?>
 <div class="cost-formula-fields">
 	<tr class="form-field">
@@ -59,5 +61,5 @@
 				name="height_formula"/>
 		</td>
 	</tr>
-
+	<?php wp_nonce_field( Main::PLUGIN_SLUG . '-product-cat-formulas', Main::PLUGIN_SLUG . '_nonce', false ); ?>
 </div>
