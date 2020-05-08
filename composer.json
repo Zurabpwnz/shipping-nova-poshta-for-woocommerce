@@ -8,6 +8,7 @@
     "ext-json": "*"
   },
   "require-dev": {
+    "composer/composer": "~1.9",
     "wp-coding-standards/wpcs": "dev-master",
     "10up/wp_mock": "^0.3.0",
     "phpcompatibility/php-compatibility": "^9.0",
@@ -28,8 +29,7 @@
       "admin",
       "front",
       "shipping",
-      "tests/phpunit/classes",
-      "tests/phpunit/stubs"
+      "tests/phpunit/classes"
     ]
   }
 }

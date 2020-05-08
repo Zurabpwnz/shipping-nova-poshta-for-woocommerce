@@ -104,9 +104,9 @@ class Shipping_Cost {
 	 * @param WC_Product $product  Product.
 	 * @param int        $quantity Quantity of this products.
 	 *
-	 * @return int
+	 * @return float
 	 */
-	private function get_volume( WC_Product $product, int $quantity ): int {
+	private function get_volume( WC_Product $product, int $quantity ): float {
 		$width   = $this->get_dimension( $product, $quantity, 'width' );
 		$length  = $this->get_dimension( $product, $quantity, 'length' );
 		$height  = $this->get_dimension( $product, $quantity, 'height' );
