@@ -67,11 +67,16 @@
 			init();
 		}
 	});
+
+	const getQueryParams = (params, url) => {
+		let href = url;
+		let reg = new RegExp('[?&]' + params + '=([^&#]*)', 'i');
+		let queryString = reg.exec(href);
+		return queryString ? queryString[1] : null;
+	};
+
 	$(document).ajaxComplete(function (event, xhr, settings) {
-		if (settings.url.indexOf('?wc-ajax=update_order_review') + 1) {
-			init();
-		}
-		if (settings.url.indexOf('?wc-ajax=update_shipping_method') + 1) {
+		if ('update_order_review' === getQueryParams('wc-ajax', settings.url)) {
 			init();
 		}
 	});
