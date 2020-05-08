@@ -23,7 +23,12 @@ try {
 	exit( 1 );
 }
 
-function autoload_tests_classes( $class ) {
+/**
+ * Autoload stubs
+ *
+ * @param string $class Class name.
+ */
+function autoload_tests_classes( string $class ) {
 	static $maps;
 
 	if ( ! $maps ) {
