@@ -65,6 +65,9 @@ class Shipping_Cost {
 	 * @throws Exception Invalid DateTime.
 	 */
 	public function calculate( string $recipient_city_id, WC_Cart $cart ): float {
+		if ( ! $this->settings->is_shipping_cost_enable() ) {
+			return 0;
+		}
 		$items  = $cart->get_cart_contents();
 		$weight = 0;
 		$volume = 0;

@@ -19,6 +19,20 @@ use WP_Mock;
  */
 class Test_Shipping_Cost extends Test_Case {
 
+	public function test_shipping_cost_disabled() {
+		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'is_shipping_cost_enable' )
+			->once()
+			->andReturn( false );
+		$calculator = Mockery::mock( 'Nova_Poshta\Core\Calculator' );
+		$cart       = Mockery::mock( 'WC_Cart' );
+
+		$shipping_cost = new Shipping_Cost( $api, $settings, $calculator );
+		$shipping_cost->calculate( 'city-id', $cart );
+	}
+
 	/**
 	 * Shipping cost with default product weight and dimensions
 	 *
@@ -65,7 +79,11 @@ class Test_Shipping_Cost extends Test_Case {
 			)
 			->once()
 			->andReturn( $cost );
-		$settings   = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'is_shipping_cost_enable' )
+			->once()
+			->andReturn( true );
 		$calculator = Mockery::mock( 'Nova_Poshta\Core\Calculator' );
 		$calculator
 			->shouldReceive( 'result' )
@@ -162,7 +180,11 @@ class Test_Shipping_Cost extends Test_Case {
 			)
 			->once()
 			->andReturn( $cost );
-		$settings   = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'is_shipping_cost_enable' )
+			->once()
+			->andReturn( true );
 		$calculator = Mockery::mock( 'Nova_Poshta\Core\Calculator' );
 		$calculator
 			->shouldReceive( 'result' )
@@ -271,7 +293,11 @@ class Test_Shipping_Cost extends Test_Case {
 			)
 			->once()
 			->andReturn( $cost );
-		$settings   = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'is_shipping_cost_enable' )
+			->once()
+			->andReturn( true );
 		$calculator = Mockery::mock( 'Nova_Poshta\Core\Calculator' );
 		$calculator
 			->shouldReceive( 'result' )
@@ -418,7 +444,11 @@ class Test_Shipping_Cost extends Test_Case {
 			)
 			->once()
 			->andReturn( $cost );
-		$settings   = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'is_shipping_cost_enable' )
+			->once()
+			->andReturn( true );
 		$calculator = Mockery::mock( 'Nova_Poshta\Core\Calculator' );
 		$calculator
 			->shouldReceive( 'result' )
@@ -600,6 +630,10 @@ class Test_Shipping_Cost extends Test_Case {
 			->once()
 			->andReturn( $cost );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'is_shipping_cost_enable' )
+			->once()
+			->andReturn( true );
 		$settings
 			->shouldReceive( 'default_weight_formula' )
 			->twice()

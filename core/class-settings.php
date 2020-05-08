@@ -110,6 +110,15 @@ class Settings {
 	}
 
 	/**
+	 * Is a shipping cost enable
+	 *
+	 * @return bool
+	 */
+	public function is_shipping_cost_enable(): bool {
+		return ! empty( $this->options['is_shipping_cost_enable'] );
+	}
+
+	/**
 	 * Default formula for calculate weight of products in order
 	 *
 	 * @return string

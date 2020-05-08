@@ -212,6 +212,8 @@ class Test_Admin extends Test_Case {
 		twice();
 		WP_Mock::userFunction( 'get_admin_url' )->
 		once();
+		WP_Mock::userFunction( 'checked' )->
+		once();
 		WP_Mock::userFunction( 'settings_errors' )->
 		with( Main::PLUGIN_SLUG )->
 		once();
@@ -247,13 +249,17 @@ class Test_Admin extends Test_Case {
 			->once()
 			->andReturn( $warehouse_id );
 		$settings
+			->shouldReceive( 'is_shipping_cost_enable' )
+			->twice()
+			->andReturn( true );
+		$settings
 			->shouldReceive(
 				'phone',
 				'description',
 				'default_weight_formula',
 				'default_width_formula',
 				'default_height_formula',
-				'default_length_formula'
+				'default_length_formula',
 			)
 			->once();
 		WP_Mock::userFunction( 'wp_kses_post' )->
