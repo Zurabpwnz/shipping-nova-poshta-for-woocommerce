@@ -49,6 +49,10 @@ class Test_Main extends Test_Case {
 			->shouldReceive( 'api_key' )
 			->once()
 			->andReturn( 'api-key' );
+		$settings
+			->shouldReceive( 'is_shipping_cost_enable' )
+			->once()
+			->andReturn( true );
 		$shipping = Mockery::mock( 'overload:Nova_Poshta\Core\Shipping' );
 		$shipping
 			->shouldReceive( 'hooks' )

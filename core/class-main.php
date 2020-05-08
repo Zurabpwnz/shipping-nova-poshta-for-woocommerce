@@ -160,11 +160,13 @@ class Main {
 		$user = new User( $this->api, $this->language );
 		$user->hooks();
 
-		$product_cat_metabox = new Product_Category_Metabox();
-		$product_cat_metabox->hooks();
+		if ( $this->settings->is_shipping_cost_enable() ) {
+			$product_cat_metabox = new Product_Category_Metabox();
+			$product_cat_metabox->hooks();
 
-		$product_metabox = new Product_Metabox();
-		$product_metabox->hooks();
+			$product_metabox = new Product_Metabox();
+			$product_metabox->hooks();
+		}
 	}
 
 }
