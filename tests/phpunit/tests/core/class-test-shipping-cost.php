@@ -19,6 +19,11 @@ use WP_Mock;
  */
 class Test_Shipping_Cost extends Test_Case {
 
+	/**
+	 * Shipping cost disabled
+	 *
+	 * @throws Exception Invalid DateTime.
+	 */
 	public function test_shipping_cost_disabled() {
 		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );

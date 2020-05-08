@@ -259,7 +259,7 @@ class Test_Admin extends Test_Case {
 				'default_weight_formula',
 				'default_width_formula',
 				'default_height_formula',
-				'default_length_formula',
+				'default_length_formula'
 			)
 			->once();
 		WP_Mock::userFunction( 'wp_kses_post' )->
