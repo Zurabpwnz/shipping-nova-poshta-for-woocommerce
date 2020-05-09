@@ -99,6 +99,7 @@ Please do not change the code, otherwise it will be lost during the next update.
 * Calculate shipping cost
 * Formulas for shipping cost
 * Improved city search
+* Improved activate/deactivation plugin
 
 == Upgrade Notice ==
 
