@@ -96,7 +96,7 @@ class Admin {
 			true
 		);
 		wp_enqueue_script(
-			'tip-tip',
+			'np-tip-tip',
 			plugin_dir_url( __FILE__ ) . '/assets/js/jquery.tip-tip.min.js',
 			[ 'jquery' ],
 			Main::VERSION,

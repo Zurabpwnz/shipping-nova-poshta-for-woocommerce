@@ -77,10 +77,10 @@ class Test_Product_Metabox extends Test_Case {
 		with(
 			[
 				'id'          => 'weight_formula',
-				'label'       => 'Weight formula',
+				'label'       => 'Formula for weight calculate',
 				'placeholder' => '',
 				'desc_tip'    => 'true',
-				'description' => 'Formula for weight calculate.',
+				'description' => 'Formula cost calculation. The numbers are indicated in kilograms. You can use the [qty] shortcode to indicate the number of products.',
 				'value'       => $weight,
 			]
 		)->
@@ -89,10 +89,10 @@ class Test_Product_Metabox extends Test_Case {
 		with(
 			[
 				'id'          => 'width_formula',
-				'label'       => 'Width formula',
+				'label'       => 'Formula for width calculate',
 				'placeholder' => '',
 				'desc_tip'    => 'true',
-				'description' => 'Formula for width calculate.',
+				'description' => 'Formula cost calculation. The numbers are indicated in meters. You can use the [qty] shortcode to indicate the number of products.',
 				'value'       => $width,
 			]
 		)->
@@ -101,10 +101,10 @@ class Test_Product_Metabox extends Test_Case {
 		with(
 			[
 				'id'          => 'length_formula',
-				'label'       => 'Length formula',
+				'label'       => 'Formula for length calculate',
 				'placeholder' => '',
 				'desc_tip'    => 'true',
-				'description' => 'Formula for length calculate.',
+				'description' => 'Formula cost calculation. The numbers are indicated in meters. You can use the [qty] shortcode to indicate the number of products.',
 				'value'       => $length,
 			]
 		)->
@@ -113,10 +113,10 @@ class Test_Product_Metabox extends Test_Case {
 		with(
 			[
 				'id'          => 'height_formula',
-				'label'       => 'Height formula',
+				'label'       => 'Formula for height calculate',
 				'placeholder' => '',
 				'desc_tip'    => 'true',
-				'description' => 'Formula for height calculate.',
+				'description' => 'Formula cost calculation. The numbers are indicated in meters. You can use the [qty] shortcode to indicate the number of products.',
 				'value'       => $height,
 			]
 		)->
