@@ -76,6 +76,7 @@ class Admin {
 			return;
 		}
 		wp_enqueue_style( 'np-select2', plugin_dir_url( __DIR__ ) . 'front/assets/css/select2.min.css', [], Main::VERSION, 'all' );
+		wp_enqueue_style( 'np-tip-tip', plugin_dir_url( __FILE__ ) . '/assets/css/tip-tip.css', [], Main::VERSION, 'all' );
 		wp_enqueue_style( Main::PLUGIN_SLUG, plugin_dir_url( __FILE__ ) . '/assets/css/main.css', [ 'np-select2' ], Main::VERSION, 'all' );
 		wp_enqueue_style( Main::PLUGIN_SLUG . '-front', plugin_dir_url( __DIR__ ) . '/front/assets/css/main.css', [ 'np-select2' ], Main::VERSION, 'all' );
 	}
@@ -90,6 +91,13 @@ class Admin {
 		wp_enqueue_script(
 			'np-select2',
 			plugin_dir_url( __DIR__ ) . 'front/assets/js/select2.min.js',
+			[ 'jquery' ],
+			Main::VERSION,
+			true
+		);
+		wp_enqueue_script(
+			'tip-tip',
+			plugin_dir_url( __FILE__ ) . '/assets/js/jquery.tip-tip.min.js',
 			[ 'jquery' ],
 			Main::VERSION,
 			true
@@ -137,7 +145,7 @@ class Admin {
 	private function is_plugin_page(): bool {
 		global $current_screen, $post_type;
 
-		return 0 === strpos( $current_screen->base, 'toplevel_page_' . Main::PLUGIN_SLUG ) || 'shop_order' === $post_type;
+		return 0 === strpos( $current_screen->base, 'toplevel_page_' . Main::PLUGIN_SLUG ) || 'shop_order' === $post_type || 'product_cat' === $current_screen->taxonomy;
 	}
 
 	/**

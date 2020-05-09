@@ -15,10 +15,10 @@ wp_nonce_field( Product_Metabox::NONCE, Product_Metabox::NONCE_FIELD, false );
 woocommerce_wp_text_input(
 	[
 		'id'          => 'weight_formula',
-		'label'       => __( 'Weight formula', 'shipping-nova-poshta-for-woocommerce' ),
+		'label'       => __( 'Formula for weight calculate', 'shipping-nova-poshta-for-woocommerce' ),
 		'placeholder' => '',
 		'desc_tip'    => 'true',
-		'description' => __( 'Formula for weight calculate.', 'shipping-nova-poshta-for-woocommerce' ),
+		'description' => __( 'Formula cost calculation. The numbers are indicated in kilograms. You can use the [qty] shortcode to indicate the number of products.', 'shipping-nova-poshta-for-woocommerce' ),
 		'value'       => $product->get_meta( 'weight_formula', true ),
 	]
 );
@@ -26,10 +26,10 @@ woocommerce_wp_text_input(
 woocommerce_wp_text_input(
 	[
 		'id'          => 'width_formula',
-		'label'       => __( 'Width formula', 'shipping-nova-poshta-for-woocommerce' ),
+		'label'       => __( 'Formula for width calculate', 'shipping-nova-poshta-for-woocommerce' ),
 		'placeholder' => '',
 		'desc_tip'    => 'true',
-		'description' => __( 'Formula for width calculate.', 'shipping-nova-poshta-for-woocommerce' ),
+		'description' => __( 'Formula cost calculation. The numbers are indicated in meters. You can use the [qty] shortcode to indicate the number of products.', 'shipping-nova-poshta-for-woocommerce' ),
 		'value'       => $product->get_meta( 'width_formula', true ),
 	]
 );
@@ -37,10 +37,10 @@ woocommerce_wp_text_input(
 woocommerce_wp_text_input(
 	[
 		'id'          => 'length_formula',
-		'label'       => __( 'Length formula', 'shipping-nova-poshta-for-woocommerce' ),
+		'label'       => __( 'Formula for length calculate', 'shipping-nova-poshta-for-woocommerce' ),
 		'placeholder' => '',
 		'desc_tip'    => 'true',
-		'description' => __( 'Formula for length calculate.', 'shipping-nova-poshta-for-woocommerce' ),
+		'description' => __( 'Formula cost calculation. The numbers are indicated in meters. You can use the [qty] shortcode to indicate the number of products.', 'shipping-nova-poshta-for-woocommerce' ),
 		'value'       => $product->get_meta( 'length_formula', true ),
 	]
 );
@@ -48,10 +48,10 @@ woocommerce_wp_text_input(
 woocommerce_wp_text_input(
 	[
 		'id'          => 'height_formula',
-		'label'       => __( 'Height formula', 'shipping-nova-poshta-for-woocommerce' ),
+		'label'       => __( 'Formula for height calculate', 'shipping-nova-poshta-for-woocommerce' ),
 		'placeholder' => '',
 		'desc_tip'    => 'true',
-		'description' => __( 'Formula for height calculate.', 'shipping-nova-poshta-for-woocommerce' ),
+		'description' => __( 'Formula cost calculation. The numbers are indicated in meters. You can use the [qty] shortcode to indicate the number of products.', 'shipping-nova-poshta-for-woocommerce' ),
 		'value'       => $product->get_meta( 'height_formula', true ),
 	]
 );

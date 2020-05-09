@@ -24,7 +24,7 @@ use Nova_Poshta\Core\Main;
 			sprintf(
 			/* translators: 1: Link on Nova Poshta personal account */
 				__(
-					'If you do not have an API key, then you can get it in the <a href="%s" target="_blank">personal account of Nova Poshta</a>',
+					'If you do not have an API key, then you can get it in the <a href="%s" target="_blank">personal account of Nova Poshta. Unfortunately, without the API key, the plugin will not work :(</a>',
 					'shipping-nova-poshta-for-woocommerce'
 				),
 				'https://new.novaposhta.ua/#/1/settings/developers'
@@ -36,7 +36,7 @@ use Nova_Poshta\Core\Main;
 		<div>
 			<p>
 				<label>
-					<?php esc_attr_e( 'Phone', 'shipping-nova-poshta-for-woocommerce' ); ?><br>
+					<?php esc_attr_e( 'Sender Phone', 'shipping-nova-poshta-for-woocommerce' ); ?><br>
 					<input
 							type="tel"
 							name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[phone]"
@@ -48,11 +48,17 @@ use Nova_Poshta\Core\Main;
 			<p>
 				<label>
 					<?php esc_attr_e( 'Description of your products', 'shipping-nova-poshta-for-woocommerce' ); ?><br>
-					<input
-							type="tel"
-							name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[description]"
-							value="<?php echo esc_attr( $this->settings->description() ); ?>"
-							required="required"/>
+					<span class="with-help-tip">
+						<input
+								type="tel"
+								name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[description]"
+								value="<?php echo esc_attr( $this->settings->description() ); ?>"
+								required="required"/>
+						<span
+								class="help-tip"
+								data-tip="<?php esc_attr_e( 'A few words about what you send. For example: toys, shoes, household appliances, etc.', 'shipping-nova-poshta-for-woocommerce' ); ?>"
+						></span>
+					</span>
 				</label>
 			</p>
 			<p>
@@ -61,7 +67,7 @@ use Nova_Poshta\Core\Main;
 				$current_city    = $current_city_id ? $this->api->city( $current_city_id ) : '';
 				?>
 				<label>
-					<?php esc_attr_e( 'City', 'shipping-nova-poshta-for-woocommerce' ); ?><br>
+					<?php esc_attr_e( 'Sender City', 'shipping-nova-poshta-for-woocommerce' ); ?><br>
 					<select
 							id="shipping_nova_poshta_for_woocommerce_city"
 							name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[city_id]"
@@ -77,7 +83,7 @@ use Nova_Poshta\Core\Main;
 				$current_warehouse_id = $this->settings->warehouse_id();
 				?>
 				<label>
-					<?php esc_attr_e( 'Warehouse', 'shipping-nova-poshta-for-woocommerce' ); ?><br>
+					<?php esc_attr_e( 'Sender Warehouse', 'shipping-nova-poshta-for-woocommerce' ); ?><br>
 					<select
 							id="shipping_nova_poshta_for_woocommerce_warehouse"
 							name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[warehouse_id]"
@@ -108,44 +114,68 @@ use Nova_Poshta\Core\Main;
 						<label>
 							<?php esc_attr_e( 'Default weight formula', 'shipping-nova-poshta-for-woocommerce' ); ?>
 							<br>
-							<input
-									type="text"
-									name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[default_weight_formula]"
-									value="<?php echo esc_attr( $this->settings->default_weight_formula() ); ?>"
-									required="required"/>
+							<span class="with-help-tip">
+								<input
+										type="text"
+										name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[default_weight_formula]"
+										value="<?php echo esc_attr( $this->settings->default_weight_formula() ); ?>"
+										required="required"/>
+								<span
+										class="help-tip"
+										data-tip="<?php esc_attr_e( 'Formula cost calculation. The numbers are indicated in kilograms. You can use the [qty] shortcode to indicate the number of products.', 'shipping-nova-poshta-for-woocommerce' ); ?>"
+								></span>
+							</span>
 						</label>
 					</p>
 					<p>
 						<label>
 							<?php esc_attr_e( 'Default width formula', 'shipping-nova-poshta-for-woocommerce' ); ?>
 							<br>
-							<input
-									type="text"
-									name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[default_width_formula]"
-									value="<?php echo esc_attr( $this->settings->default_width_formula() ); ?>"
-									required="required"/>
+							<span class="with-help-tip">
+								<input
+										type="text"
+										name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[default_width_formula]"
+										value="<?php echo esc_attr( $this->settings->default_width_formula() ); ?>"
+										required="required"/>
+								<span
+										class="help-tip"
+										data-tip="<?php esc_attr_e( 'Formula cost calculation. The numbers are indicated in meters. You can use the [qty] shortcode to indicate the number of products.', 'shipping-nova-poshta-for-woocommerce' ); ?>"
+								></span>
+							</span>
 						</label>
 					</p>
 					<p>
 						<label>
 							<?php esc_attr_e( 'Default lenght formula', 'shipping-nova-poshta-for-woocommerce' ); ?>
 							<br>
-							<input
-									type="text"
-									name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[default_length_formula]"
-									value="<?php echo esc_attr( $this->settings->default_length_formula() ); ?>"
-									required="required"/>
+							<span class="with-help-tip">
+								<input
+										type="text"
+										name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[default_length_formula]"
+										value="<?php echo esc_attr( $this->settings->default_length_formula() ); ?>"
+										required="required"/>
+								<span
+										class="help-tip"
+										data-tip="<?php esc_attr_e( 'Formula cost calculation. The numbers are indicated in meters. You can use the [qty] shortcode to indicate the number of products.', 'shipping-nova-poshta-for-woocommerce' ); ?>"
+								></span>
+							</span>
 						</label>
 					</p>
 					<p>
 						<label>
 							<?php esc_attr_e( 'Default height formula', 'shipping-nova-poshta-for-woocommerce' ); ?>
 							<br>
-							<input
-									type="text"
-									name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[default_height_formula]"
-									value="<?php echo esc_attr( $this->settings->default_height_formula() ); ?>"
-									required="required"/>
+							<span class="with-help-tip">
+								<input
+										type="text"
+										name="<?php echo esc_attr( Main::PLUGIN_SLUG ); ?>[default_height_formula]"
+										value="<?php echo esc_attr( $this->settings->default_height_formula() ); ?>"
+										required="required"/>
+								<span
+										class="help-tip"
+										data-tip="<?php esc_attr_e( 'Formula cost calculation. The numbers are indicated in meters. You can use the [qty] shortcode to indicate the number of products.', 'shipping-nova-poshta-for-woocommerce' ); ?>"
+								></span>
+							</span>
 						</label>
 					</p>
 				<?php } ?>

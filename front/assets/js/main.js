@@ -1,6 +1,6 @@
 (function ($) {
 	function init() {
-		$('#shipping_nova_poshta_for_woocommerce_city').np_select2({
+		$('#shipping_nova_poshta_for_woocommerce_city:not(.select2-hidden-accessible)').np_select2({
 			language: shipping_nova_poshta_for_woocommerce.language,
 			minimumInputLength: 1,
 			ajax: {
@@ -57,7 +57,7 @@
 				},
 			})
 		});
-		$('#shipping_nova_poshta_for_woocommerce_warehouse').np_select2({
+		$('#shipping_nova_poshta_for_woocommerce_warehouse:not(.select2-hidden-accessible)').np_select2({
 			language: shipping_nova_poshta_for_woocommerce.language
 		});
 	}
