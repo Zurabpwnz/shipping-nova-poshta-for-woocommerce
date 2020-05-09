@@ -33,10 +33,11 @@ class Object_Cache extends Abstract_Cache {
 	 *
 	 * @param string $key   Key name.
 	 * @param mixed  $value Value.
+	 * @param int    $expire Expire in seconds.
 	 */
-	public function set( string $key, $value ) {
+	public function set( string $key, $value, int $expire ) {
 		$this->add_key( $key );
-		wp_cache_set( $key, $value, Main::PLUGIN_SLUG );
+		wp_cache_set( $key, $value, Main::PLUGIN_SLUG, $expire );
 	}
 
 	/**

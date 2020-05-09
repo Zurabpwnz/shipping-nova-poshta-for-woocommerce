@@ -22,8 +22,9 @@ class Test_Object_Cache extends Test_Case {
 	 * Test set new object cache
 	 */
 	public function test_set() {
-		$key   = 'some-key';
-		$value = 'value';
+		$key    = 'some-key';
+		$value  = 'value';
+		$expire = 100;
 		WP_Mock::userFunction( 'wp_cache_get' )->
 		with( 'Nova_Poshta\Core\Cache\Object_Cache-keys', Main::PLUGIN_SLUG )->
 		once();
@@ -31,11 +32,11 @@ class Test_Object_Cache extends Test_Case {
 		with( 'Nova_Poshta\Core\Cache\Object_Cache-keys', [ $key ], Main::PLUGIN_SLUG )->
 		once();
 		WP_Mock::userFunction( 'wp_cache_set' )->
-		with( $key, $value, Main::PLUGIN_SLUG )->
+		with( $key, $value, Main::PLUGIN_SLUG, $expire )->
 		once();
 		$object_cache = new Object_Cache();
 
-		$object_cache->set( $key, $value );
+		$object_cache->set( $key, $value, $expire );
 	}
 
 	/**

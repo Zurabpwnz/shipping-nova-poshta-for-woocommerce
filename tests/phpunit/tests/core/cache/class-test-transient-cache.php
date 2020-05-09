@@ -9,7 +9,6 @@ namespace Nova_Poshta\Core\Cache;
 
 use Nova_Poshta\Core\Main;
 use Nova_Poshta\Tests\Test_Case;
-use tad\FunctionMocker\FunctionMocker;
 use WP_Mock;
 
 /**
@@ -23,10 +22,9 @@ class Test_Transient_Cache extends Test_Case {
 	 * Test set new object cache
 	 */
 	public function test_set() {
-		$key            = 'some-key';
-		$value          = 'value';
-		$day_in_seconds = 1234;
-		$constant       = FunctionMocker::replace( 'constant', $day_in_seconds );
+		$key     = 'some-key';
+		$value   = 'value';
+		$exprire = 100;
 		WP_Mock::userFunction( 'wp_cache_get' )->
 		with( 'Nova_Poshta\Core\Cache\Transient_Cache-keys', Main::PLUGIN_SLUG )->
 		once();
@@ -34,13 +32,11 @@ class Test_Transient_Cache extends Test_Case {
 		with( 'Nova_Poshta\Core\Cache\Transient_Cache-keys', [ $key ], Main::PLUGIN_SLUG )->
 		once();
 		WP_Mock::userFunction( 'set_transient' )->
-		with( Main::PLUGIN_SLUG . '-' . $key, $value, $day_in_seconds )->
+		with( Main::PLUGIN_SLUG . '-' . $key, $value, $exprire )->
 		once();
 		$object_cache = new Transient_Cache();
 
-		$object_cache->set( $key, $value );
-
-		$constant->wasCalledWithOnce( [ 'DAY_IN_SECONDS' ] );
+		$object_cache->set( $key, $value, $exprire );
 	}
 
 	/**

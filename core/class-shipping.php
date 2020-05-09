@@ -121,7 +121,7 @@ class Shipping {
 					self::METHOD_NAME
 				)
 			);
-			$this->object_cache->set( self::METHOD_NAME . '_active', $is_active );
+			$this->object_cache->set( self::METHOD_NAME . '_active', $is_active, constant( 'DAY_IN_SECONDS' ) );
 		}
 
 		//phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching

@@ -86,10 +86,11 @@ abstract class Abstract_Cache {
 	/**
 	 * Set value for cache with key.
 	 *
-	 * @param string $key   Key name.
-	 * @param mixed  $value Value.
+	 * @param string $key    Key name.
+	 * @param mixed  $value  Value.
+	 * @param int    $expire Expire in seconds.
 	 */
-	abstract public function set( string $key, $value );
+	abstract public function set( string $key, $value, int $expire );
 
 	/**
 	 * Get cache value by name

@@ -31,12 +31,13 @@ class Transient_Cache extends Abstract_Cache {
 	/**
 	 * Set value for cache with key.
 	 *
-	 * @param string $key   Key name.
-	 * @param mixed  $value Value.
+	 * @param string $key    Key name.
+	 * @param mixed  $value  Value.
+	 * @param int    $expire Expire in seconds.
 	 */
-	public function set( string $key, $value ) {
+	public function set( string $key, $value, int $expire ) {
 		$this->add_key( $key );
-		set_transient( Main::PLUGIN_SLUG . '-' . $key, $value, constant( 'DAY_IN_SECONDS' ) );
+		set_transient( Main::PLUGIN_SLUG . '-' . $key, $value, $expire );
 	}
 
 	/**

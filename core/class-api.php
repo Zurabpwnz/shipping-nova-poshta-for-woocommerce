@@ -102,7 +102,7 @@ class API {
 			$response = $this->request( 'Address', 'getCities' );
 			if ( $response['success'] ) {
 				$this->db->update_cities( $response['data'] );
-				$this->transient_cache->set( 'cities', 1 );
+				$this->transient_cache->set( 'cities', 1, constant( 'DAY_IN_SECONDS' ) );
 			}
 			unset( $response );
 		}
@@ -161,7 +161,7 @@ class API {
 			);
 			if ( ! empty( $response['success'] ) ) {
 				$this->db->update_warehouses( $response['data'] );
-				$this->object_cache->set( 'warehouse-' . $city_id, 1 );
+				$this->object_cache->set( 'warehouse-' . $city_id, 1, constant( 'DAY_IN_SECONDS' ) );
 			}
 			unset( $response );
 		}
@@ -172,28 +172,37 @@ class API {
 	/**
 	 * Shipping cost
 	 *
-	 * @param string $city_id Recipient City ID.
-	 * @param float  $weight  Weight.
-	 * @param float  $volume  Volume weight.
+	 * @param string $recipient_city_id Recipient City ID.
+	 * @param float  $weight            Weight.
+	 * @param float  $volume            Volume weight.
 	 *
 	 * @return int
 	 * @throws Exception Invalid DateTime.
 	 */
-	public function shipping_cost( string $city_id, float $weight, float $volume ): int {
-		$cost = $this->request(
-			'InternetDocument',
-			'getDocumentPrice',
-			[
-				'CitySender'    => $this->settings->city_id(),
-				'CityRecipient' => $city_id,
-				'CargoType'     => 'Parcel',
-				'DateTime'      => $this->get_current_date(),
-				'VolumeGeneral' => max( 0.0004, $volume ),
-				'Weight'        => max( 0.1, $weight ),
-			]
-		);
+	public function shipping_cost( string $recipient_city_id, float $weight, float $volume ): int {
+		$city_id = $this->settings->city_id();
+		$key     = 'shipping-from-' . $city_id . '-to-' . $recipient_city_id . '-' . $weight . '-' . $volume;
+		$cost    = (int) $this->object_cache->get( $key );
+		if ( ! $cost ) {
+			$request = $this->request(
+				'InternetDocument',
+				'getDocumentPrice',
+				[
+					'CitySender'    => $city_id,
+					'CityRecipient' => $recipient_city_id,
+					'CargoType'     => 'Parcel',
+					'DateTime'      => $this->get_current_date(),
+					'VolumeGeneral' => max( 0.0004, $volume ),
+					'Weight'        => max( 0.1, $weight ),
+				]
+			);
+			$cost    = $request['success'] ? $request['data'][0]['CostWarehouseWarehouse'] : 0;
+			if ( $cost ) {
+				$this->object_cache->set( $key, $cost, 300 );
+			}
+		}
 
-		return $cost['success'] ? $cost['data'][0]['CostWarehouseWarehouse'] : '';
+		return $cost;
 	}
 
 	/**
