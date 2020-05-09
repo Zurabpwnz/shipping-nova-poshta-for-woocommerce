@@ -10,6 +10,17 @@
  * @wordpress-plugin
  */
 
+use Nova_Poshta\Admin\Notice;
+use Nova_Poshta\Core\API;
+use Nova_Poshta\Core\Cache\Object_Cache;
+use Nova_Poshta\Core\Cache\Transient_Cache;
+use Nova_Poshta\Core\Calculator;
+use Nova_Poshta\Core\DB;
+use Nova_Poshta\Core\Language;
+use Nova_Poshta\Core\Main;
+use Nova_Poshta\Core\Settings;
+use Nova_Poshta\Core\Shipping_Cost;
+
 if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 	/**
 	 * Class Nova_Poshta_Shipping_Method
@@ -104,14 +115,49 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 		 * @param array $package Packages.
 		 *
 		 * @return void
+		 * @throws Exception Invalid DateTime.
 		 */
 		public function calculate_shipping( $package = [] ) {
-			$rate = array(
+			$notice          = new Notice();
+			$language        = new Language();
+			$db              = new DB( $language );
+			$object_cache    = new Object_Cache();
+			$transient_cache = new Transient_Cache();
+			$settings        = new Settings( $notice );
+			$api             = new API( $db, $object_cache, $transient_cache, $settings );
+			$user_id         = get_current_user_id();
+			$city_id         = apply_filters( 'shipping_nova_poshta_for_woocommerce_default_city_id', '', $user_id );
+			if ( ! $city_id ) {
+				$city    = $api->cities(
+					apply_filters(
+						'shipping_nova_poshta_for_woocommerce_default_city',
+						'',
+						$user_id,
+						$language->get_current_language()
+					),
+					1
+				);
+				$city_id = array_keys( $city )[0];
+			}
+			$nonce = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_nonce', FILTER_SANITIZE_STRING );
+			if ( wp_verify_nonce( $nonce, Main::PLUGIN_SLUG . '-shipping' ) ) {
+				$request_city_id = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_city', FILTER_SANITIZE_STRING );
+				$city_id         = ! empty( $request_city_id ) ? $request_city_id : $city_id;
+			}
+			$cost = 0;
+			global $woocommerce;
+			$cart = $woocommerce->cart;
+			if ( $city_id && $cart ) {
+				$calculator    = new Calculator();
+				$shipping_cost = new Shipping_Cost( $api, $settings, $calculator );
+				$cost          = $shipping_cost->calculate( $city_id, $cart );
+			}
+			$rate = [
 				'id'       => $this->id,
 				'label'    => $this->title,
-				'cost'     => '0',
 				'calc_tax' => 'per_item',
-			);
+				'cost'     => $cost,
+			];
 
 			// Register the rate.
 			$this->add_rate( $rate );

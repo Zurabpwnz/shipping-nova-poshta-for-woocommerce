@@ -49,6 +49,18 @@ class Test_Main extends Test_Case {
 			->shouldReceive( 'api_key' )
 			->once()
 			->andReturn( 'api-key' );
+		$settings
+			->shouldReceive( 'is_shipping_cost_enable' )
+			->once()
+			->andReturn( true );
+		$shipping = Mockery::mock( 'overload:Nova_Poshta\Core\Shipping' );
+		$shipping
+			->shouldReceive( 'hooks' )
+			->once();
+		$language = Mockery::mock( 'overload:Nova_Poshta\Core\Language' );
+		$language
+			->shouldReceive( 'hooks' )
+			->once();
 		$db = Mockery::mock( 'overload:Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'hooks' )
@@ -57,28 +69,22 @@ class Test_Main extends Test_Case {
 		$api
 			->shouldReceive( 'hooks' )
 			->once();
-		$ajax = Mockery::mock( 'overload:Nova_Poshta\Core\AJAX' );
-		$ajax
-			->shouldReceive( 'hooks' )
-			->once();
 		$admin = Mockery::mock( 'overload:Nova_Poshta\Admin\Admin' );
 		$admin
 			->shouldReceive( 'hooks' )
 			->once();
-		$user = Mockery::mock( 'overload:Nova_Poshta\Admin\User' );
-		$user
-			->shouldReceive( 'hooks' )
-			->once();
-		$front = Mockery::mock( 'overload:Nova_Poshta\Front\Front' );
-		$front
-			->shouldReceive( 'hooks' )
-			->once();
-		$shipping = Mockery::mock( 'overload:Nova_Poshta\Core\Shipping' );
-		$shipping
+		Mockery::mock( 'overload:Nova_Poshta\Core\Calculator' );
+		Mockery::mock( 'overload:Nova_Poshta\Core\Shipping_Cost' );
+		$ajax = Mockery::mock( 'overload:Nova_Poshta\Core\AJAX' );
+		$ajax
 			->shouldReceive( 'hooks' )
 			->once();
 		$checkout = Mockery::mock( 'overload:Nova_Poshta\Core\Checkout' );
 		$checkout
+			->shouldReceive( 'hooks' )
+			->once();
+		$front = Mockery::mock( 'overload:Nova_Poshta\Front\Front' );
+		$front
 			->shouldReceive( 'hooks' )
 			->once();
 		$order = Mockery::mock( 'overload:Nova_Poshta\Core\Order' );
@@ -89,8 +95,16 @@ class Test_Main extends Test_Case {
 		$thank_you
 			->shouldReceive( 'hooks' )
 			->once();
-		$language = Mockery::mock( 'overload:Nova_Poshta\Core\Language' );
-		$language
+		$user = Mockery::mock( 'overload:Nova_Poshta\Admin\User' );
+		$user
+			->shouldReceive( 'hooks' )
+			->once();
+		$product_cat_metabox = Mockery::mock( 'overload:Nova_Poshta\Admin\Product_Category_Metabox' );
+		$product_cat_metabox
+			->shouldReceive( 'hooks' )
+			->once();
+		$product_metabox = Mockery::mock( 'overload:Nova_Poshta\Admin\Product_Metabox' );
+		$product_metabox
 			->shouldReceive( 'hooks' )
 			->once();
 

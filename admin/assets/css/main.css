@@ -54,3 +54,39 @@
     background-image: url('../img/nova-poshta.svg');
     background-size: cover;
 }
+
+.shipping-nova-poshta-for-woocommerce-form .with-help-tip {
+    display: flex;
+    align-items: center;
+}
+
+.shipping-nova-poshta-for-woocommerce-form .help-tip {
+    color: #666;
+    display: block;
+    font-family: dashicons;
+    font-size: 1.1em;
+    font-style: normal;
+    position: relative;
+    vertical-align: middle;
+    padding: 5px;
+    cursor: help;
+    line-height: 1;
+    margin: 0 -5px 0 5px;
+}
+
+.shipping-nova-poshta-for-woocommerce-form .help-tip::after {
+    speak: none;
+    font-weight: 400;
+    text-transform: none;
+    -webkit-font-smoothing: antialiased;
+    text-indent: 0px;
+    width: 16px;
+    line-height: 16px;
+    height: 16px;
+    text-align: center;
+    content: "";
+    cursor: help;
+    font-variant: normal;
+    margin: 0;
+    display: block;
+}

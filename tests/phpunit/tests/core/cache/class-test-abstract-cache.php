@@ -45,10 +45,11 @@ class Test_Abstract_Cache extends Test_Case {
 			/**
 			 * Set value for cache with key.
 			 *
-			 * @param string $key   Key name.
-			 * @param mixed  $value Value.
+			 * @param string $key    Key name.
+			 * @param mixed  $value  Value.
+			 * @param int    $expire Expire of a cache.
 			 */
-			public function set( string $key, $value ) {
+			public function set( string $key, $value, int $expire ) {
 				// TODO: Implement set() method.
 			}
 
@@ -93,10 +94,11 @@ class Test_Abstract_Cache extends Test_Case {
 			/**
 			 * Set value for cache with key.
 			 *
-			 * @param string $key   Key name.
-			 * @param mixed  $value Value.
+			 * @param string $key    Key name.
+			 * @param mixed  $value  Value.
+			 * @param int    $expire Expire of a cache.
 			 */
-			public function set( string $key, $value ) {
+			public function set( string $key, $value, int $expire ) {
 				// TODO: Implement set() method.
 			}
 

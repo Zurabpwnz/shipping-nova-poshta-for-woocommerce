@@ -4,7 +4,7 @@ Donate link: https://www.liqpay.ua/api/3/checkout?data=eyJ2ZXJzaW9uIjozLCJhY3Rpb
 Tags: Нова пошта, новая почта, nova poshta, novaposhta
 Requires at least: 5.1
 Tested up to: 5.4
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -18,6 +18,7 @@ Integration Nova Poshta API with WooCommerce. Add shipping method for WooCommerc
 = Features =
 * Add shipping method for WooCommerce.
 * Creating internet documents for orders.
+* Calculating shipping costs.
 * Update user profile
 
 == Installation ==
@@ -56,6 +57,13 @@ a) In order actions In select choose a create internet document for Nova Poshta.
 b) Change order status to processing.
 4. Check internet document in shipping method item.
 
+= How to enable shipping cost? =
+
+1. Go to plugin settings page.
+2. Checked option "Enable shipping cost"
+3. Fill in the calculation formulas
+4. You can also fill out formulas for calculation in categories or products
+
 = How to change the plugin? =
 
 Please do not change the code, otherwise it will be lost during the next update. Use hooks instead. We have written [documentation](https://github.com/wppunk/shipping-nova-poshta-for-woocommerce/wiki/%D0%A5%D1%83%D0%BA%D0%B8-%D0%BF%D0%BB%D0%B0%D0%B3%D0%B8%D0%BD%D0%B0) for you with examples. If there is no necessary hook for you, then create a [task](https://wordpress.org/support/plugin/shipping-nova-poshta-for-woocommerce/) and we will do it in the near future.
@@ -85,6 +93,13 @@ Please do not change the code, otherwise it will be lost during the next update.
 
 = 1.2.2 =
 * Add translates of select2
+
+= 1.3.0 =
+* Rename select2 for no conflicting with other plugins
+* Calculate shipping cost
+* Formulas for shipping cost
+* Improved city search
+* Improved activate/deactivation plugin
 
 == Upgrade Notice ==
 

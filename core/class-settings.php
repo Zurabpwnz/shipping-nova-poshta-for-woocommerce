@@ -109,4 +109,49 @@ class Settings {
 		return $this->options['warehouse_id'] ?? '';
 	}
 
+	/**
+	 * Is a shipping cost enable
+	 *
+	 * @return bool
+	 */
+	public function is_shipping_cost_enable(): bool {
+		return ! empty( $this->options['is_shipping_cost_enable'] );
+	}
+
+	/**
+	 * Default formula for calculate weight of products in order
+	 *
+	 * @return string
+	 */
+	public function default_weight_formula(): string {
+		return $this->options['default_weight_formula'] ?? '[qty] * 0.5';
+	}
+
+	/**
+	 * Default formula for calculate width of products in order
+	 *
+	 * @return string
+	 */
+	public function default_width_formula(): string {
+		return $this->options['default_width_formula'] ?? '[qty] * 0.26';
+	}
+
+	/**
+	 * Default formula for calculate length of products in order
+	 *
+	 * @return string
+	 */
+	public function default_length_formula(): string {
+		return $this->options['default_length_formula'] ?? '[qty] * 0.145';
+	}
+
+	/**
+	 * Default formula for calculate height of products in order
+	 *
+	 * @return string
+	 */
+	public function default_height_formula(): string {
+		return $this->options['default_height_formula'] ?? '[qty] * 0.1';
+	}
+
 }

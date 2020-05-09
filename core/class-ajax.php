@@ -25,14 +25,22 @@ class AJAX {
 	 * @var API
 	 */
 	private $api;
+	/**
+	 * Calculate a shipping cost
+	 *
+	 * @var Shipping_Cost
+	 */
+	private $shipping_cost;
 
 	/**
 	 * AJAX constructor.
 	 *
-	 * @param API $api API for Nova Poshta.
+	 * @param API           $api           API for Nova Poshta.
+	 * @param Shipping_Cost $shipping_cost Calculate a shipping cost.
 	 */
-	public function __construct( API $api ) {
-		$this->api = $api;
+	public function __construct( API $api, Shipping_Cost $shipping_cost ) {
+		$this->api           = $api;
+		$this->shipping_cost = $shipping_cost;
 	}
 
 	/**
@@ -43,6 +51,8 @@ class AJAX {
 		add_action( 'wp_ajax_nopriv_shipping_nova_poshta_for_woocommerce_city', [ $this, 'cities' ] );
 		add_action( 'wp_ajax_shipping_nova_poshta_for_woocommerce_warehouse', [ $this, 'warehouses' ] );
 		add_action( 'wp_ajax_nopriv_shipping_nova_poshta_for_woocommerce_warehouse', [ $this, 'warehouses' ] );
+		add_action( 'wp_ajax_shipping_nova_poshta_for_woocommerce_shipping_cost', [ $this, 'shipping_cost' ] );
+		add_action( 'wp_ajax_nopriv_shipping_nova_poshta_for_woocommerce_shipping_cost', [ $this, 'shipping_cost' ] );
 	}
 
 	/**
@@ -75,6 +85,29 @@ class AJAX {
 			];
 		}
 		wp_send_json( array_values( $warehouses ) );
+	}
+
+	/**
+	 * Shipping cost
+	 */
+	public function shipping_cost() {
+		check_ajax_referer( Main::PLUGIN_SLUG, 'nonce' );
+		$city = filter_input( INPUT_POST, 'city', FILTER_SANITIZE_STRING );
+		if ( ! $city ) {
+			wp_send_json_error();
+			return;
+		}
+		global $woocommerce;
+		$cart = $woocommerce->cart;
+		if ( ! $cart ) {
+			wp_send_json_error();
+			return;
+		}
+		$price = $this->shipping_cost->calculate( $city, $cart );
+		if ( $price ) {
+			$price = wc_price( $price );
+		}
+		wp_send_json( $price );
 	}
 
 }

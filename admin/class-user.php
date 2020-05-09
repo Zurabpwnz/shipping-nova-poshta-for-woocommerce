@@ -67,7 +67,12 @@ class User {
 		$city_id      = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_city', FILTER_SANITIZE_STRING );
 		$warehouse_id = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_warehouse', FILTER_SANITIZE_STRING );
 		if ( empty( $city_id || $warehouse_id ) ) {
-			$city         = $this->api->cities(
+			$city_id = apply_filters( 'shipping_nova_poshta_for_woocommerce_default_city_id', '', $user_id );
+		}
+		if ( $city_id ) {
+			$city = $this->api->city( $city_id );
+		} else {
+			$city    = $this->api->cities(
 				apply_filters(
 					'shipping_nova_poshta_for_woocommerce_default_city',
 					'',
@@ -76,27 +81,25 @@ class User {
 				),
 				1
 			);
-			$city_id      = apply_filters( 'shipping_nova_poshta_for_woocommerce_default_city_id', array_keys( $city )[0] ?? '', $user_id );
-			$warehouses   = [ 0 => '' ];
-			$warehouse_id = '';
-			if ( $city_id ) {
-				$warehouses   = $this->api->warehouses( $city_id );
-				$warehouse_id = array_keys( $warehouses )[0] ?? '';
-				$warehouse_id = apply_filters(
-					'shipping_nova_poshta_for_woocommerce_default_warehouse_id',
-					$warehouse_id,
-					$user_id,
-					$city
-				);
-			}
+			$city_id = array_keys( $city )[0];
+			$city    = array_pop( $city );
 		}
+
+		$warehouses   = $this->api->warehouses( $city_id );
+		$warehouse_id = array_keys( $warehouses )[0] ?? '';
+		$warehouse_id = apply_filters(
+			'shipping_nova_poshta_for_woocommerce_default_warehouse_id',
+			$warehouse_id,
+			$user_id,
+			$city_id
+		);
 
 		$fields = [
 			'shipping_nova_poshta_for_woocommerce_city' => [
 				'type'     => 'select',
 				'label'    => __( 'Select delivery city', 'shipping-nova-poshta-for-woocommerce' ),
 				'required' => true,
-				'options'  => $city,
+				'options'  => [ $city_id => $city ],
 				'default'  => $city_id,
 				'priority' => 10,
 			],

@@ -64,8 +64,9 @@ class Test_Admin extends Test_Case {
 		global $current_screen;
 
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$current_screen       = new stdClass();
-		$current_screen->base = 'something';
+		$current_screen           = new stdClass();
+		$current_screen->base     = 'something';
+		$current_screen->taxonomy = 'something';
 
 		$admin = $this->instance();
 
@@ -82,15 +83,18 @@ class Test_Admin extends Test_Case {
 		$current_screen       = new stdClass();
 		$current_screen->base = 'toplevel_page_' . Main::PLUGIN_SLUG;
 		WP_Mock::userFunction( 'plugin_dir_url' )->
-		times( 3 );
+		times( 4 );
 		WP_Mock::userFunction( 'wp_enqueue_style' )->
-		with( 'select2', Functions::type( 'string' ), [], Main::VERSION, 'all' )->
+		with( 'np-select2', Functions::type( 'string' ), [], Main::VERSION, 'all' )->
 		once();
 		WP_Mock::userFunction( 'wp_enqueue_style' )->
-		with( Main::PLUGIN_SLUG, Functions::type( 'string' ), [ 'select2' ], Main::VERSION, 'all' )->
+		with( 'np-tip-tip', Functions::type( 'string' ), [], Main::VERSION, 'all' )->
 		once();
 		WP_Mock::userFunction( 'wp_enqueue_style' )->
-		with( Main::PLUGIN_SLUG . '-front', Functions::type( 'string' ), [ 'select2' ], Main::VERSION, 'all' )->
+		with( Main::PLUGIN_SLUG, Functions::type( 'string' ), [ 'np-select2' ], Main::VERSION, 'all' )->
+		once();
+		WP_Mock::userFunction( 'wp_enqueue_style' )->
+		with( Main::PLUGIN_SLUG . '-front', Functions::type( 'string' ), [ 'np-select2' ], Main::VERSION, 'all' )->
 		once();
 
 		$admin = $this->instance();
@@ -105,8 +109,9 @@ class Test_Admin extends Test_Case {
 		global $current_screen;
 
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$current_screen       = new stdClass();
-		$current_screen->base = 'page';
+		$current_screen           = new stdClass();
+		$current_screen->base     = 'something';
+		$current_screen->taxonomy = 'something';
 
 		$admin = $this->instance();
 
@@ -125,7 +130,7 @@ class Test_Admin extends Test_Case {
 		$admin_url            = '/admin-url/';
 		$nonce                = 'nonce123';
 		WP_Mock::userFunction( 'plugin_dir_url' )->
-		times( 3 );
+		times( 4 );
 		WP_Mock::userFunction( 'admin_url' )->
 		once()->
 		andReturn( $admin_url );
@@ -133,13 +138,16 @@ class Test_Admin extends Test_Case {
 		once()->
 		andReturn( $nonce );
 		WP_Mock::userFunction( 'wp_enqueue_script' )->
-		with( 'select2', Functions::type( 'string' ), [ 'jquery' ], Main::VERSION, true )->
+		with( 'np-select2', Functions::type( 'string' ), [ 'jquery' ], Main::VERSION, true )->
 		once();
 		WP_Mock::userFunction( 'wp_enqueue_script' )->
-		with( 'select2-i18n-uk', Functions::type( 'string' ), [ 'jquery', 'select2' ], Main::VERSION, true )->
+		with( 'np-tip-tip', Functions::type( 'string' ), [ 'jquery' ], Main::VERSION, true )->
 		once();
 		WP_Mock::userFunction( 'wp_enqueue_script' )->
-		with( Main::PLUGIN_SLUG, Functions::type( 'string' ), [ 'jquery', 'select2' ], Main::VERSION, true )->
+		with( 'select2-i18n-uk', Functions::type( 'string' ), [ 'jquery', 'np-select2' ], Main::VERSION, true )->
+		once();
+		WP_Mock::userFunction( 'wp_enqueue_script' )->
+		with( Main::PLUGIN_SLUG, Functions::type( 'string' ), [ 'jquery', 'np-select2' ], Main::VERSION, true )->
 		once();
 		WP_Mock::userFunction(
 			'wp_localize_script',
@@ -212,6 +220,8 @@ class Test_Admin extends Test_Case {
 		twice();
 		WP_Mock::userFunction( 'get_admin_url' )->
 		once();
+		WP_Mock::userFunction( 'checked' )->
+		once();
 		WP_Mock::userFunction( 'settings_errors' )->
 		with( Main::PLUGIN_SLUG )->
 		once();
@@ -238,8 +248,6 @@ class Test_Admin extends Test_Case {
 			->shouldReceive( 'api_key' )
 			->twice()
 			->andReturn( 'api-key' );
-		$settings->shouldReceive( 'phone' )->once();
-		$settings->shouldReceive( 'description' )->once();
 		$settings
 			->shouldReceive( 'city_id' )
 			->once()
@@ -248,8 +256,22 @@ class Test_Admin extends Test_Case {
 			->shouldReceive( 'warehouse_id' )
 			->once()
 			->andReturn( $warehouse_id );
+		$settings
+			->shouldReceive( 'is_shipping_cost_enable' )
+			->twice()
+			->andReturn( true );
+		$settings
+			->shouldReceive(
+				'phone',
+				'description',
+				'default_weight_formula',
+				'default_width_formula',
+				'default_height_formula',
+				'default_length_formula'
+			)
+			->once();
 		WP_Mock::userFunction( 'wp_kses_post' )->
-		with( 'If you do not have an API key, then you can get it in the <a href="https://new.novaposhta.ua/#/1/settings/developers" target="_blank">personal account of Nova Poshta</a>' )->
+		with( 'If you do not have an API key, then you can get it in the <a href="https://new.novaposhta.ua/#/1/settings/developers" target="_blank">personal account of Nova Poshta</a>. Unfortunately, without the API key, the plugin will not work :(' )->
 		once();
 		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
 		$admin    = new Admin( $api, $settings, $language );

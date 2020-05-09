@@ -9,6 +9,7 @@ namespace Nova_Poshta\Core;
 
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
+use tad\FunctionMocker\FunctionMocker;
 use WP_Mock;
 
 /**
@@ -67,9 +68,11 @@ class Test_Shipping extends Test_Case {
 		global $wpdb;
 		$request = false;
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$wpdb         = Mockery::mock( 'wpdb' );
-		$wpdb->prefix = 'prefix_';
-		$sql          = 'SELECT `instance_id` FROM ' . $wpdb->prefix . 'woocommerce_shipping_zone_methods
+		$wpdb           = Mockery::mock( 'wpdb' );
+		$wpdb->prefix   = 'prefix_';
+		$day_in_seconds = 1234;
+		$constant       = FunctionMocker::replace( 'constant', $day_in_seconds );
+		$sql            = 'SELECT `instance_id` FROM ' . $wpdb->prefix . 'woocommerce_shipping_zone_methods
 			WHERE `method_id` = "shipping_nova_poshta_for_woocommerce" AND `is_enabled` = 1 LIMIT 1';
 		$wpdb
 			->shouldReceive( 'prepare' )
@@ -107,10 +110,12 @@ class Test_Shipping extends Test_Case {
 			->andReturn( false );
 		$object_cache
 			->shouldReceive( 'set' )
-			->with( Shipping::METHOD_NAME . '_active', $request )
+			->with( Shipping::METHOD_NAME . '_active', $request, $day_in_seconds )
 			->once();
 
 		new Shipping( $notice, $object_cache );
+
+		$constant->wasCalledWithOnce( [ 'DAY_IN_SECONDS' ] );
 	}
 
 }

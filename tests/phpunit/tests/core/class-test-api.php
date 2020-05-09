@@ -13,6 +13,7 @@ use Exception;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
 use stdClass;
+use tad\FunctionMocker\FunctionMocker;
 use WP_Mock;
 
 /**
@@ -66,15 +67,17 @@ class Test_API extends Test_Case {
 	 * Test search cities
 	 */
 	public function test_cities() {
-		$api_key = 'api-key';
-		$search  = 'search';
-		$limit   = 11;
-		$cities  = [ 'City 1', 'City 2' ];
-		$request = [
+		$api_key        = 'api-key';
+		$search         = 'search';
+		$limit          = 11;
+		$cities         = [ 'City 1', 'City 2' ];
+		$day_in_seconds = 1234;
+		$request        = [
 			'success' => true,
 			'data'    => [ 'some-data' ],
 		];
-		$db      = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$constant       = FunctionMocker::replace( 'constant', $day_in_seconds );
+		$db             = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'update_cities' )
 			->with( $request['data'] )
@@ -127,11 +130,13 @@ class Test_API extends Test_Case {
 			->andReturn( false );
 		$transient_cache
 			->shouldReceive( 'set' )
-			->with( 'cities', 1 );
+			->with( 'cities', 1, $day_in_seconds );
 
 		$api = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$this->assertSame( $cities, $api->cities( $search, $limit ) );
+
+		$constant->wasCalledWithOnce( [ 'DAY_IN_SECONDS' ] );
 	}
 
 	/**
@@ -201,14 +206,16 @@ class Test_API extends Test_Case {
 	 * Test warehouse by city_id
 	 */
 	public function test_warehouses() {
-		$api_key    = 'api-key';
-		$city_id    = 'city_id';
-		$warehouses = [ 'Warehouse 1', 'Warehouse 2' ];
-		$request    = [
+		$api_key        = 'api-key';
+		$city_id        = 'city_id';
+		$warehouses     = [ 'Warehouse 1', 'Warehouse 2' ];
+		$day_in_seconds = 1234;
+		$request        = [
 			'success' => true,
 			'data'    => [ 'some-data' ],
 		];
-		$db         = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$constant       = FunctionMocker::replace( 'constant', $day_in_seconds );
+		$db             = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'update_warehouses' )
 			->with( $request['data'] )
@@ -262,13 +269,96 @@ class Test_API extends Test_Case {
 			->andReturn( false );
 		$object_cache
 			->shouldReceive( 'set' )
-			->with( 'warehouse-' . $city_id, 1 )
+			->with( 'warehouse-' . $city_id, 1, $day_in_seconds )
 			->once();
 		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
-
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api             = new API( $db, $object_cache, $transient_cache, $settings );
 
 		$this->assertSame( $warehouses, $api->warehouses( $city_id ) );
+
+		$constant->wasCalledWithOnce( [ 'DAY_IN_SECONDS' ] );
+	}
+
+	/**
+	 * Shipping cost
+	 *
+	 * @throws Exception Invalid DateTime.
+	 */
+	public function test_shipping_cost() {
+		$city_id       = 'city-id';
+		$admin_city_id = 'admin-city-id';
+		$api_key       = 'api-key';
+		$weight        = 5.37;
+		$volume        = 0.157;
+		$cost          = 48;
+		$date          = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
+		$response      = [
+			'success' => true,
+			'data'    => [
+				[
+					'CostWarehouseWarehouse' => $cost,
+				],
+			],
+		];
+		WP_Mock::userFunction( 'is_wp_error' )->
+		once()->
+		andReturn( false );
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'InternetDocument',
+				'calledMethod'     => 'getDocumentPrice',
+				'methodProperties' => (object) [
+					'CitySender'    => $admin_city_id,
+					'CityRecipient' => $city_id,
+					'CargoType'     => 'Parcel',
+					'DateTime'      => $date->format( 'd.m.Y' ),
+					'VolumeGeneral' => $volume,
+					'Weight'        => $weight,
+				],
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+				'timeout'     => 30,
+			]
+		)->
+		once()->
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn( [ 'body' => json_encode( $response ) ] );
+		WP_Mock::userFunction( 'wp_remote_post' );
+		$db           = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$object_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
+		$object_cache
+			->shouldReceive( 'get' )
+			->with( 'shipping-from-' . $admin_city_id . '-to-' . $city_id . '-' . $weight . '-' . $volume )
+			->once()
+			->andReturn( false );
+		$object_cache
+			->shouldReceive( 'set' )
+			->with( 'shipping-from-' . $admin_city_id . '-to-' . $city_id . '-' . $weight . '-' . $volume, $cost, 300 )
+			->once();
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$settings        = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'city_id' )
+			->once()
+			->andReturn( $admin_city_id );
+		$settings
+			->shouldReceive( 'api_key' )
+			->twice()
+			->andReturn( $api_key );
+		$api = new API( $db, $object_cache, $transient_cache, $settings );
+
+		$this->assertSame( $cost, $api->shipping_cost( $city_id, $weight, $volume ) );
 	}
 
 	/**
