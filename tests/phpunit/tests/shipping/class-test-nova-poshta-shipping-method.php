@@ -12,6 +12,7 @@ use tad\FunctionMocker\FunctionMocker;
 /**
  * Class Test_Thank_You
  *
+ * @group   krya
  * @package Nova_Poshta\Shipping
  */
 class Test_Nova_Poshta_Shipping_Method extends Test_Case {
@@ -66,8 +67,48 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 
 	/**
 	 * Test calculate shipping
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
-	public function test_calculate_shipping_without_recipient_city() {
+	public function test_calculate_shipping_with_default_city() {
+		$user_id = 'user-id';
+		$city_id = 'city-id';
+		$city    = 'City';
+		$locale  = 'ua';
+		$cost    = 48;
+		Mockery::mock( 'overload:Nova_Poshta\Admin\Notice' );
+		$language = Mockery::mock( 'overload:Nova_Poshta\Core\Language' );
+		$language
+			->shouldReceive( 'get_current_language' )
+			->once()
+			->andReturn( $locale );
+		Mockery::mock( 'overload:Nova_Poshta\Core\DB' );
+		Mockery::mock( 'overload:Nova_Poshta\Core\Cache\Object_Cache' );
+		Mockery::mock( 'overload:Nova_Poshta\Core\Cache\Transient_Cache' );
+		Mockery::mock( 'overload:Nova_Poshta\Core\Settings' );
+		$api = Mockery::mock( 'overload:Nova_Poshta\Core\API' );
+		$api
+			->shouldReceive( 'cities' )
+			->once()
+			->andReturn( [ $city_id => $city ] );
+		WP_Mock::userFunction( 'get_current_user_id' )->
+		once()->
+		andReturn( $user_id );
+		WP_Mock::userFunction( 'wp_verify_nonce' )->
+		once()->
+		andReturn( false );
+		Mockery::mock( 'overload:Nova_Poshta\Core\Calculator' );
+		$cart = Mockery::mock( 'WC_Cart' );
+		global $woocommerce;
+		$woocommerce       = new stdClass();
+		$woocommerce->cart = $cart;
+		$shipping_cost     = Mockery::mock( 'overload:Nova_Poshta\Core\Shipping_Cost' );
+		$shipping_cost
+			->shouldReceive( 'calculate' )
+			->with( $city_id, $cart )
+			->once()
+			->andReturn( $cost );
 		$stub        = Mockery::mock( 'Nova_Poshta_Shipping_Method' )->makePartial();
 		$stub->id    = 'shipping_nova_poshta_for_woocommerce';
 		$stub->title = 'shipping_nova_poshta_for_woocommerce';
@@ -78,7 +119,7 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 				[
 					'id'       => $stub->id,
 					'label'    => $stub->title,
-					'cost'     => '0',
+					'cost'     => $cost,
 					'calc_tax' => 'per_item',
 				]
 			);
@@ -184,13 +225,16 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 		Mockery::mock( 'overload:Nova_Poshta\Core\Settings' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\API' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\Calculator' );
-		$shipping_cost = Mockery::mock( 'overload:Nova_Poshta\Core\Shipping_Cost' );
+		$cart = Mockery::mock( 'WC_Cart' );
+		global $woocommerce;
+		$woocommerce       = new stdClass();
+		$woocommerce->cart = $cart;
+		$shipping_cost     = Mockery::mock( 'overload:Nova_Poshta\Core\Shipping_Cost' );
 		$shipping_cost
 			->shouldReceive( 'calculate' )
 			->with( $request_city_id, $cart )
 			->once()
 			->andReturn( $cost );
-
 		$stub        = Mockery::mock( 'Nova_Poshta_Shipping_Method' )->makePartial();
 		$stub->id    = 'shipping_nova_poshta_for_woocommerce';
 		$stub->title = 'shipping_nova_poshta_for_woocommerce';

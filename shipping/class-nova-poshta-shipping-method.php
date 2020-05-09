@@ -118,8 +118,28 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 		 * @throws Exception Invalid DateTime.
 		 */
 		public function calculate_shipping( $package = [] ) {
-			$city_id = apply_filters( 'shipping_nova_poshta_for_woocommerce_default_city_id', '', get_current_user_id() );
-			$nonce   = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_nonce', FILTER_SANITIZE_STRING );
+			$notice          = new Notice();
+			$language        = new Language();
+			$db              = new DB( $language );
+			$object_cache    = new Object_Cache();
+			$transient_cache = new Transient_Cache();
+			$settings        = new Settings( $notice );
+			$api             = new API( $db, $object_cache, $transient_cache, $settings );
+			$user_id         = get_current_user_id();
+			$city_id         = apply_filters( 'shipping_nova_poshta_for_woocommerce_default_city_id', '', $user_id );
+			if ( ! $city_id ) {
+				$city    = $api->cities(
+					apply_filters(
+						'shipping_nova_poshta_for_woocommerce_default_city',
+						'',
+						$user_id,
+						$language->get_current_language()
+					),
+					1
+				);
+				$city_id = array_keys( $city )[0];
+			}
+			$nonce = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_nonce', FILTER_SANITIZE_STRING );
 			if ( wp_verify_nonce( $nonce, Main::PLUGIN_SLUG . '-shipping' ) ) {
 				$request_city_id = filter_input( INPUT_POST, 'shipping_nova_poshta_for_woocommerce_city', FILTER_SANITIZE_STRING );
 				$city_id         = ! empty( $request_city_id ) ? $request_city_id : $city_id;
@@ -128,16 +148,9 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 			global $woocommerce;
 			$cart = $woocommerce->cart;
 			if ( $city_id && $cart ) {
-				$notice          = new Notice();
-				$language        = new Language();
-				$db              = new DB( $language );
-				$object_cache    = new Object_Cache();
-				$transient_cache = new Transient_Cache();
-				$settings        = new Settings( $notice );
-				$api             = new API( $db, $object_cache, $transient_cache, $settings );
-				$calculator      = new Calculator();
-				$shipping_cost   = new Shipping_Cost( $api, $settings, $calculator );
-				$cost            = $shipping_cost->calculate( $city_id, $cart );
+				$calculator    = new Calculator();
+				$shipping_cost = new Shipping_Cost( $api, $settings, $calculator );
+				$cost          = $shipping_cost->calculate( $city_id, $cart );
 			}
 			$rate = [
 				'id'       => $this->id,
