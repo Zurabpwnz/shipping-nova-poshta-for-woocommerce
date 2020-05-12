@@ -146,11 +146,11 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 			}
 			$cost = 0;
 			global $woocommerce;
-			$cart = $woocommerce->cart;
-			if ( $city_id && $cart ) {
+			$products = $woocommerce->cart->get_cart_contents();
+			if ( $city_id && ! empty( $products ) ) {
 				$calculator    = new Calculator();
 				$shipping_cost = new Shipping_Cost( $api, $settings, $calculator );
-				$cost          = $shipping_cost->calculate( $city_id, $cart );
+				$cost          = $shipping_cost->calculate( $city_id, $products );
 			}
 			$rate = [
 				'id'       => $this->id,

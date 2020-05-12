@@ -95,15 +95,23 @@ class AJAX {
 		$city = filter_input( INPUT_POST, 'city', FILTER_SANITIZE_STRING );
 		if ( ! $city ) {
 			wp_send_json_error();
+
 			return;
 		}
 		global $woocommerce;
 		$cart = $woocommerce->cart;
 		if ( ! $cart ) {
 			wp_send_json_error();
+
 			return;
 		}
-		$price = $this->shipping_cost->calculate( $city, $cart );
+		$products = $cart->get_cart_contents();
+		if ( ! $products ) {
+			wp_send_json_error();
+
+			return;
+		}
+		$price = $this->shipping_cost->calculate( $city, $products );
 		if ( $price ) {
 			$price = wc_price( $price );
 		}
