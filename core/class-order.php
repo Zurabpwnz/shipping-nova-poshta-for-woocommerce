@@ -116,32 +116,39 @@ class Order {
 	/**
 	 * Save shipping method
 	 *
-	 * @param WC_Order_Item $item WC Order Item.
+	 * @param WC_Order_Item $order_item WC Order Item.
 	 *
 	 * @throws WC_Data_Exception Invalid total shipping cost.
 	 * @throws Exception Invalid DateTime.
 	 */
-	public function save( WC_Order_Item $item ) {
+	public function save( WC_Order_Item $order_item ) {
 		if ( ! is_admin() ) {
 			return;
 		}
-		if ( ! is_a( $item, 'WC_Order_Item_Shipping' ) ) {
+		if ( ! is_a( $order_item, 'WC_Order_Item_Shipping' ) ) {
 			return;
 		}
-		if ( 'shipping_nova_poshta_for_woocommerce' !== $item->get_method_id() ) {
+		if ( 'shipping_nova_poshta_for_woocommerce' !== $order_item->get_method_id() ) {
 			return;
 		}
-		$city_id = $item->get_meta( 'city_id', true );
+		$city_id = $order_item->get_meta( 'city_id', true );
 		if ( ! $city_id ) {
 			return;
 		}
-		global $woocommerce;
-		$cart = $woocommerce->cart;
-		if ( ! $cart ) {
+		$order = $order_item->get_order();
+		$items = $order->get_items();
+		if ( empty( $items ) ) {
 			return;
 		}
-		$item->set_total(
-			$this->shipping_cost->calculate( $city_id, $cart )
+		$products = [];
+		foreach ( $items as $item ) {
+			$products[] = [
+				'quantity' => $item->get_quantity(),
+				'data'     => $item->get_product(),
+			];
+		}
+		$order_item->set_total(
+			(int) $this->shipping_cost->calculate( $city_id, $products )
 		);
 	}
 

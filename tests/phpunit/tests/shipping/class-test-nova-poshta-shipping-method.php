@@ -87,7 +87,9 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 		Mockery::mock( 'overload:Nova_Poshta\Core\Cache\Object_Cache' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\Cache\Transient_Cache' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\Settings' );
-		$api = Mockery::mock( 'overload:Nova_Poshta\Core\API' );
+		$product1 = Mockery::mock( 'WC_Product' );
+		$product2 = Mockery::mock( 'WC_Product' );
+		$api      = Mockery::mock( 'overload:Nova_Poshta\Core\API' );
 		$api
 			->shouldReceive( 'cities' )
 			->once()
@@ -103,10 +105,24 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 		global $woocommerce;
 		$woocommerce       = new stdClass();
 		$woocommerce->cart = $cart;
-		$shipping_cost     = Mockery::mock( 'overload:Nova_Poshta\Core\Shipping_Cost' );
+		$contents          = [
+			[
+				'quantity' => 10,
+				'data'     => $product1,
+			],
+			[
+				'quantity' => 15,
+				'data'     => $product2,
+			],
+		];
+		$cart
+			->shouldReceive( 'get_cart_contents' )
+			->once()
+			->andReturn( $contents );
+		$shipping_cost = Mockery::mock( 'overload:Nova_Poshta\Core\Shipping_Cost' );
 		$shipping_cost
 			->shouldReceive( 'calculate' )
-			->with( $city_id, $cart )
+			->with( $city_id, $contents )
 			->once()
 			->andReturn( $cost );
 		$stub        = Mockery::mock( 'Nova_Poshta_Shipping_Method' )->makePartial();
@@ -154,14 +170,30 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 		Mockery::mock( 'overload:Nova_Poshta\Core\Settings' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\API' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\Calculator' );
-		$cart = Mockery::mock( 'WC_Cart' );
+		$product1 = Mockery::mock( 'WC_Product' );
+		$product2 = Mockery::mock( 'WC_Product' );
+		$cart     = Mockery::mock( 'WC_Cart' );
 		global $woocommerce;
 		$woocommerce       = new stdClass();
 		$woocommerce->cart = $cart;
-		$shipping_cost     = Mockery::mock( 'overload:Nova_Poshta\Core\Shipping_Cost' );
+		$contents          = [
+			[
+				'quantity' => 10,
+				'data'     => $product1,
+			],
+			[
+				'quantity' => 15,
+				'data'     => $product2,
+			],
+		];
+		$cart
+			->shouldReceive( 'get_cart_contents' )
+			->once()
+			->andReturn( $contents );
+		$shipping_cost = Mockery::mock( 'overload:Nova_Poshta\Core\Shipping_Cost' );
 		$shipping_cost
 			->shouldReceive( 'calculate' )
-			->with( $city_id, $cart )
+			->with( $city_id, $contents )
 			->once()
 			->andReturn( $cost );
 		$stub        = Mockery::mock( 'Nova_Poshta_Shipping_Method' )->makePartial();
@@ -198,9 +230,6 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 		once()->
 		andReturn( $user_id );
 		$cart = Mockery::mock( 'WC_Cart' );
-		global $woocommerce;
-		$woocommerce       = new stdClass();
-		$woocommerce->cart = $cart;
 		FunctionMocker::replace(
 			'filter_input',
 			function () use ( $nonce, $request_city_id ) {
@@ -225,14 +254,30 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 		Mockery::mock( 'overload:Nova_Poshta\Core\Settings' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\API' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\Calculator' );
-		$cart = Mockery::mock( 'WC_Cart' );
+		$product1 = Mockery::mock( 'WC_Product' );
+		$product2 = Mockery::mock( 'WC_Product' );
+		$cart     = Mockery::mock( 'WC_Cart' );
 		global $woocommerce;
 		$woocommerce       = new stdClass();
 		$woocommerce->cart = $cart;
-		$shipping_cost     = Mockery::mock( 'overload:Nova_Poshta\Core\Shipping_Cost' );
+		$contents          = [
+			[
+				'quantity' => 10,
+				'data'     => $product1,
+			],
+			[
+				'quantity' => 15,
+				'data'     => $product2,
+			],
+		];
+		$cart
+			->shouldReceive( 'get_cart_contents' )
+			->once()
+			->andReturn( $contents );
+		$shipping_cost = Mockery::mock( 'overload:Nova_Poshta\Core\Shipping_Cost' );
 		$shipping_cost
 			->shouldReceive( 'calculate' )
-			->with( $request_city_id, $cart )
+			->with( $request_city_id, $contents )
 			->once()
 			->andReturn( $cost );
 		$stub        = Mockery::mock( 'Nova_Poshta_Shipping_Method' )->makePartial();

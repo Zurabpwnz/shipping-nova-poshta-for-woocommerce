@@ -151,6 +151,36 @@ class Test_Ajax extends Test_Case {
 	}
 
 	/**
+	 * Test shipping cost without contents
+	 */
+	public function test_shipping_without_contents() {
+		$city_id    = 'city_id';
+		$price      = 48;
+		$price_html = '<span>' . $price . '</span>';
+		WP_Mock::userFunction( 'check_ajax_referer' )->
+		withArgs( [ Main::PLUGIN_SLUG, 'nonce' ] )->
+		once();
+		$filter_input = FunctionMocker::replace( 'filter_input', $city_id );
+		$cart         = Mockery::mock( 'WC_Cart' );
+		$cart
+			->shouldReceive( 'get_cart_contents' )
+			->once()
+			->andReturn( [] );
+		global $woocommerce;
+		$woocommerce       = new stdClass();
+		$woocommerce->cart = $cart;
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		WP_Mock::userFunction( 'wp_send_json_error' )->
+		once();
+
+		$ajax = new AJAX( $api, $shipping_cost );
+
+		$ajax->shipping_cost();
+		$filter_input->wasCalledWithOnce( [ INPUT_POST, 'city', FILTER_SANITIZE_STRING ] );
+	}
+
+	/**
 	 * Test shipping cost
 	 */
 	public function test_shipping_cost() {
@@ -168,7 +198,21 @@ class Test_Ajax extends Test_Case {
 		once()->
 		andReturn( $price_html );
 		$filter_input = FunctionMocker::replace( 'filter_input', $city_id );
+		$contents     = [
+			[
+				'quantity' => 1,
+				'data'     => 'item1',
+			],
+			[
+				'quantity' => 3,
+				'data'     => 'item2',
+			],
+		];
 		$cart         = Mockery::mock( 'WC_Cart' );
+		$cart
+			->shouldReceive( 'get_cart_contents' )
+			->once()
+			->andReturn( $contents );
 		global $woocommerce;
 		$woocommerce       = new stdClass();
 		$woocommerce->cart = $cart;
@@ -176,7 +220,7 @@ class Test_Ajax extends Test_Case {
 		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
 		$shipping_cost
 			->shouldReceive( 'calculate' )
-			->with( $city_id, $cart )
+			->with( $city_id, $contents )
 			->once()
 			->andReturn( $price );
 		$ajax = new AJAX( $api, $shipping_cost );
