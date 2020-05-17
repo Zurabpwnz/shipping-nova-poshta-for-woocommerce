@@ -101,6 +101,10 @@ Please do not change the code, otherwise it will be lost during the next update.
 * Improved city search
 * Improved activate/deactivation plugin
 
+= 1.3.1 =
+* Improved cache work
+* Improved first UX
+
 == Upgrade Notice ==
 
 = 1.0.0 =

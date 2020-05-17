@@ -25,11 +25,11 @@ class Test_Object_Cache extends Test_Case {
 		$key    = 'some-key';
 		$value  = 'value';
 		$expire = 100;
-		WP_Mock::userFunction( 'wp_cache_get' )->
-		with( 'Nova_Poshta\Core\Cache\Object_Cache-keys', Main::PLUGIN_SLUG )->
+		WP_Mock::userFunction( 'get_transient' )->
+		with( 'Nova_Poshta\Core\Cache\Object_Cache-keys' )->
 		once();
-		WP_Mock::userFunction( 'wp_cache_set' )->
-		with( 'Nova_Poshta\Core\Cache\Object_Cache-keys', [ $key ], Main::PLUGIN_SLUG )->
+		WP_Mock::userFunction( 'set_transient' )->
+		with( 'Nova_Poshta\Core\Cache\Object_Cache-keys', [ $key ] )->
 		once();
 		WP_Mock::userFunction( 'wp_cache_set' )->
 		with( $key, $value, Main::PLUGIN_SLUG, $expire )->
@@ -44,8 +44,8 @@ class Test_Object_Cache extends Test_Case {
 	 */
 	public function test_get() {
 		$key = 'some-key';
-		WP_Mock::userFunction( 'wp_cache_get' )->
-		with( 'Nova_Poshta\Core\Cache\Object_Cache-keys', Main::PLUGIN_SLUG )->
+		WP_Mock::userFunction( 'get_transient' )->
+		with( 'Nova_Poshta\Core\Cache\Object_Cache-keys' )->
 		once();
 		WP_Mock::userFunction( 'wp_cache_get' )->
 		with( $key, Main::PLUGIN_SLUG )->
@@ -60,8 +60,8 @@ class Test_Object_Cache extends Test_Case {
 	 */
 	public function test_delete() {
 		$key = 'some-key';
-		WP_Mock::userFunction( 'wp_cache_get' )->
-		with( 'Nova_Poshta\Core\Cache\Object_Cache-keys', Main::PLUGIN_SLUG )->
+		WP_Mock::userFunction( 'get_transient' )->
+		with( 'Nova_Poshta\Core\Cache\Object_Cache-keys' )->
 		once();
 		WP_Mock::userFunction( 'wp_cache_delete' )->
 		with( $key, Main::PLUGIN_SLUG )->
