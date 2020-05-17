@@ -287,7 +287,8 @@ class Test_Admin extends Test_Case {
 	 */
 	public function test_page_options_general_first_sign_in() {
 		$city_id      = 'city-id';
-		$default_city = $city_name = 'City Name';
+		$default_city = 'City Name';
+		$city_name    = $default_city;
 		$warehouse_id = 'warehouse-id';
 		$user_id      = 10;
 		$locale       = 'uk';
