@@ -109,7 +109,7 @@ class Test_Shipping extends Test_Case {
 			->shouldReceive( 'add' )
 			->with(
 				'error',
-				'You must add the "New Delivery Method" delivery method <a href="url">in the WooCommerce settings</a>'
+				'You must add the "Nova Poshta" shipping method <a href="url">in the WooCommerce settings</a>'
 			)
 			->once();
 		$object_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
