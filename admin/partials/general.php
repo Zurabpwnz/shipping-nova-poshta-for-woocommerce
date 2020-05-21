@@ -65,6 +65,20 @@ use Nova_Poshta\Core\Main;
 				<?php
 				$current_city_id = $this->settings->city_id();
 				$current_city    = $current_city_id ? $this->api->city( $current_city_id ) : '';
+				if ( ! $current_city ) {
+					$cities          = $this->api->cities( '', 0 );
+					$city            = $this->api->cities(
+						apply_filters(
+							'shipping_nova_poshta_for_woocommerce_default_city',
+							'',
+							get_current_user_id(),
+							$this->language->get_current_language()
+						),
+						1
+					);
+					$current_city_id = array_keys( $city )[0];
+					$current_city    = array_pop( $city );
+				}
 				?>
 				<label>
 					<?php esc_attr_e( 'Sender City', 'shipping-nova-poshta-for-woocommerce' ); ?><br>
