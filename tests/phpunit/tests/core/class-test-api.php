@@ -515,8 +515,8 @@ class Test_API extends Test_Case {
 		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
 		once()->
 		with( 'response' )->
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
 		andReturn(
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
 			json_encode(
 				[
 					'success' => true,
@@ -638,8 +638,8 @@ class Test_API extends Test_Case {
 		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
 		once()->
 		with( 'response' )->
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
 		andReturn(
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
 			json_encode(
 				[
 					'success' => true,
@@ -649,7 +649,7 @@ class Test_API extends Test_Case {
 						],
 					],
 				]
-			),
+			)
 		);
 		WP_Mock::userFunction( 'wp_json_encode' )->
 		with(
@@ -679,8 +679,8 @@ class Test_API extends Test_Case {
 		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
 		once()->
 		with( 'response' )->
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
 		andReturn(
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
 			json_encode(
 				[
 					'success' => true,
@@ -873,7 +873,7 @@ class Test_API extends Test_Case {
 						],
 					],
 				]
-			),
+			)
 		);
 		WP_Mock::userFunction( 'wp_json_encode' )->
 		with(
@@ -930,7 +930,7 @@ class Test_API extends Test_Case {
 						],
 					],
 				]
-			),
+			)
 		);
 		$date = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
 		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_document_description' )->
@@ -1007,7 +1007,7 @@ class Test_API extends Test_Case {
 						],
 					],
 				]
-			),
+			)
 		);
 		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
 		with( 'json' )->
@@ -1158,7 +1158,7 @@ class Test_API extends Test_Case {
 						],
 					],
 				]
-			),
+			)
 		);
 		WP_Mock::userFunction( 'wp_json_encode' )->
 		with(
@@ -1299,7 +1299,7 @@ class Test_API extends Test_Case {
 						],
 					],
 				]
-			),
+			)
 		);
 		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
 		with( 'json' )->

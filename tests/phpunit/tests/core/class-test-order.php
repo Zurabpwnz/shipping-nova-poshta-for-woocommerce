@@ -1007,7 +1007,6 @@ class Test_Order extends Test_Case {
 			->with( 'error', 'Error message 2' )
 			->once();
 
-
 		$order = new Order( $api, $shipping_cost, $notice );
 
 		$order->create_internet_document( $wc_order );

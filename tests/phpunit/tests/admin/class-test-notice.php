@@ -85,6 +85,9 @@ class Test_Notice extends Test_Case {
 		$this->assertTrue( ! ! strpos( $html, $message ) );
 	}
 
+	/**
+	 * Save notices if these not used.
+	 */
 	public function test_save() {
 		$cache  = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 		$notice = 'some-notice';
