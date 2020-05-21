@@ -12,8 +12,6 @@
 
 namespace Nova_Poshta\Core\Cache;
 
-use Nova_Poshta\Core\Main;
-
 /**
  * Class Cache
  *

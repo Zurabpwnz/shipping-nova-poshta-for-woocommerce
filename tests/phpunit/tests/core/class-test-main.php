@@ -36,6 +36,7 @@ class Test_Main extends Test_Case {
 		$notice
 			->shouldReceive( 'hooks' )
 			->once();
+		Mockery::mock( 'overload:Nova_Poshta\Core\Cache\Factory_Cache' );
 		$object_cache = Mockery::mock( 'overload:Nova_Poshta\Core\Cache\Object_Cache' );
 		$object_cache
 			->shouldReceive( 'hooks' )

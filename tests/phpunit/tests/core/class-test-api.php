@@ -34,12 +34,11 @@ class Test_API extends Test_Case {
 		andReturn( 'path/to/main-file' );
 		WP_Mock::userFunction( 'register_activation_hook' )->
 		once();
-		$db              = Mockery::mock( 'Nova_Poshta\Core\DB' );
-		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
-		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
-		$settings        = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$db            = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
+		$settings      = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api = new API( $db, $factory_cache, $settings );
 		$api->hooks();
 	}
 
@@ -47,16 +46,15 @@ class Test_API extends Test_Case {
 	 * Test activate API actions
 	 */
 	public function test_activate_with_api_key() {
-		$db              = Mockery::mock( 'Nova_Poshta\Core\DB' );
-		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
-		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
-		$settings        = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$db            = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
+		$settings      = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 		$settings
 			->shouldReceive( 'api_key' )
 			->once()
 			->andReturn( 'api-key' );
 
-		$api = Mockery::mock( 'Nova_Poshta\Core\API[cities]', [ $db, $object_cache, $transient_cache, $settings ] );
+		$api = Mockery::mock( 'Nova_Poshta\Core\API[cities]', [ $db, $factory_cache, $settings ] );
 		$api
 			->shouldReceive( 'cities' )
 			->once();
@@ -114,15 +112,18 @@ class Test_API extends Test_Case {
 			]
 		)->
 		once()->
+		andReturn( 'response' );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		once()->
+		with( 'response' )->
 		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-		andReturn( [ 'body' => json_encode( $request ) ] );
+		andReturn( json_encode( $request ) );
 		WP_Mock::userFunction( 'is_wp_error' )->
 		once()->
 		andReturn( false );
 		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
 		with( 'json' )->
 		reply( 'json' );
-		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
 		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 		$transient_cache
 			->shouldReceive( 'get' )
@@ -131,8 +132,13 @@ class Test_API extends Test_Case {
 		$transient_cache
 			->shouldReceive( 'set' )
 			->with( 'cities', 1, $day_in_seconds );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
+		$factory_cache
+			->shouldReceive( 'transient' )
+			->once()
+			->andReturn( $transient_cache );
 
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api = new API( $db, $factory_cache, $settings );
 
 		$this->assertSame( $cities, $api->cities( $search, $limit ) );
 
@@ -151,11 +157,10 @@ class Test_API extends Test_Case {
 			->withArgs( [ $city_id ] )
 			->once()
 			->andReturn( $city_name );
-		$settings        = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
-		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$settings      = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api = new API( $db, $factory_cache, $settings );
 
 		$this->assertSame( $city_name, $api->city( $city_id ) );
 	}
@@ -172,11 +177,10 @@ class Test_API extends Test_Case {
 			->withArgs( [ $city_id ] )
 			->once()
 			->andReturn( $area_name );
-		$settings        = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
-		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$settings      = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api = new API( $db, $factory_cache, $settings );
 
 		$this->assertSame( $area_name, $api->area( $city_id ) );
 	}
@@ -193,11 +197,10 @@ class Test_API extends Test_Case {
 			->withArgs( [ $warehouse_id ] )
 			->once()
 			->andReturn( $warehouse_name );
-		$settings        = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
-		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$settings      = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api = new API( $db, $factory_cache, $settings );
 
 		$this->assertSame( $warehouse_name, $api->warehouse( $warehouse_id ) );
 	}
@@ -253,8 +256,12 @@ class Test_API extends Test_Case {
 			]
 		)->
 		once()->
+		andReturn( 'response' );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		once()->
+		with( 'response' )->
 		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-		andReturn( [ 'body' => json_encode( $request ) ] );
+		andReturn( json_encode( $request ) );
 		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
 		with( 'json' )->
 		reply( 'json' );
@@ -271,8 +278,12 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'set' )
 			->with( 'warehouse-' . $city_id, 1, $day_in_seconds )
 			->once();
-		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
-		$api             = new API( $db, $object_cache, $transient_cache, $settings );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
+		$factory_cache
+			->shouldReceive( 'object' )
+			->once()
+			->andReturn( $object_cache );
+		$api = new API( $db, $factory_cache, $settings );
 
 		$this->assertSame( $warehouses, $api->warehouses( $city_id ) );
 
@@ -332,8 +343,12 @@ class Test_API extends Test_Case {
 			]
 		)->
 		once()->
+		andReturn( 'response' );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		once()->
+		with( 'response' )->
 		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-		andReturn( [ 'body' => json_encode( $response ) ] );
+		andReturn( json_encode( $response ) );
 		WP_Mock::userFunction( 'wp_remote_post' );
 		$db           = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$object_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
@@ -346,8 +361,12 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'set' )
 			->with( 'shipping-from-' . $admin_city_id . '-to-' . $city_id . '-' . $weight . '-' . $volume, $cost, 300 )
 			->once();
-		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
-		$settings        = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
+		$factory_cache
+			->shouldReceive( 'object' )
+			->once()
+			->andReturn( $object_cache );
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 		$settings
 			->shouldReceive( 'city_id' )
 			->once()
@@ -356,7 +375,7 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'api_key' )
 			->twice()
 			->andReturn( $api_key );
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api = new API( $db, $factory_cache, $settings );
 
 		$this->assertSame( $cost, $api->shipping_cost( $city_id, $weight, $volume ) );
 	}
@@ -383,10 +402,9 @@ class Test_API extends Test_Case {
 		$settings
 			->shouldReceive( 'warehouse_id' )
 			->once();
-		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
-		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api = new API( $db, $factory_cache, $settings );
 
 		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count );
 	}
@@ -426,10 +444,9 @@ class Test_API extends Test_Case {
 		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
 		with( 'json' )->
 		reply( 'json' );
-		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
-		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api = new API( $db, $factory_cache, $settings );
 
 		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count );
 	}
@@ -494,21 +511,22 @@ class Test_API extends Test_Case {
 			]
 		)->
 		once()->
+		andReturn( 'response' );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		once()->
+		with( 'response' )->
 		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
 		andReturn(
-			[
-				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-				'body' => json_encode(
-					[
-						'success' => true,
-						'data'    => [
-							[
-								'Ref' => $sender,
-							],
+			json_encode(
+				[
+					'success' => true,
+					'data'    => [
+						[
+							'Ref' => $sender,
 						],
-					]
-				),
-			]
+					],
+				]
+			)
 		);
 		WP_Mock::userFunction( 'wp_json_encode' )->
 		with(
@@ -534,20 +552,18 @@ class Test_API extends Test_Case {
 			]
 		)->
 		once()->
+		andReturn( 'response' );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		once()->
+		with( 'response' )->
 		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-		andReturn(
-			[
-				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-				'body' => json_encode( [] ),
-			]
-		);
+		andReturn( json_encode( [ 'success' => false ] ) );
 		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
 		with( 'json' )->
 		reply( 'json' );
-		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
-		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api = new API( $db, $factory_cache, $settings );
 
 		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count );
 	}
@@ -618,21 +634,22 @@ class Test_API extends Test_Case {
 			]
 		)->
 		once()->
+		andReturn( 'response' );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		once()->
+		with( 'response' )->
 		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
 		andReturn(
-			[
-				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-				'body' => json_encode(
-					[
-						'success' => true,
-						'data'    => [
-							[
-								'Ref' => $sender,
-							],
+			json_encode(
+				[
+					'success' => true,
+					'data'    => [
+						[
+							'Ref' => $sender,
 						],
-					]
-				),
-			]
+					],
+				]
+			),
 		);
 		WP_Mock::userFunction( 'wp_json_encode' )->
 		with(
@@ -658,21 +675,22 @@ class Test_API extends Test_Case {
 			]
 		)->
 		once()->
+		andReturn( 'response' );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		once()->
+		with( 'response' )->
 		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
 		andReturn(
-			[
-				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-				'body' => json_encode(
-					[
-						'success' => true,
-						'data'    => [
-							[
-								'Ref' => $contact_sender,
-							],
+			json_encode(
+				[
+					'success' => true,
+					'data'    => [
+						[
+							'Ref' => $contact_sender,
 						],
-					]
-				),
-			]
+					],
+				]
+			)
 		);
 		WP_Mock::userFunction( 'wp_json_encode' )->
 		with(
@@ -707,20 +725,18 @@ class Test_API extends Test_Case {
 			]
 		)->
 		once()->
+		andReturn( 'response' );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		once()->
+		with( 'response' )->
 		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-		andReturn(
-			[
-				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-				'body' => json_encode( [ 'success' => false ] ),
-			]
-		);
+		andReturn( json_encode( [ 'success' => false ] ) );
 		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
 		with( 'json' )->
 		reply( 'json' );
-		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
-		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api = new API( $db, $factory_cache, $settings );
 
 		$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count );
 	}
@@ -801,21 +817,22 @@ class Test_API extends Test_Case {
 			]
 		)->
 		once()->
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn( 'response' );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		once()->
+		with( 'response' )->
 		andReturn(
-			[
-				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-				'body' => json_encode(
-					[
-						'success' => true,
-						'data'    => [
-							[
-								'Ref' => $sender,
-							],
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+			json_encode(
+				[
+					'success' => true,
+					'data'    => [
+						[
+							'Ref' => $sender,
 						],
-					]
-				),
-			]
+					],
+				]
+			)
 		);
 		WP_Mock::userFunction( 'wp_json_encode' )->
 		with(
@@ -841,21 +858,22 @@ class Test_API extends Test_Case {
 			]
 		)->
 		once()->
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn( 'response' );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		once()->
+		with( 'response' )->
 		andReturn(
-			[
-				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-				'body' => json_encode(
-					[
-						'success' => true,
-						'data'    => [
-							[
-								'Ref' => $contact_sender,
-							],
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+			json_encode(
+				[
+					'success' => true,
+					'data'    => [
+						[
+							'Ref' => $contact_sender,
 						],
-					]
-				),
-			]
+					],
+				]
+			),
 		);
 		WP_Mock::userFunction( 'wp_json_encode' )->
 		with(
@@ -890,28 +908,29 @@ class Test_API extends Test_Case {
 			]
 		)->
 		once()->
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn( 'response' );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		once()->
+		with( 'response' )->
 		andReturn(
-			[
-				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-				'body' => json_encode(
-					[
-						'success' => true,
-						'data'    => [
-							[
-								'Ref'           => $recipient,
-								'ContactPerson' => [
-									'data' => [
-										[
-											'Ref' => $contact_recipient,
-										],
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+			json_encode(
+				[
+					'success' => true,
+					'data'    => [
+						[
+							'Ref'           => $recipient,
+							'ContactPerson' => [
+								'data' => [
+									[
+										'Ref' => $contact_recipient,
 									],
 								],
 							],
 						],
-					]
-				),
-			]
+					],
+				]
+			),
 		);
 		$date = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
 		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_document_description' )->
@@ -973,21 +992,22 @@ class Test_API extends Test_Case {
 			]
 		)->
 		once()->
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn( 'response' );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		once()->
+		with( 'response' )->
 		andReturn(
-			[
-				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-				'body' => json_encode(
-					[
-						'success' => true,
-						'data'    => [
-							[
-								'IntDocNumber' => $internet_document,
-							],
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+			json_encode(
+				[
+					'success' => true,
+					'data'    => [
+						[
+							'IntDocNumber' => $internet_document,
 						],
-					]
-				),
-			]
+					],
+				]
+			),
 		);
 		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
 		with( 'json' )->
@@ -995,10 +1015,9 @@ class Test_API extends Test_Case {
 		WP_Mock::userFunction( 'is_wp_error' )->
 		times( 4 )->
 		andReturn( false );
-		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
-		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api = new API( $db, $factory_cache, $settings );
 
 		$this->assertSame(
 			$internet_document,
@@ -1083,21 +1102,22 @@ class Test_API extends Test_Case {
 			]
 		)->
 		once()->
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn( 'response' );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		once()->
+		with( 'response' )->
 		andReturn(
-			[
-				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-				'body' => json_encode(
-					[
-						'success' => true,
-						'data'    => [
-							[
-								'Ref' => $sender,
-							],
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+			json_encode(
+				[
+					'success' => true,
+					'data'    => [
+						[
+							'Ref' => $sender,
 						],
-					]
-				),
-			]
+					],
+				]
+			)
 		);
 		WP_Mock::userFunction( 'wp_json_encode' )->
 		with(
@@ -1123,21 +1143,22 @@ class Test_API extends Test_Case {
 			]
 		)->
 		once()->
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn( 'response' );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		once()->
+		with( 'response' )->
 		andReturn(
-			[
-				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-				'body' => json_encode(
-					[
-						'success' => true,
-						'data'    => [
-							[
-								'Ref' => $contact_sender,
-							],
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+			json_encode(
+				[
+					'success' => true,
+					'data'    => [
+						[
+							'Ref' => $contact_sender,
 						],
-					]
-				),
-			]
+					],
+				]
+			),
 		);
 		WP_Mock::userFunction( 'wp_json_encode' )->
 		with(
@@ -1172,28 +1193,29 @@ class Test_API extends Test_Case {
 			]
 		)->
 		once()->
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn( 'response' );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		once()->
+		with( 'response' )->
 		andReturn(
-			[
-				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-				'body' => json_encode(
-					[
-						'success' => true,
-						'data'    => [
-							[
-								'Ref'           => $recipient,
-								'ContactPerson' => [
-									'data' => [
-										[
-											'Ref' => $contact_recipient,
-										],
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+			json_encode(
+				[
+					'success' => true,
+					'data'    => [
+						[
+							'Ref'           => $recipient,
+							'ContactPerson' => [
+								'data' => [
+									[
+										'Ref' => $contact_recipient,
 									],
 								],
 							],
 						],
-					]
-				),
-			]
+					],
+				]
+			)
 		);
 		$date = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
 		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_document_description' )->
@@ -1262,21 +1284,22 @@ class Test_API extends Test_Case {
 			]
 		)->
 		once()->
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+		andReturn( 'response' );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		once()->
+		with( 'response' )->
 		andReturn(
-			[
-				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-				'body' => json_encode(
-					[
-						'success' => true,
-						'data'    => [
-							[
-								'IntDocNumber' => $internet_document,
-							],
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+			json_encode(
+				[
+					'success' => true,
+					'data'    => [
+						[
+							'IntDocNumber' => $internet_document,
 						],
-					]
-				),
-			]
+					],
+				]
+			),
 		);
 		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
 		with( 'json' )->
@@ -1284,10 +1307,9 @@ class Test_API extends Test_Case {
 		WP_Mock::userFunction( 'is_wp_error' )->
 		times( 4 )->
 		andReturn( false );
-		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
-		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api = new API( $db, $factory_cache, $settings );
 
 		$this->assertSame(
 			$internet_document,
@@ -1332,10 +1354,9 @@ class Test_API extends Test_Case {
 		WP_Mock::userFunction( 'is_wp_error' )->
 		once()->
 		andReturn( true );
-		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
-		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api = new API( $db, $factory_cache, $settings );
 
 		$this->assertFalse( $api->validate( $api_key ) );
 	}
@@ -1386,10 +1407,9 @@ class Test_API extends Test_Case {
 		WP_Mock::userFunction( 'is_wp_error' )->
 		once()->
 		andReturn( false );
-		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
-		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api = new API( $db, $factory_cache, $settings );
 
 		$this->assertFalse( $api->validate( $api_key ) );
 	}
@@ -1437,12 +1457,108 @@ class Test_API extends Test_Case {
 		WP_Mock::userFunction( 'is_wp_error' )->
 		once()->
 		andReturn( false );
-		$object_cache    = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
-		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
-		$api = new API( $db, $object_cache, $transient_cache, $settings );
+		$api = new API( $db, $factory_cache, $settings );
 
 		$this->assertTrue( $api->validate( $api_key ) );
+	}
+
+	/**
+	 * Test errors
+	 */
+	public function test_errors_request() {
+		$api_key        = 'api-key';
+		$search         = 'search';
+		$limit          = 11;
+		$cities         = [ 'City 1', 'City 2' ];
+		$day_in_seconds = 1234;
+		$request        = [
+			'success' => true,
+			'data'    => [ 'some-data' ],
+		];
+		$db             = Mockery::mock( 'Nova_Poshta\Core\DB' );
+		$db
+			->shouldReceive( 'cities' )
+			->withArgs( [ $search, $limit ] )
+			->once()
+			->andReturn( $cities );
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'api_key' )
+			->twice()
+			->andReturn( $api_key );
+		WP_Mock::userFunction( 'wp_json_encode' )->
+		with(
+			[
+				'modelName'        => 'Address',
+				'calledMethod'     => 'getCities',
+				'methodProperties' => new stdClass(),
+				'apiKey'           => $api_key,
+			]
+		)->
+		once()->
+		andReturn( 'json' );
+		$wp_error = Mockery::mock( 'WP_Error' );
+		$wp_error
+			->shouldReceive( 'get_error_messages' )
+			->once()
+			->andReturn( [ 'error1', 'error2' ] );
+		WP_Mock::userFunction( 'wp_remote_post' )->
+		with(
+			API::ENDPOINT,
+			[
+				'headers'     => [ 'Content-Type' => 'application/json' ],
+				'body'        => 'json',
+				'data_format' => 'body',
+				'timeout'     => 30,
+			]
+		)->
+		once()->
+		andReturn( $wp_error );
+		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
+		with( $wp_error )->
+		once()->
+		andReturn(
+		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+			json_encode(
+				[
+					'success' => false,
+					'errors'  => [ 'error3', 'error4' ],
+				]
+			)
+		);
+		WP_Mock::userFunction( 'is_wp_error' )->
+		once()->
+		andReturn( $wp_error );
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
+		with( 'json' )->
+		reply( 'json' );
+		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$transient_cache
+			->shouldReceive( 'get' )
+			->with( 'cities' )
+			->andReturn( false );
+		$transient_cache
+			->shouldReceive( 'set' )
+			->with( 'cities', 1, $day_in_seconds );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
+		$factory_cache
+			->shouldReceive( 'transient' )
+			->once()
+			->andReturn( $transient_cache );
+
+		$api = new API( $db, $factory_cache, $settings );
+		$api->cities( $search, $limit );
+		$this->assertSame(
+			[
+				'error1',
+				'error2',
+				'error3',
+				'error4',
+			],
+			$api->errors()
+		);
 	}
 
 }

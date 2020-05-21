@@ -22,11 +22,15 @@ class Test_Notice extends Test_Case {
 	 * Test adding hooks
 	 */
 	public function test_hooks() {
-		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$shipping = Mockery::mock( 'Nova_Poshta\Core\Shipping' );
-		$notice   = new Notice( $settings, $shipping );
+		$cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$cache
+			->shouldReceive( 'get' )
+			->with( Notice::NOTICES_KEY )
+			->once();
+		$notice = new Notice( $cache );
 
 		WP_Mock::expectActionAdded( 'admin_notices', [ $notice, 'notices' ] );
+		WP_Mock::expectActionAdded( 'shutdown', [ $notice, 'save' ] );
 
 		$notice->hooks();
 	}
@@ -35,7 +39,12 @@ class Test_Notice extends Test_Case {
 	 * Don't show notices
 	 */
 	public function test_without_notice() {
-		$notice = new Notice();
+		$cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$cache
+			->shouldReceive( 'get' )
+			->with( Notice::NOTICES_KEY )
+			->once();
+		$notice = new Notice( $cache );
 
 		ob_start();
 		$notice->notices();
@@ -47,7 +56,6 @@ class Test_Notice extends Test_Case {
 	 * Show notices
 	 */
 	public function test_show_notice() {
-
 		$type    = 'type';
 		$message = 'message';
 		WP_Mock::userFunction( 'wp_kses' )->
@@ -61,7 +69,12 @@ class Test_Notice extends Test_Case {
 		once()->
 		andReturn( $message );
 
-		$notice = new Notice();
+		$cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$cache
+			->shouldReceive( 'get' )
+			->with( Notice::NOTICES_KEY )
+			->once();
+		$notice = new Notice( $cache );
 		$notice->add( $type, $message );
 
 		ob_start();
@@ -70,6 +83,27 @@ class Test_Notice extends Test_Case {
 
 		$this->assertTrue( ! ! strpos( $html, $type ) );
 		$this->assertTrue( ! ! strpos( $html, $message ) );
+	}
+
+	public function test_save() {
+		$cache  = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
+		$notice = 'some-notice';
+		$cache
+			->shouldReceive( 'get' )
+			->with( Notice::NOTICES_KEY )
+			->once()
+			->andReturn( [ $notice ] );
+		$cache
+			->shouldReceive( 'delete' )
+			->with( Notice::NOTICES_KEY )
+			->once();
+		$cache
+			->shouldReceive( 'set' )
+			->with( Notice::NOTICES_KEY, [ $notice ], 60 )
+			->once();
+		$notice = new Notice( $cache );
+
+		$notice->save();
 	}
 
 }

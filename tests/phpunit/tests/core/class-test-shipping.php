@@ -30,8 +30,13 @@ class Test_Shipping extends Test_Case {
 			->with( Shipping::METHOD_NAME . '_active' )
 			->once()
 			->andReturn( true );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
+		$factory_cache
+			->shouldReceive( 'object' )
+			->once()
+			->andReturn( $object_cache );
 
-		$shipping = new Shipping( $notice, $object_cache );
+		$shipping = new Shipping( $notice, $factory_cache );
 
 		WP_Mock::expectActionAdded( 'woocommerce_shipping_init', [ $shipping, 'require_methods' ] );
 		WP_Mock::expectFilterAdded( 'woocommerce_shipping_methods', [ $shipping, 'register_methods' ] );
@@ -50,8 +55,13 @@ class Test_Shipping extends Test_Case {
 			->with( Shipping::METHOD_NAME . '_active' )
 			->once()
 			->andReturn( true );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
+		$factory_cache
+			->shouldReceive( 'object' )
+			->once()
+			->andReturn( $object_cache );
 
-		$shipping = new Shipping( $notice, $object_cache );
+		$shipping = new Shipping( $notice, $factory_cache );
 
 		$this->assertSame(
 			[
@@ -112,8 +122,13 @@ class Test_Shipping extends Test_Case {
 			->shouldReceive( 'set' )
 			->with( Shipping::METHOD_NAME . '_active', $request, $day_in_seconds )
 			->once();
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
+		$factory_cache
+			->shouldReceive( 'object' )
+			->once()
+			->andReturn( $object_cache );
 
-		new Shipping( $notice, $object_cache );
+		new Shipping( $notice, $factory_cache );
 
 		$constant->wasCalledWithOnce( [ 'DAY_IN_SECONDS' ] );
 	}
