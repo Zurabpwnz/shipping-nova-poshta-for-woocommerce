@@ -6,7 +6,7 @@
  * Plugin URI:  https://github.com/wppunk/shipping-nova-poshta-for-woocommerce
  * Description: Select a branch on the checkout page. Creation of electronic invoices. Calculating shipping costs and
  * much more ...
- * Version: 1.3.0
+ * Version: 1.3.1.1
  * Author: WP Punk, Anton Serednii
  * Author URI: https://profiles.wordpress.org/wppunk/
  * License: GPLv2 or later
