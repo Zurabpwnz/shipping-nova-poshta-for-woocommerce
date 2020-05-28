@@ -25,8 +25,8 @@ class Test_Abstract_Cache extends Test_Case {
 	 * @throws ReflectionException Invalid property.
 	 */
 	public function test_flush() {
-		WP_Mock::userFunction( 'wp_cache_get' )->
-		with( 'prefix-keys', Main::PLUGIN_SLUG )->
+		WP_Mock::userFunction( 'get_transient' )->
+		with( 'prefix-keys' )->
 		once();
 		global $times;
 		$times = 0;
@@ -66,10 +66,13 @@ class Test_Abstract_Cache extends Test_Case {
 
 		};
 		$this->update_inaccessible_property( $stub, 'keys', [ 'key-1', 'key-2' ] );
+		WP_Mock::userFunction( 'delete_transient' )->
+		with( 'prefix-keys' )->
+		once();
 
 		$stub->flush();
 
-		$this->assertSame( 3, $times );
+		$this->assertSame( 2, $times );
 		unset( $times );
 	}
 
@@ -77,8 +80,8 @@ class Test_Abstract_Cache extends Test_Case {
 	 * Test hooks
 	 */
 	public function test_hooks() {
-		WP_Mock::userFunction( 'wp_cache_get' )->
-		with( 'prefix-keys', Main::PLUGIN_SLUG )->
+		WP_Mock::userFunction( 'get_transient' )->
+		with( 'prefix-keys' )->
 		once();
 		$stub = new class( 'prefix' ) extends Abstract_Cache {
 

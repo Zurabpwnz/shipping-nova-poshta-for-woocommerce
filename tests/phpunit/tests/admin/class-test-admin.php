@@ -283,6 +283,100 @@ class Test_Admin extends Test_Case {
 	}
 
 	/**
+	 * Test page option tab general first sign in
+	 */
+	public function test_page_options_general_first_sign_in() {
+		$city_id      = 'city-id';
+		$default_city = 'City Name';
+		$city_name    = $default_city;
+		$warehouse_id = 'warehouse-id';
+		$user_id      = 10;
+		$locale       = 'uk';
+		WP_Mock::userFunction( 'plugin_dir_path' )->
+		twice();
+		WP_Mock::userFunction( 'get_admin_url' )->
+		once();
+		WP_Mock::userFunction( 'checked' )->
+		once();
+		WP_Mock::userFunction( 'settings_errors' )->
+		with( Main::PLUGIN_SLUG )->
+		once();
+		WP_Mock::userFunction( 'settings_fields' )->
+		with( Main::PLUGIN_SLUG )->
+		once();
+		WP_Mock::userFunction( 'get_current_user_id' )->
+		once()->
+		andReturn( $user_id );
+		WP_Mock::userFunction( 'submit_button', [ 'times' => 1 ] );
+		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$api
+			->shouldReceive( 'cities' )
+			->with( '', 0 )
+			->once()
+			->andReturn(
+				[
+					'city_id_1' => 'City name 1',
+					'city_id_2' => 'City name 2',
+				]
+			);
+		$api
+			->shouldReceive( 'cities' )
+			->with( $default_city, 1 )
+			->once()
+			->andReturn( [ $city_id => $city_name ] );
+		$api
+			->shouldReceive( 'warehouses' )
+			->withArgs( [ $city_id ] )
+			->once()
+			->andReturn( [ 'Warehuse #1' ] );
+		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_default_city' )->
+		with( '', $user_id, $locale )->
+		reply( $default_city );
+		WP_Mock::userFunction( 'selected' )->once();
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$settings
+			->shouldReceive( 'api_key' )
+			->twice()
+			->andReturn( 'api-key' );
+		$settings
+			->shouldReceive( 'city_id' )
+			->once()
+			->andReturn( '' );
+		$settings
+			->shouldReceive( 'warehouse_id' )
+			->once()
+			->andReturn( $warehouse_id );
+		$settings
+			->shouldReceive( 'is_shipping_cost_enable' )
+			->twice()
+			->andReturn( true );
+		$settings
+			->shouldReceive(
+				'phone',
+				'description',
+				'default_weight_formula',
+				'default_width_formula',
+				'default_height_formula',
+				'default_length_formula'
+			)
+			->once();
+		WP_Mock::userFunction( 'wp_kses_post' )->
+		with( 'If you do not have an API key, then you can get it in the <a href="https://new.novaposhta.ua/#/1/settings/developers" target="_blank">personal account of Nova Poshta</a>. Unfortunately, without the API key, the plugin will not work :(' )->
+		once();
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$language
+			->shouldReceive( 'get_current_language' )
+			->once()
+			->andReturn( $locale );
+		$admin = new Admin( $api, $settings, $language );
+
+		ob_start();
+		$admin->page_options();
+
+		$this->assertNotEmpty( ob_get_clean() );
+	}
+
+	/**
 	 * Test creating invoice
 	 *
 	 * @dataProvider dp_request

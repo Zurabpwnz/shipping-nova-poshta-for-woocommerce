@@ -13,7 +13,6 @@
 namespace Nova_Poshta\Core;
 
 use Exception;
-use WC_Cart;
 use WC_Product;
 
 /**
@@ -58,20 +57,20 @@ class Shipping_Cost {
 	/**
 	 * Calculate shipping cost
 	 *
-	 * @param string  $recipient_city_id Recipient city ID.
-	 * @param WC_Cart $cart              WooCommerce Cart.
+	 * @param string $recipient_city_id Recipient city ID.
+	 * @param array  $products          List of products.
+	 *                                  Each product will be array with 'data' => WC_Product and quantity.
 	 *
 	 * @return float
 	 * @throws Exception Invalid DateTime.
 	 */
-	public function calculate( string $recipient_city_id, WC_Cart $cart ): float {
+	public function calculate( string $recipient_city_id, array $products ): float {
 		if ( ! $this->settings->is_shipping_cost_enable() ) {
 			return 0;
 		}
-		$items  = $cart->get_cart_contents();
 		$weight = 0;
 		$volume = 0;
-		foreach ( $items as $item ) {
+		foreach ( $products as $item ) {
 			$weight += $this->get_weight( $item['data'], $item['quantity'] );
 			$volume += $this->get_volume( $item['data'], $item['quantity'] );
 		}

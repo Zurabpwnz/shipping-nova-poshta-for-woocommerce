@@ -32,10 +32,9 @@ class Test_Shipping_Cost extends Test_Case {
 			->once()
 			->andReturn( false );
 		$calculator = Mockery::mock( 'Nova_Poshta\Core\Calculator' );
-		$cart       = Mockery::mock( 'WC_Cart' );
 
 		$shipping_cost = new Shipping_Cost( $api, $settings, $calculator );
-		$shipping_cost->calculate( 'city-id', $cart );
+		$shipping_cost->calculate( 'city-id', [] );
 	}
 
 	/**
@@ -100,7 +99,6 @@ class Test_Shipping_Cost extends Test_Case {
 			->with( '(' . $product2_dimension . ') * (' . $product2_dimension . ') * (' . $product2_dimension . ')', 1 )
 			->once()
 			->andReturn( $product2_dimension ^ 3 );
-		$cart     = Mockery::mock( 'WC_Cart' );
 		$product1 = Mockery::mock( 'WC_Product' );
 		$product1
 			->shouldReceive( 'get_weight' )
@@ -119,24 +117,21 @@ class Test_Shipping_Cost extends Test_Case {
 			->shouldReceive( 'get_width', 'get_length', 'get_height' )
 			->andReturn( $product2_dimension )
 			->once();
-		$cart
-			->shouldReceive( 'get_cart_contents' )
-			->once()
-			->andReturn(
-				[
-					[
-						'quantity' => 1,
-						'data'     => $product1,
-					],
-					[
-						'quantity' => 1,
-						'data'     => $product2,
-					],
-				]
-			);
 		$shipping_cost = new Shipping_Cost( $api, $settings, $calculator );
 
-		$shipping_cost->calculate( $city_id, $cart );
+		$shipping_cost->calculate(
+			$city_id,
+			[
+				[
+					'quantity' => 1,
+					'data'     => $product1,
+				],
+				[
+					'quantity' => 1,
+					'data'     => $product2,
+				],
+			]
+		);
 	}
 
 	/**
@@ -199,7 +194,6 @@ class Test_Shipping_Cost extends Test_Case {
 			->shouldReceive( 'result' )
 			->once()
 			->andReturn( $product2_dimension ^ 3 );
-		$cart     = Mockery::mock( 'WC_Cart' );
 		$product1 = Mockery::mock( 'WC_Product' );
 		$product1
 			->shouldReceive( 'get_weight' )
@@ -252,24 +246,21 @@ class Test_Shipping_Cost extends Test_Case {
 		with( 20 )->
 		times( 4 )->
 		andReturn( $product2_parent );
-		$cart
-			->shouldReceive( 'get_cart_contents' )
-			->once()
-			->andReturn(
-				[
-					[
-						'quantity' => 1,
-						'data'     => $product1,
-					],
-					[
-						'quantity' => 1,
-						'data'     => $product2,
-					],
-				]
-			);
 		$shipping_cost = new Shipping_Cost( $api, $settings, $calculator );
 
-		$shipping_cost->calculate( $city_id, $cart );
+		$shipping_cost->calculate(
+			$city_id,
+			[
+				[
+					'quantity' => 1,
+					'data'     => $product1,
+				],
+				[
+					'quantity' => 1,
+					'data'     => $product2,
+				],
+			]
+		);
 	}
 
 	/**
@@ -334,7 +325,6 @@ class Test_Shipping_Cost extends Test_Case {
 			->with( '(' . $product2_dimension . ') * (' . $product2_dimension . ') * (' . $product2_dimension . ')', 1 )
 			->once()
 			->andReturn( $product2_dimension ^ 3 );
-		$cart     = Mockery::mock( 'WC_Cart' );
 		$product1 = Mockery::mock( 'WC_Product' );
 		$product1
 			->shouldReceive( 'get_weight' )
@@ -401,24 +391,21 @@ class Test_Shipping_Cost extends Test_Case {
 			->with( 'length_formula', true )
 			->once()
 			->andReturn( $product2_dimension_formula );
-		$cart
-			->shouldReceive( 'get_cart_contents' )
-			->once()
-			->andReturn(
-				[
-					[
-						'quantity' => 1,
-						'data'     => $product1,
-					],
-					[
-						'quantity' => 1,
-						'data'     => $product2,
-					],
-				]
-			);
 		$shipping_cost = new Shipping_Cost( $api, $settings, $calculator );
 
-		$shipping_cost->calculate( $city_id, $cart );
+		$shipping_cost->calculate(
+			$city_id,
+			[
+				[
+					'quantity' => 1,
+					'data'     => $product1,
+				],
+				[
+					'quantity' => 1,
+					'data'     => $product2,
+				],
+			]
+		);
 	}
 
 	/**
@@ -485,7 +472,6 @@ class Test_Shipping_Cost extends Test_Case {
 			->with( '(' . $product2_dimension . ') * (' . $product2_dimension . ') * (' . $product2_dimension . ')', 1 )
 			->once()
 			->andReturn( $product2_dimension ^ 3 );
-		$cart     = Mockery::mock( 'WC_Cart' );
 		$product1 = Mockery::mock( 'WC_Product' );
 		$product1
 			->shouldReceive( 'get_weight' )
@@ -592,24 +578,21 @@ class Test_Shipping_Cost extends Test_Case {
 		with( $category2, 'length_formula', true )->
 		once()->
 		andReturn( $product2_dimension_formula );
-		$cart
-			->shouldReceive( 'get_cart_contents' )
-			->once()
-			->andReturn(
-				[
-					[
-						'quantity' => 1,
-						'data'     => $product1,
-					],
-					[
-						'quantity' => 1,
-						'data'     => $product2,
-					],
-				]
-			);
 		$shipping_cost = new Shipping_Cost( $api, $settings, $calculator );
 
-		$shipping_cost->calculate( $city_id, $cart );
+		$shipping_cost->calculate(
+			$city_id,
+			[
+				[
+					'quantity' => 1,
+					'data'     => $product1,
+				],
+				[
+					'quantity' => 1,
+					'data'     => $product2,
+				],
+			]
+		);
 	}
 
 	/**
@@ -663,7 +646,6 @@ class Test_Shipping_Cost extends Test_Case {
 			->with( '(' . $default_dimension . ') * (' . $default_dimension . ') * (' . $default_dimension . ')', 1 )
 			->twice()
 			->andReturn( $default_dimension ^ 3 );
-		$cart     = Mockery::mock( 'WC_Cart' );
 		$product1 = Mockery::mock( 'WC_Product' );
 		$product1
 			->shouldReceive( 'get_weight' )
@@ -738,24 +720,21 @@ class Test_Shipping_Cost extends Test_Case {
 			->shouldReceive( 'get_category_ids' )
 			->times( 4 )
 			->andReturn( false );
-		$cart
-			->shouldReceive( 'get_cart_contents' )
-			->once()
-			->andReturn(
-				[
-					[
-						'quantity' => 1,
-						'data'     => $product1,
-					],
-					[
-						'quantity' => 1,
-						'data'     => $product2,
-					],
-				]
-			);
 		$shipping_cost = new Shipping_Cost( $api, $settings, $calculator );
 
-		$shipping_cost->calculate( $city_id, $cart );
+		$shipping_cost->calculate(
+			$city_id,
+			[
+				[
+					'quantity' => 1,
+					'data'     => $product1,
+				],
+				[
+					'quantity' => 1,
+					'data'     => $product2,
+				],
+			]
+		);
 	}
 
 }

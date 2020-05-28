@@ -12,8 +12,6 @@
 
 namespace Nova_Poshta\Core\Cache;
 
-use Nova_Poshta\Core\Main;
-
 /**
  * Class Cache
  *
@@ -41,7 +39,7 @@ abstract class Abstract_Cache {
 	 */
 	public function __construct( string $key_name ) {
 		$this->key_name = $key_name . '-keys';
-		$keys           = wp_cache_get( $this->key_name, Main::PLUGIN_SLUG );
+		$keys           = get_transient( $this->key_name );
 		$this->keys     = ! empty( $keys ) && is_array( $keys ) ? $keys : [];
 	}
 
@@ -49,8 +47,9 @@ abstract class Abstract_Cache {
 	 * Add hooks
 	 */
 	public function hooks() {
+		$dir = plugin_dir_path( dirname( __DIR__ ) );
 		register_deactivation_hook(
-			plugin_dir_path( __DIR__ ) . dirname( plugin_basename( __DIR__ ) ) . '.php',
+			$dir . plugin_basename( $dir ) . '.php',
 			[ $this, 'flush' ]
 		);
 	}
@@ -80,7 +79,7 @@ abstract class Abstract_Cache {
 	 */
 	protected function save_keys() {
 		$this->keys = array_unique( $this->keys );
-		wp_cache_set( $this->key_name, $this->keys, Main::PLUGIN_SLUG );
+		set_transient( $this->key_name, $this->keys );
 	}
 
 	/**
@@ -115,7 +114,7 @@ abstract class Abstract_Cache {
 		foreach ( $this->keys as $key ) {
 			$this->delete( $key );
 		}
-		$this->delete( $this->key_name );
+		delete_transient( $this->key_name );
 	}
 
 }

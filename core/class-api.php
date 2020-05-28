@@ -16,8 +16,7 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 use Nova_Poshta\Core\Cache\Cache;
-use Nova_Poshta\Core\Cache\Object_Cache;
-use Nova_Poshta\Core\Cache\Transient_Cache;
+use Nova_Poshta\Core\Cache\Factory_Cache;
 
 /**
  * Class API
@@ -43,31 +42,29 @@ class API {
 	 */
 	private $db;
 	/**
-	 * Object cache
+	 * Cache
 	 *
-	 * @var Object_Cache
+	 * @var Factory_Cache
 	 */
-	private $object_cache;
+	private $factory_cache;
 	/**
-	 * Transient cache
+	 * API Errors
 	 *
-	 * @var Transient_Cache
+	 * @var array
 	 */
-	private $transient_cache;
+	private $errors = [];
 
 	/**
 	 * API constructor.
 	 *
-	 * @param DB              $db              Database.
-	 * @param Object_Cache    $object_cache    Object cache.
-	 * @param Transient_Cache $transient_cache Transient cache.
-	 * @param Settings        $settings        Plugin settings.
+	 * @param DB            $db            Database.
+	 * @param Factory_Cache $factory_cache Factory Cache.
+	 * @param Settings      $settings      Plugin settings.
 	 */
-	public function __construct( DB $db, Object_Cache $object_cache, Transient_Cache $transient_cache, Settings $settings ) {
-		$this->settings        = $settings;
-		$this->object_cache    = $object_cache;
-		$this->transient_cache = $transient_cache;
-		$this->db              = $db;
+	public function __construct( DB $db, Factory_Cache $factory_cache, Settings $settings ) {
+		$this->settings      = $settings;
+		$this->factory_cache = $factory_cache;
+		$this->db            = $db;
 	}
 
 	/**
@@ -98,11 +95,12 @@ class API {
 	 * @return array
 	 */
 	public function cities( string $search = '', int $limit = 10 ): array {
-		if ( ! $this->transient_cache->get( 'cities' ) ) {
+		$cache = $this->factory_cache->transient();
+		if ( ! $cache->get( 'cities' ) ) {
 			$response = $this->request( 'Address', 'getCities' );
 			if ( $response['success'] ) {
 				$this->db->update_cities( $response['data'] );
-				$this->transient_cache->set( 'cities', 1, constant( 'DAY_IN_SECONDS' ) );
+				$cache->set( 'cities', 1, constant( 'DAY_IN_SECONDS' ) );
 			}
 			unset( $response );
 		}
@@ -151,7 +149,8 @@ class API {
 	 * @return array
 	 */
 	public function warehouses( string $city_id ): array {
-		if ( ! $this->object_cache->get( 'warehouse-' . $city_id ) ) {
+		$cache = $this->factory_cache->object();
+		if ( ! $cache->get( 'warehouse-' . $city_id ) ) {
 			$response = $this->request(
 				'AddressGeneral',
 				'getWarehouses',
@@ -161,7 +160,7 @@ class API {
 			);
 			if ( ! empty( $response['success'] ) ) {
 				$this->db->update_warehouses( $response['data'] );
-				$this->object_cache->set( 'warehouse-' . $city_id, 1, constant( 'DAY_IN_SECONDS' ) );
+				$cache->set( 'warehouse-' . $city_id, 1, constant( 'DAY_IN_SECONDS' ) );
 			}
 			unset( $response );
 		}
@@ -182,7 +181,8 @@ class API {
 	public function shipping_cost( string $recipient_city_id, float $weight, float $volume ): int {
 		$city_id = $this->settings->city_id();
 		$key     = 'shipping-from-' . $city_id . '-to-' . $recipient_city_id . '-' . $weight . '-' . $volume;
-		$cost    = (int) $this->object_cache->get( $key );
+		$cache   = $this->factory_cache->object();
+		$cost    = (int) $cache->get( $key );
 		if ( ! $cost ) {
 			$request = $this->request(
 				'InternetDocument',
@@ -198,7 +198,7 @@ class API {
 			);
 			$cost    = $request['success'] ? $request['data'][0]['CostWarehouseWarehouse'] : 0;
 			if ( $cost ) {
-				$this->object_cache->set( $key, $cost, 300 );
+				$cache->set( $key, $cost, 300 );
 			}
 		}
 
@@ -387,6 +387,15 @@ class API {
 	}
 
 	/**
+	 * Get last API errors
+	 *
+	 * @return array
+	 */
+	public function errors(): array {
+		return $this->errors;
+	}
+
+	/**
 	 * Request to Nova Poshta API.
 	 *
 	 * @param string $model  Model name.
@@ -397,6 +406,8 @@ class API {
 	 */
 	private function request( string $model, string $method, array $args = [] ): array {
 		if ( ! $this->settings->api_key() ) {
+			$this->errors[] = __( 'You must enter the API key', 'shipping-nova-poshta-for-woocommerce' );
+
 			return [];
 		}
 
@@ -422,7 +433,16 @@ class API {
 			]
 		);
 
-		return ! is_wp_error( $response ) ? json_decode( $response['body'], true ) : [];
+		if ( is_wp_error( $response ) ) {
+			$this->errors = array_merge( $this->errors, $response->get_error_messages() );
+		}
+
+		$body = json_decode( wp_remote_retrieve_body( $response ), true );
+		if ( ! empty( $body['errors'] ) ) {
+			$this->errors = array_merge( $this->errors, $body['errors'] );
+		}
+
+		return $body;
 	}
 
 	/**

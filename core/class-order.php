@@ -13,6 +13,7 @@
 namespace Nova_Poshta\Core;
 
 use Exception;
+use Nova_Poshta\Admin\Notice;
 use WC_Data_Exception;
 use WC_Meta_Data;
 use WC_Order;
@@ -38,16 +39,24 @@ class Order {
 	 * @var Shipping_Cost
 	 */
 	private $shipping_cost;
+	/**
+	 * Notice
+	 *
+	 * @var Notice
+	 */
+	private $notice;
 
 	/**
 	 * Order constructor.
 	 *
 	 * @param API           $api           API for Nova Poshta.
 	 * @param Shipping_Cost $shipping_cost Calculate a shipping cost.
+	 * @param Notice        $notice        Notice.
 	 */
-	public function __construct( API $api, Shipping_Cost $shipping_cost ) {
+	public function __construct( API $api, Shipping_Cost $shipping_cost, Notice $notice ) {
 		$this->api           = $api;
 		$this->shipping_cost = $shipping_cost;
+		$this->notice        = $notice;
 	}
 
 	/**
@@ -116,32 +125,39 @@ class Order {
 	/**
 	 * Save shipping method
 	 *
-	 * @param WC_Order_Item $item WC Order Item.
+	 * @param WC_Order_Item $order_item WC Order Item.
 	 *
 	 * @throws WC_Data_Exception Invalid total shipping cost.
 	 * @throws Exception Invalid DateTime.
 	 */
-	public function save( WC_Order_Item $item ) {
+	public function save( WC_Order_Item $order_item ) {
 		if ( ! is_admin() ) {
 			return;
 		}
-		if ( ! is_a( $item, 'WC_Order_Item_Shipping' ) ) {
+		if ( ! is_a( $order_item, 'WC_Order_Item_Shipping' ) ) {
 			return;
 		}
-		if ( 'shipping_nova_poshta_for_woocommerce' !== $item->get_method_id() ) {
+		if ( 'shipping_nova_poshta_for_woocommerce' !== $order_item->get_method_id() ) {
 			return;
 		}
-		$city_id = $item->get_meta( 'city_id', true );
+		$city_id = $order_item->get_meta( 'city_id', true );
 		if ( ! $city_id ) {
 			return;
 		}
-		global $woocommerce;
-		$cart = $woocommerce->cart;
-		if ( ! $cart ) {
+		$order = $order_item->get_order();
+		$items = $order->get_items();
+		if ( empty( $items ) ) {
 			return;
 		}
-		$item->set_total(
-			$this->shipping_cost->calculate( $city_id, $cart )
+		$products = [];
+		foreach ( $items as $item ) {
+			$products[] = [
+				'quantity' => $item->get_quantity(),
+				'data'     => $item->get_product(),
+			];
+		}
+		$order_item->set_total(
+			(int) $this->shipping_cost->calculate( $city_id, $products )
 		);
 	}
 
@@ -255,6 +271,8 @@ class Order {
 			return;
 		}
 		if ( $shipping_item->get_meta( 'internet_document' ) ) {
+			$this->notice->add( 'error', __( 'The invoice was created before', 'shipping-nova-poshta-for-woocommerce' ) );
+
 			return;
 		}
 		$internet_document = $this->api->internet_document(
@@ -269,9 +287,16 @@ class Order {
 		if ( $internet_document ) {
 			$shipping_item->add_meta_data( 'internet_document', $internet_document, true );
 			$shipping_item->save_meta_data();
+			$this->notice->add( 'success', __( 'The invoice will successfully create', 'shipping-nova-poshta-for-woocommerce' ) );
 			$order->add_order_note(
 				__( 'Created Internet document for Nova Poshta', 'shipping-nova-poshta-for-woocommerce' )
 			);
+		} else {
+			$this->notice->add( 'error', __( 'The invoice wasn\'t created because:', 'shipping-nova-poshta-for-woocommerce' ) );
+			$errors = $this->api->errors();
+			foreach ( $errors as $error ) {
+				$this->notice->add( 'error', $error );
+			}
 		}
 	}
 
