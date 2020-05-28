@@ -105,7 +105,7 @@ class Main {
 
 		$cache = new Factory_Cache( $transient_cache, $object_cache );
 
-		$this->notice = new Notice( $cache );
+		$this->notice = new Notice( $transient_cache );
 		$this->notice->hooks();
 		if ( ! $this->is_woocommerce_active() ) {
 			$this->notice->add(
