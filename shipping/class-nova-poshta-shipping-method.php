@@ -14,6 +14,7 @@ use Nova_Poshta\Admin\Notice;
 use Nova_Poshta\Core\API;
 use Nova_Poshta\Core\Cache\Object_Cache;
 use Nova_Poshta\Core\Cache\Transient_Cache;
+use Nova_Poshta\Core\Cache\Factory_Cache;
 use Nova_Poshta\Core\Calculator;
 use Nova_Poshta\Core\DB;
 use Nova_Poshta\Core\Language;
@@ -118,13 +119,14 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 		 * @throws Exception Invalid DateTime.
 		 */
 		public function calculate_shipping( $package = [] ) {
-			$notice          = new Notice();
+			$transient_cache = new Transient_Cache();
+			$object_cache    = new Object_Cache();
+			$factory_cache   = new Factory_Cache( $transient_cache, $object_cache );
+			$notice          = new Notice( $transient_cache );
 			$language        = new Language();
 			$db              = new DB( $language );
-			$object_cache    = new Object_Cache();
-			$transient_cache = new Transient_Cache();
 			$settings        = new Settings( $notice );
-			$api             = new API( $db, $object_cache, $transient_cache, $settings );
+			$api             = new API( $db, $factory_cache, $settings );
 			$user_id         = get_current_user_id();
 			$city_id         = apply_filters( 'shipping_nova_poshta_for_woocommerce_default_city_id', '', $user_id );
 			if ( ! $city_id ) {
