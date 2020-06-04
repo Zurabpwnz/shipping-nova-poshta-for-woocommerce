@@ -7,8 +7,11 @@
 
 namespace Nova_Poshta\Core;
 
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
+use function Brain\Monkey\Functions\expect;
+use function Brain\Monkey\Functions\when;
 
 /**
  * Class Test_Main
@@ -22,12 +25,14 @@ class Test_Main extends Test_Case {
 	 *
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_init() {
-		\WP_Mock::userFunction( 'is_plugin_active' )->
-		with( 'woocommerce/woocommerce.php' )->
-		once()->
-		andReturn( false );
+		expect( 'is_plugin_active' )
+			->with( 'woocommerce/woocommerce.php' )
+			->once()
+			->andReturn( false );
+		when( '__' )->returnArg();
 		$notice = Mockery::mock( 'overload:Nova_Poshta\Admin\Notice' );
 		$notice
 			->shouldReceive( 'add' )

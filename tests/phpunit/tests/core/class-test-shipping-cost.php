@@ -10,7 +10,7 @@ namespace Nova_Poshta\Core;
 use Exception;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
-use WP_Mock;
+use function Brain\Monkey\Functions\expect;
 
 /**
  * Class Test_API
@@ -49,30 +49,30 @@ class Test_Shipping_Cost extends Test_Case {
 		$product2_weight    = 20;
 		$product1_dimension = 15;
 		$product2_dimension = 25;
-		WP_Mock::userFunction( 'get_option' )->
-		with( 'woocommerce_weight_unit' )->
-		twice()->
-		andReturn( 'weight_unit' );
-		WP_Mock::userFunction( 'get_option' )->
-		with( 'woocommerce_dimension_unit' )->
-		times( 6 )->
-		andReturn( 'dimension_unit' );
-		WP_Mock::userFunction( 'wc_get_weight' )->
-		with( $product1_weight, 'kg', 'weight_unit' )->
-		once()->
-		andReturn( $product1_weight );
-		WP_Mock::userFunction( 'wc_get_weight' )->
-		with( $product2_weight, 'kg', 'weight_unit' )->
-		once()->
-		andReturn( $product2_weight );
-		WP_Mock::userFunction( 'wc_get_dimension' )->
-		with( $product1_dimension, 'm', 'dimension_unit' )->
-		times( 3 )->
-		andReturn( $product1_dimension );
-		WP_Mock::userFunction( 'wc_get_dimension' )->
-		with( $product2_dimension, 'm', 'dimension_unit' )->
-		times( 3 )->
-		andReturn( $product2_dimension );
+		expect( 'get_option' )
+			->with( 'woocommerce_weight_unit' )
+			->twice()
+			->andReturn( 'weight_unit' );
+		expect( 'get_option' )
+			->with( 'woocommerce_dimension_unit' )
+			->times( 6 )
+			->andReturn( 'dimension_unit' );
+		expect( 'wc_get_weight' )
+			->with( $product1_weight, 'kg', 'weight_unit' )
+			->once()
+			->andReturn( $product1_weight );
+		expect( 'wc_get_weight' )
+			->with( $product2_weight, 'kg', 'weight_unit' )
+			->once()
+			->andReturn( $product2_weight );
+		expect( 'wc_get_dimension' )
+			->with( $product1_dimension, 'm', 'dimension_unit' )
+			->times( 3 )
+			->andReturn( $product1_dimension );
+		expect( 'wc_get_dimension' )
+			->with( $product2_dimension, 'm', 'dimension_unit' )
+			->times( 3 )
+			->andReturn( $product2_dimension );
 		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
 			->shouldReceive( 'shipping_cost' )
@@ -146,30 +146,30 @@ class Test_Shipping_Cost extends Test_Case {
 		$product2_weight    = 20;
 		$product1_dimension = 15;
 		$product2_dimension = 25;
-		WP_Mock::userFunction( 'get_option' )->
-		with( 'woocommerce_weight_unit' )->
-		twice()->
-		andReturn( 'weight_unit' );
-		WP_Mock::userFunction( 'get_option' )->
-		with( 'woocommerce_dimension_unit' )->
-		times( 6 )->
-		andReturn( 'dimension_unit' );
-		WP_Mock::userFunction( 'wc_get_weight' )->
-		with( $product1_weight, 'kg', 'weight_unit' )->
-		once()->
-		andReturn( $product1_weight );
-		WP_Mock::userFunction( 'wc_get_weight' )->
-		with( $product2_weight, 'kg', 'weight_unit' )->
-		once()->
-		andReturn( $product2_weight );
-		WP_Mock::userFunction( 'wc_get_dimension' )->
-		with( $product1_dimension, 'm', 'dimension_unit' )->
-		times( 3 )->
-		andReturn( $product1_dimension );
-		WP_Mock::userFunction( 'wc_get_dimension' )->
-		with( $product2_dimension, 'm', 'dimension_unit' )->
-		times( 3 )->
-		andReturn( $product2_dimension );
+		expect( 'get_option' )
+			->with( 'woocommerce_weight_unit' )
+			->twice()
+			->andReturn( 'weight_unit' );
+		expect( 'get_option' )
+			->with( 'woocommerce_dimension_unit' )
+			->times( 6 )
+			->andReturn( 'dimension_unit' );
+		expect( 'wc_get_weight' )
+			->with( $product1_weight, 'kg', 'weight_unit' )
+			->once()
+			->andReturn( $product1_weight );
+		expect( 'wc_get_weight' )
+			->with( $product2_weight, 'kg', 'weight_unit' )
+			->once()
+			->andReturn( $product2_weight );
+		expect( 'wc_get_dimension' )
+			->with( $product1_dimension, 'm', 'dimension_unit' )
+			->times( 3 )
+			->andReturn( $product1_dimension );
+		expect( 'wc_get_dimension' )
+			->with( $product2_dimension, 'm', 'dimension_unit' )
+			->times( 3 )
+			->andReturn( $product2_dimension );
 		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
 			->shouldReceive( 'shipping_cost' )
@@ -238,14 +238,14 @@ class Test_Shipping_Cost extends Test_Case {
 			->shouldReceive( 'get_width', 'get_length', 'get_height' )
 			->once()
 			->andReturn( $product2_dimension );
-		WP_Mock::userFunction( 'wc_get_product' )->
-		with( 10 )->
-		times( 4 )->
-		andReturn( $product1_parent );
-		WP_Mock::userFunction( 'wc_get_product' )->
-		with( 20 )->
-		times( 4 )->
-		andReturn( $product2_parent );
+		expect( 'wc_get_product' )
+			->with( 10 )
+			->times( 4 )
+			->andReturn( $product1_parent );
+		expect( 'wc_get_product' )
+			->with( 20 )
+			->times( 4 )
+			->andReturn( $product2_parent );
 		$shipping_cost = new Shipping_Cost( $api, $settings, $calculator );
 
 		$shipping_cost->calculate(
@@ -509,22 +509,38 @@ class Test_Shipping_Cost extends Test_Case {
 			->shouldReceive( 'get_category_ids' )
 			->times( 8 )
 			->andReturn( [ $category1 ] );
-		WP_Mock::userFunction( 'get_term_meta' )->
-		with( $category1, 'weight_formula', true )->
-		once()->
-		andReturn( $product1_weight_formula );
-		WP_Mock::userFunction( 'get_term_meta' )->
-		with( $category1, 'width_formula', true )->
-		once()->
-		andReturn( $product1_dimension_formula );
-		WP_Mock::userFunction( 'get_term_meta' )->
-		with( $category1, 'height_formula', true )->
-		once()->
-		andReturn( $product1_dimension_formula );
-		WP_Mock::userFunction( 'get_term_meta' )->
-		with( $category1, 'length_formula', true )->
-		once()->
-		andReturn( $product1_dimension_formula );
+		expect( 'get_term_meta' )
+			->with( $category1, 'weight_formula', true )
+			->once()
+			->andReturn( $product1_weight_formula );
+		expect( 'get_term_meta' )
+			->with( $category1, 'width_formula', true )
+			->once()
+			->andReturn( $product1_dimension_formula );
+		expect( 'get_term_meta' )
+			->with( $category1, 'height_formula', true )
+			->once()
+			->andReturn( $product1_dimension_formula );
+		expect( 'get_term_meta' )
+			->with( $category1, 'length_formula', true )
+			->once()
+			->andReturn( $product1_dimension_formula );
+		expect( 'get_term_meta' )
+			->with( $category2, 'weight_formula', true )
+			->once()
+			->andReturn( $product2_weight_formula );
+		expect( 'get_term_meta' )
+			->with( $category2, 'width_formula', true )
+			->once()
+			->andReturn( $product2_dimension_formula );
+		expect( 'get_term_meta' )
+			->with( $category2, 'height_formula', true )
+			->once()
+			->andReturn( $product2_dimension_formula );
+		expect( 'get_term_meta' )
+			->with( $category2, 'length_formula', true )
+			->once()
+			->andReturn( $product2_dimension_formula );
 		$product2 = Mockery::mock( 'WC_Product' );
 		$product2
 			->shouldReceive( 'get_weight' )
@@ -562,22 +578,6 @@ class Test_Shipping_Cost extends Test_Case {
 			->shouldReceive( 'get_category_ids' )
 			->times( 8 )
 			->andReturn( [ $category2 ] );
-		WP_Mock::userFunction( 'get_term_meta' )->
-		with( $category2, 'weight_formula', true )->
-		once()->
-		andReturn( $product2_weight_formula );
-		WP_Mock::userFunction( 'get_term_meta' )->
-		with( $category2, 'width_formula', true )->
-		once()->
-		andReturn( $product2_dimension_formula );
-		WP_Mock::userFunction( 'get_term_meta' )->
-		with( $category2, 'height_formula', true )->
-		once()->
-		andReturn( $product2_dimension_formula );
-		WP_Mock::userFunction( 'get_term_meta' )->
-		with( $category2, 'length_formula', true )->
-		once()->
-		andReturn( $product2_dimension_formula );
 		$shipping_cost = new Shipping_Cost( $api, $settings, $calculator );
 
 		$shipping_cost->calculate(

@@ -4,7 +4,7 @@ Donate link: https://www.liqpay.ua/api/3/checkout?data=eyJ2ZXJzaW9uIjozLCJhY3Rpb
 Tags: Нова пошта, новая почта, nova poshta, novaposhta
 Requires at least: 5.1
 Tested up to: 5.4
-Stable tag: 1.3.1.2
+Stable tag: 1.3.1.3
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -13,7 +13,7 @@ Integration Nova Poshta API with WooCommerce.
 
 == Description ==
 
-Integration Nova Poshta API with WooCommerce. Add shipping method for WooCommerce. Creating invoice for orders.
+Select a branch on the checkout page. Creation of electronic invoices. Calculating shipping costs and much more ...
 
 = Features =
 * Add shipping method for WooCommerce.

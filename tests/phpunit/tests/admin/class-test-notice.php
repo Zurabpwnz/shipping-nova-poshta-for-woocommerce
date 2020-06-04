@@ -7,9 +7,11 @@
 
 namespace Nova_Poshta\Admin;
 
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
-use WP_Mock;
+use function Brain\Monkey\Functions\expect;
+use function Brain\Monkey\Functions\when;
 
 /**
  * Class Test_Notice
@@ -29,10 +31,10 @@ class Test_Notice extends Test_Case {
 			->once();
 		$notice = new Notice( $cache );
 
-		WP_Mock::expectActionAdded( 'admin_notices', [ $notice, 'notices' ] );
-		WP_Mock::expectActionAdded( 'shutdown', [ $notice, 'save' ] );
-
 		$notice->hooks();
+
+		$this->assertTrue( has_action( 'admin_notices', [ $notice, 'notices' ] ) );
+		$this->assertTrue( has_action( 'shutdown', [ $notice, 'save' ] ) );
 	}
 
 	/**
@@ -54,20 +56,27 @@ class Test_Notice extends Test_Case {
 
 	/**
 	 * Show notices
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_show_notice() {
 		$type    = 'type';
 		$message = 'message';
-		WP_Mock::userFunction( 'wp_kses' )->
-		with(
-			$message,
-			[
-				'a'      => [ 'href' => true ],
-				'strong' => [],
-			]
-		)->
-		once()->
-		andReturn( $message );
+		when( 'esc_attr' )
+			->returnArg();
+		expect( 'plugin_dir_path' )
+			->withAnyArgs()
+			->once();
+		expect( 'wp_kses' )
+			->with(
+				$message,
+				[
+					'a'      => [ 'href' => true ],
+					'strong' => [],
+				]
+			)
+			->once()
+			->andReturn( $message );
 
 		$cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 		$cache

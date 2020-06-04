@@ -7,9 +7,11 @@
 
 namespace Nova_Poshta\Core;
 
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
-use WP_Mock;
+use function Brain\Monkey\Functions\expect;
+use function Brain\Monkey\Functions\when;
 
 /**
  * Class Test_Settings
@@ -20,13 +22,15 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get api key
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_api_key() {
 		$api_key = 'api-key';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn( [ 'api_key' => $api_key ] );
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn( [ 'api_key' => $api_key ] );
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -36,16 +40,19 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get empty api key
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_empty_api_key() {
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn( [] );
-		WP_Mock::userFunction( 'get_admin_url' )->
-		with( null, 'admin.php?page=' . Main::PLUGIN_SLUG )->
-		once()->
-		andReturn( 'url' );
+		when( '__' )->returnArg();
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn( [] );
+		expect( 'get_admin_url' )
+			->with( null, 'admin.php?page=' . Main::PLUGIN_SLUG )
+			->once()
+			->andReturn( 'url' );
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 		$notice
 			->shouldReceive( 'add' )
@@ -62,19 +69,21 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get phone
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_phone() {
 		$api_key = 'api-key';
 		$phone   = 'phone';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn(
-			[
-				'api_key' => $api_key,
-				'phone'   => $phone,
-			]
-		);
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn(
+				[
+					'api_key' => $api_key,
+					'phone'   => $phone,
+				]
+			);
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -84,13 +93,15 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get empty phone
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_empty_phone() {
 		$api_key = 'api-key';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn( [ 'api_key' => $api_key ] );
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn( [ 'api_key' => $api_key ] );
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -100,19 +111,21 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get description
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_description() {
 		$api_key     = 'api-key';
 		$description = 'description';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn(
-			[
-				'api_key'     => $api_key,
-				'description' => $description,
-			]
-		);
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn(
+				[
+					'api_key'     => $api_key,
+					'description' => $description,
+				]
+			);
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -122,13 +135,15 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get empty phone
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_empty_description() {
 		$api_key = 'api-key';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn( [ 'api_key' => $api_key ] );
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn( [ 'api_key' => $api_key ] );
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -138,19 +153,21 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get city_id
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_city_id() {
 		$api_key = 'api-key';
 		$city_id = 'city-id';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn(
-			[
-				'api_key' => $api_key,
-				'city_id' => $city_id,
-			]
-		);
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn(
+				[
+					'api_key' => $api_key,
+					'city_id' => $city_id,
+				]
+			);
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -160,13 +177,15 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get empty city_id
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_empty_city_id() {
 		$api_key = 'api-key';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn( [ 'api_key' => $api_key ] );
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn( [ 'api_key' => $api_key ] );
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -176,19 +195,21 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get warehouse_id
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_warehouse_id() {
 		$api_key      = 'api-key';
 		$warehouse_id = 'warehouse-id';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn(
-			[
-				'api_key'      => $api_key,
-				'warehouse_id' => $warehouse_id,
-			]
-		);
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn(
+				[
+					'api_key'      => $api_key,
+					'warehouse_id' => $warehouse_id,
+				]
+			);
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -198,13 +219,15 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get empty warehouse_id
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_empty_warehouse_id() {
 		$api_key = 'api-key';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn( [ 'api_key' => $api_key ] );
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn( [ 'api_key' => $api_key ] );
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -214,18 +237,20 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test shipping cost enable
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_shipping_cost_enable() {
 		$api_key = 'api-key';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn(
-			[
-				'api_key'                 => $api_key,
-				'is_shipping_cost_enable' => 1,
-			]
-		);
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn(
+				[
+					'api_key'                 => $api_key,
+					'is_shipping_cost_enable' => 1,
+				]
+			);
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -235,13 +260,15 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test shipping cost enable
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_shipping_cost_DISABLED() {
 		$api_key = 'api-key';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn( [ 'api_key' => $api_key ] );
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn( [ 'api_key' => $api_key ] );
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -251,19 +278,21 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get default_weight_formula
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_default_weight_formula() {
 		$api_key        = 'api-key';
 		$weight_formula = 'weight-formula';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn(
-			[
-				'api_key'                => $api_key,
-				'default_weight_formula' => $weight_formula,
-			]
-		);
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn(
+				[
+					'api_key'                => $api_key,
+					'default_weight_formula' => $weight_formula,
+				]
+			);
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -273,17 +302,19 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get empty default_weight_formula
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_empty_default_weight_formula() {
 		$api_key = 'api-key';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn(
-			[
-				'api_key' => $api_key,
-			]
-		);
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn(
+				[
+					'api_key' => $api_key,
+				]
+			);
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -293,19 +324,21 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get default_width_formula
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_default_width_formula() {
 		$api_key       = 'api-key';
 		$width_formula = 'width-formula';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn(
-			[
-				'api_key'               => $api_key,
-				'default_width_formula' => $width_formula,
-			]
-		);
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn(
+				[
+					'api_key'               => $api_key,
+					'default_width_formula' => $width_formula,
+				]
+			);
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -315,17 +348,19 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get empty default_width_formula
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_empty_default_width_formula() {
 		$api_key = 'api-key';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn(
-			[
-				'api_key' => $api_key,
-			]
-		);
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn(
+				[
+					'api_key' => $api_key,
+				]
+			);
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -335,19 +370,21 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get default_height_formula
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_default_height_formula() {
 		$api_key        = 'api-key';
 		$height_formula = 'height-formula';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn(
-			[
-				'api_key'                => $api_key,
-				'default_height_formula' => $height_formula,
-			]
-		);
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn(
+				[
+					'api_key'                => $api_key,
+					'default_height_formula' => $height_formula,
+				]
+			);
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -357,17 +394,19 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get empty default_height_formula
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_empty_default_height_formula() {
 		$api_key = 'api-key';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn(
-			[
-				'api_key' => $api_key,
-			]
-		);
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn(
+				[
+					'api_key' => $api_key,
+				]
+			);
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -377,19 +416,21 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get default_length_formula
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_default_length_formula() {
 		$api_key        = 'api-key';
 		$length_formula = 'length-formula';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn(
-			[
-				'api_key'                => $api_key,
-				'default_length_formula' => $length_formula,
-			]
-		);
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn(
+				[
+					'api_key'                => $api_key,
+					'default_length_formula' => $length_formula,
+				]
+			);
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );
@@ -399,17 +440,19 @@ class Test_Settings extends Test_Case {
 
 	/**
 	 * Test get empty default_length_formula
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_empty_default_length_formula() {
 		$api_key = 'api-key';
-		WP_Mock::userFunction( 'get_option' )->
-		withArgs( [ Main::PLUGIN_SLUG, [] ] )->
-		once()->
-		andReturn(
-			[
-				'api_key' => $api_key,
-			]
-		);
+		expect( 'get_option' )
+			->with( Main::PLUGIN_SLUG, [] )
+			->once()
+			->andReturn(
+				[
+					'api_key' => $api_key,
+				]
+			);
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 
 		$settings = new Settings( $notice );

@@ -5,14 +5,17 @@
  * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Nova_Poshta\Core\Main;
 use Nova_Poshta\Tests\Test_Case;
 use tad\FunctionMocker\FunctionMocker;
+use function Brain\Monkey\Filters\expectApplied;
+use function Brain\Monkey\Functions\expect;
+use function Brain\Monkey\Functions\when;
 
 /**
  * Class Test_Thank_You
  *
- * @group   krya
  * @package Nova_Poshta\Shipping
  */
 class Test_Nova_Poshta_Shipping_Method extends Test_Case {
@@ -21,6 +24,7 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 	 * Test adding hooks
 	 */
 	public function test___construct() {
+		when( '__' )->returnArg();
 		$nova_poshta_shipping_method = new Nova_Poshta_Shipping_Method();
 
 		$this->assertSame( 'shipping_nova_poshta_for_woocommerce', $nova_poshta_shipping_method->id );
@@ -52,17 +56,21 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 	 * Test save action
 	 */
 	public function test_save_action() {
+		when( '__' )->returnArg();
 		$stub     = Mockery::mock( 'Nova_Poshta_Shipping_Method' )->makePartial();
 		$stub->id = 'shipping_nova_poshta_for_woocommerce';
-		WP_Mock::expectActionAdded(
-			'woocommerce_update_options_shipping_shipping_nova_poshta_for_woocommerce',
-			[
-				$stub,
-				'process_admin_options',
-			]
-		);
 
 		$stub->init();
+
+		$this->assertTrue(
+			has_action(
+				'woocommerce_update_options_shipping_shipping_nova_poshta_for_woocommerce',
+				[
+					$stub,
+					'process_admin_options',
+				]
+			)
+		);
 	}
 
 	/**
@@ -70,6 +78,7 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 	 *
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_calculate_shipping_with_default_city() {
 		$user_id = 'user-id';
@@ -77,6 +86,14 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 		$city    = 'City';
 		$locale  = 'ua';
 		$cost    = 48;
+		expect( 'get_current_user_id' )
+			->withNoArgs()
+			->once()
+			->andReturn( $user_id );
+		expect( 'wp_verify_nonce' )
+			->withAnyArgs()
+			->once()
+			->andReturn( false );
 		Mockery::mock( 'overload:Nova_Poshta\Admin\Notice' );
 		$language = Mockery::mock( 'overload:Nova_Poshta\Core\Language' );
 		$language
@@ -94,12 +111,6 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 			->shouldReceive( 'cities' )
 			->once()
 			->andReturn( [ $city_id => $city ] );
-		WP_Mock::userFunction( 'get_current_user_id' )->
-		once()->
-		andReturn( $user_id );
-		WP_Mock::userFunction( 'wp_verify_nonce' )->
-		once()->
-		andReturn( false );
 		Mockery::mock( 'overload:Nova_Poshta\Core\Calculator' );
 		$cart = Mockery::mock( 'WC_Cart' );
 		global $woocommerce;
@@ -148,20 +159,23 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 	 *
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_calculate_shipping_with_recipient_city() {
 		$user_id = 10;
 		$cost    = 48;
 		$city_id = 'city-id';
-		WP_Mock::userFunction( 'get_current_user_id' )->
+		expect( 'get_current_user_id' )->
 		once()->
 		andReturn( $user_id );
-		WP_Mock::userFunction( 'wp_verify_nonce' )->
-		with( null, Main::PLUGIN_SLUG . '-shipping' )->
-		andReturn( false );
-		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_default_city_id' )->
-		with( '', $user_id )->
-		reply( $city_id );
+		expect( 'wp_verify_nonce' )
+			->with( null, Main::PLUGIN_SLUG . '-shipping' )
+			->once()
+			->andReturn( false );
+		expectApplied( 'shipping_nova_poshta_for_woocommerce_default_city_id' )
+			->with( '', $user_id )
+			->once()
+			->andReturn( $city_id );
 		Mockery::mock( 'overload:Nova_Poshta\Admin\Notice' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\Language' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\DB' );
@@ -219,6 +233,7 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 	 *
 	 * @runInSeparateProcess
 	 * @preserveGlobalState disabled
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_calculate_shipping_with_city_request() {
 		$user_id         = 10;
@@ -226,10 +241,17 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 		$nonce           = 'nonce';
 		$city_id         = 'city-id';
 		$request_city_id = 'request-city-id';
-		WP_Mock::userFunction( 'get_current_user_id' )->
-		once()->
-		andReturn( $user_id );
-		$cart = Mockery::mock( 'WC_Cart' );
+		expect( 'get_current_user_id' )
+			->once()
+			->andReturn( $user_id );
+		expect( 'wp_verify_nonce' )
+			->with( $nonce, Main::PLUGIN_SLUG . '-shipping' )
+			->once()
+			->andReturn( true );
+		expectApplied( 'shipping_nova_poshta_for_woocommerce_default_city_id' )
+			->with( '', $user_id )
+			->once()
+			->andReturn( $city_id );
 		FunctionMocker::replace(
 			'filter_input',
 			function () use ( $nonce, $request_city_id ) {
@@ -240,12 +262,6 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 				return $answers[ $i ++ ];
 			}
 		);
-		WP_Mock::userFunction( 'wp_verify_nonce' )->
-		with( $nonce, Main::PLUGIN_SLUG . '-shipping' )->
-		andReturn( true );
-		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_default_city_id' )->
-		with( '', $user_id )->
-		reply( $city_id );
 		Mockery::mock( 'overload:Nova_Poshta\Admin\Notice' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\Language' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\DB' );
@@ -296,6 +312,15 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 			);
 
 		$stub->calculate_shipping();
+	}
+
+	/**
+	 * Test process admin options.
+	 */
+	public function test_process_admin_options() {
+		$stub = Mockery::mock( 'Nova_Poshta_Shipping_Method' )->makePartial();
+
+		$this->assertFalse( $stub->process_admin_options() );
 	}
 
 }

@@ -7,11 +7,13 @@
 
 namespace Nova_Poshta\Core;
 
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Exception;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
 use tad\FunctionMocker\FunctionMocker;
-use WP_Mock;
+use function Brain\Monkey\Functions\expect;
+use function Brain\Monkey\Functions\when;
 
 /**
  * Class Test_Order
@@ -38,44 +40,74 @@ class Test_Order extends Test_Case {
 		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 		$order         = new Order( $api, $shipping_cost, $notice );
 
-		WP_Mock::expectActionAdded( 'woocommerce_checkout_create_order_shipping_item', [ $order, 'create' ], 10, 4 );
-		WP_Mock::expectActionAdded( 'woocommerce_before_order_item_object_save', [ $order, 'save' ] );
-		WP_Mock::expectActionAdded( 'woocommerce_checkout_update_customer', [ $order, 'update_nonce_for_new_users' ] );
-		WP_Mock::expectActionAdded( 'woocommerce_order_actions', [ $order, 'register_order_actions' ] );
-		WP_Mock::expectActionAdded(
-			'woocommerce_order_action_nova_poshta_create_internet_document',
-			[
-				$order,
-				'create_internet_document',
-			]
-		);
-		WP_Mock::expectActionAdded( 'woocommerce_order_status_processing', [ $order, 'processing_status' ], 10, 2 );
-		WP_Mock::expectActionAdded(
-			'woocommerce_before_order_itemmeta',
-			[
-				$order,
-				'default_fields_for_shipping_item',
-			],
-			10,
-			2
-		);
-		WP_Mock::expectFilterAdded( 'woocommerce_order_item_display_meta_key', [ $order, 'labels' ], 10, 2 );
-		WP_Mock::expectFilterAdded( 'woocommerce_order_item_display_meta_value', [ $order, 'values' ], 10, 2 );
-
 		$order->hooks();
+
+		$this->assertTrue(
+			has_action(
+				'woocommerce_checkout_create_order_shipping_item',
+				[
+					$order,
+					'create',
+				]
+			)
+		);
+		$this->assertTrue(
+			has_action( 'woocommerce_before_order_item_object_save', [ $order, 'save' ] )
+		);
+		$this->assertTrue(
+			has_action(
+				'woocommerce_checkout_update_customer',
+				[
+					$order,
+					'update_nonce_for_new_users',
+				]
+			)
+		);
+		$this->assertTrue(
+			has_action( 'woocommerce_order_actions', [ $order, 'register_order_actions' ] )
+		);
+		$this->assertTrue(
+			has_action(
+				'woocommerce_order_action_nova_poshta_create_internet_document',
+				[
+					$order,
+					'create_internet_document',
+				]
+			)
+		);
+		$this->assertTrue(
+			has_action( 'woocommerce_order_status_processing', [ $order, 'processing_status' ] )
+		);
+		$this->assertTrue(
+			has_action(
+				'woocommerce_before_order_itemmeta',
+				[
+					$order,
+					'default_fields_for_shipping_item',
+				]
+			)
+		);
+		$this->assertTrue(
+			has_filter( 'woocommerce_order_item_display_meta_key', [ $order, 'labels' ] )
+		);
+		$this->assertTrue(
+			has_filter( 'woocommerce_order_item_display_meta_value', [ $order, 'values' ] )
+		);
 	}
 
 	/**
 	 * Test updating nonce after registration new user
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_update_nonce_for_new_users() {
 		$nonce     = 'some-nonce';
 		$new_nonce = 'some-new-nonce';
 		FunctionMocker::replace( 'filter_input', $nonce );
-		WP_Mock::userFunction( 'wp_create_nonce' )->
-		withArgs( [ Main::PLUGIN_SLUG . '-shipping' ] )->
-		once()->
-		andReturn( $new_nonce );
+		expect( 'wp_create_nonce' )
+			->with( Main::PLUGIN_SLUG . '-shipping' )
+			->once()
+			->andReturn( $new_nonce );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
 		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
@@ -112,19 +144,21 @@ class Test_Order extends Test_Case {
 
 	/**
 	 * Test don't save with bad nonce
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_do_NOT_save_with_bad_nonce() {
 		$nonce = 'nonce';
 
 		$_POST['shipping_nova_poshta_for_woocommerce_nonce'] = $nonce;
-		WP_Mock::userFunction( 'wp_unslash' )->
-		withArgs( [ $nonce ] )->
-		once()->
-		andReturn( $nonce );
-		WP_Mock::userFunction( 'wp_verify_nonce' )->
-		withArgs( [ $nonce, Main::PLUGIN_SLUG . '-shipping' ] )->
-		once()->
-		andReturn( false );
+		expect( 'wp_unslash' )
+			->with( $nonce )
+			->once()
+			->andReturn( $nonce );
+		expect( 'wp_verify_nonce' )
+			->with( $nonce, Main::PLUGIN_SLUG . '-shipping' )
+			->once()
+			->andReturn( false );
 		FunctionMocker::replace( 'filter_var', $nonce );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
@@ -141,19 +175,21 @@ class Test_Order extends Test_Case {
 
 	/**
 	 * Test don't save for other shipping method
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_do_NOT_save_for_other_shipping_method() {
 		$nonce = 'nonce';
 
 		$_POST['shipping_nova_poshta_for_woocommerce_nonce'] = $nonce;
-		WP_Mock::userFunction( 'wp_unslash' )->
-		withArgs( [ $nonce ] )->
-		once()->
-		andReturn( $nonce );
-		WP_Mock::userFunction( 'wp_verify_nonce' )->
-		withArgs( [ $nonce, Main::PLUGIN_SLUG . '-shipping' ] )->
-		once()->
-		andReturn( true );
+		expect( 'wp_unslash' )
+			->with( $nonce )
+			->once()
+			->andReturn( $nonce );
+		expect( 'wp_verify_nonce' )
+			->with( $nonce, Main::PLUGIN_SLUG . '-shipping' )
+			->once()
+			->andReturn( true );
 		FunctionMocker::replace( 'filter_var', $nonce );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
@@ -174,19 +210,21 @@ class Test_Order extends Test_Case {
 
 	/**
 	 * Test don't save with not enough dating
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_do_NOT_save_with_empty_city_or_warehouse() {
 		$nonce = 'nonce';
 
 		$_POST['shipping_nova_poshta_for_woocommerce_nonce'] = $nonce;
-		WP_Mock::userFunction( 'wp_unslash' )->
-		withArgs( [ $nonce ] )->
-		once()->
-		andReturn( $nonce );
-		WP_Mock::userFunction( 'wp_verify_nonce' )->
-		withArgs( [ $nonce, Main::PLUGIN_SLUG . '-shipping' ] )->
-		once()->
-		andReturn( true );
+		expect( 'wp_unslash' )
+			->with( $nonce )
+			->once()
+			->andReturn( $nonce );
+		expect( 'wp_verify_nonce' )
+			->with( $nonce, Main::PLUGIN_SLUG . '-shipping' )
+			->once()
+			->andReturn( true );
 		FunctionMocker::replace( 'filter_var', $nonce );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
@@ -207,6 +245,8 @@ class Test_Order extends Test_Case {
 
 	/**
 	 * Test save with fail nonce
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_create() {
 		global $city_id, $warehouse_id;
@@ -215,14 +255,14 @@ class Test_Order extends Test_Case {
 		$warehouse_id = 'warehouse-id';
 
 		$_POST['shipping_nova_poshta_for_woocommerce_nonce'] = $nonce;
-		WP_Mock::userFunction( 'wp_unslash' )->
-		withArgs( [ $nonce ] )->
-		once()->
-		andReturn( $nonce );
-		WP_Mock::userFunction( 'wp_verify_nonce' )->
-		withArgs( [ $nonce, Main::PLUGIN_SLUG . '-shipping' ] )->
-		once()->
-		andReturn( true );
+		expect( 'wp_unslash' )
+			->with( [ $nonce ] )
+			->once()
+			->andReturn( $nonce );
+		expect( 'wp_verify_nonce' )
+			->with( $nonce, Main::PLUGIN_SLUG . '-shipping' )
+			->once()
+			->andReturn( true );
 		FunctionMocker::replace( 'filter_var', $nonce );
 		$answers = [ $city_id, $warehouse_id ];
 		$answers = array_values( $answers );
@@ -262,11 +302,14 @@ class Test_Order extends Test_Case {
 
 	/**
 	 * Don't save in not admin area
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_save_in_NOT_admin_area() {
-		WP_Mock::userFunction( 'is_admin' )->
-		once()->
-		andReturn( false );
+		expect( 'is_admin' )
+			->withNoArgs()
+			->once()
+			->andReturn( false );
 		$order_item    = Mockery::mock( 'WC_Order_Item' );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
@@ -279,11 +322,14 @@ class Test_Order extends Test_Case {
 
 	/**
 	 * Don't save on not shipping method WC_Order_Item_Shipping
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_save_NOT_shipping_method() {
-		WP_Mock::userFunction( 'is_admin' )->
-		once()->
-		andReturn( true );
+		expect( 'is_admin' )
+			->withNoArgs()
+			->once()
+			->andReturn( true );
 		$order_item    = Mockery::mock( 'WC_Order_Item' );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
@@ -298,9 +344,10 @@ class Test_Order extends Test_Case {
 	 *  Don't save with othe shipping method
 	 */
 	public function test_save_NOT_poshta_shipping_method() {
-		WP_Mock::userFunction( 'is_admin' )->
-		once()->
-		andReturn( true );
+		expect( 'is_admin' )
+			->withNoArgs()
+			->once()
+			->andReturn( true );
 		FunctionMocker::replace( 'is_a', true );
 		$order_item = Mockery::mock( 'WC_Order_Item' );
 		$order_item
@@ -320,9 +367,10 @@ class Test_Order extends Test_Case {
 	 * Don't save without order shipping city
 	 */
 	public function test_save_without_city() {
-		WP_Mock::userFunction( 'is_admin' )->
-		once()->
-		andReturn( true );
+		expect( 'is_admin' )
+			->withNoArgs()
+			->once()
+			->andReturn( true );
 		FunctionMocker::replace( 'is_a', true );
 		$order_item = Mockery::mock( 'WC_Order_Item' );
 		$order_item
@@ -348,9 +396,10 @@ class Test_Order extends Test_Case {
 	 */
 	public function test_save_without_cart_items() {
 		$city_id = 'city-id';
-		WP_Mock::userFunction( 'is_admin' )->
-		once()->
-		andReturn( true );
+		expect( 'is_admin' )
+			->withNoArgs()
+			->once()
+			->andReturn( true );
 		FunctionMocker::replace( 'is_a', true );
 		$order_item = Mockery::mock( 'WC_Order_Item' );
 		$order      = Mockery::mock( 'WC_Order' );
@@ -390,9 +439,10 @@ class Test_Order extends Test_Case {
 		$quantity2 = 12;
 		$product1  = Mockery::mock( 'WC_Product' );
 		$product2  = Mockery::mock( 'WC_Product' );
-		WP_Mock::userFunction( 'is_admin' )->
-		once()->
-		andReturn( true );
+		expect( 'is_admin' )
+			->withNoArgs()
+			->once()
+			->andReturn( true );
 		FunctionMocker::replace( 'is_a', true );
 		$order = Mockery::mock( 'WC_Order' );
 		$item1 = Mockery::mock( 'WC_Order_Product_Item' );
@@ -495,6 +545,7 @@ class Test_Order extends Test_Case {
 	 * @param string $result Key result.
 	 */
 	public function test_labels( string $key, string $result ) {
+		when( '__' )->returnArg();
 		$api          = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$wc_meta_data = Mockery::mock( 'WC_Meta_Data' );
 		$wc_meta_data
@@ -688,6 +739,7 @@ class Test_Order extends Test_Case {
 	 * Test adding new order actions
 	 */
 	public function test_register_order_actions() {
+		when( '__' )->returnArg();
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
 		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
@@ -702,11 +754,14 @@ class Test_Order extends Test_Case {
 
 	/**
 	 * Test creating internet document with not enough permissions
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_processing_status_for_not_enough_permissions() {
-		WP_Mock::userFunction( 'current_user_can' )->
-		once()->
-		andReturn( false );
+		expect( 'current_user_can' )
+			->withNoArgs()
+			->once()
+			->andReturn( false );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$wc_order      = Mockery::mock( 'WC_Order' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
@@ -719,11 +774,14 @@ class Test_Order extends Test_Case {
 
 	/**
 	 * Test creating internet document with not enough permissions
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_processing_status() {
-		WP_Mock::userFunction( 'current_user_can' )->
-		once()->
-		andReturn( true );
+		expect( 'current_user_can' )
+			->withNoArgs()
+			->once()
+			->andReturn( true );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$wc_order      = Mockery::mock( 'WC_Order' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
@@ -768,7 +826,8 @@ class Test_Order extends Test_Case {
 	 * @throws Exception Invalid DateTime.
 	 */
 	public function test_NOT_create_invoice_repeatedly() {
-		$internet_document      = '1234 5678 9012 3456';
+		$internet_document = '1234 5678 9012 3456';
+		when( '__' )->returnArg();
 		$api                    = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$wc_order_item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
 		$wc_order_item_shipping
@@ -803,6 +862,7 @@ class Test_Order extends Test_Case {
 	 * @throws Exception Invalid DateTime.
 	 */
 	public function test_create_invoice() {
+		when( '__' )->returnArg();
 		$first_name        = 'First name';
 		$last_name         = 'Last name';
 		$phone             = '+380123456789';
@@ -910,14 +970,14 @@ class Test_Order extends Test_Case {
 	 * @throws Exception Invalid DateTime.
 	 */
 	public function test_create_invoice_with_api_error() {
-		$first_name        = 'First name';
-		$last_name         = 'Last name';
-		$phone             = '+380123456789';
-		$total             = 10;
-		$city_id           = 'city-id';
-		$warehouse_id      = 'warehouse-id';
-		$internet_document = '1234 5678 9012 3456';
-		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$first_name   = 'First name';
+		$last_name    = 'Last name';
+		$phone        = '+380123456789';
+		$total        = 10;
+		$city_id      = 'city-id';
+		$warehouse_id = 'warehouse-id';
+		when( '__' )->returnArg();
+		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
 			->shouldReceive( 'internet_document' )
 			->withArgs(

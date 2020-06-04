@@ -7,11 +7,13 @@
 
 namespace Nova_Poshta\Admin;
 
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
 use stdClass;
 use tad\FunctionMocker\FunctionMocker;
-use WP_Mock;
+use function Brain\Monkey\Functions\expect;
+use function Brain\Monkey\Functions\when;
 
 /**
  * Class Test_Product_Metabox
@@ -25,14 +27,17 @@ class Test_Product_Metabox extends Test_Case {
 	 */
 	public function test_hooks() {
 		$product_metabox = new Product_Metabox();
-		WP_Mock::expectActionAdded( 'woocommerce_product_options_shipping', [ $product_metabox, 'add' ] );
-		WP_Mock::expectActionAdded( 'woocommerce_process_product_meta', [ $product_metabox, 'save' ] );
 
 		$product_metabox->hooks();
+
+		$this->assertTrue( has_action( 'woocommerce_product_options_shipping', [ $product_metabox, 'add' ] ) );
+		$this->assertTrue( has_action( 'woocommerce_process_product_meta', [ $product_metabox, 'save' ] ) );
 	}
 
 	/**
 	 * Test add metabox
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_add() {
 		global $post;
@@ -64,63 +69,65 @@ class Test_Product_Metabox extends Test_Case {
 			->with( 'height_formula', true )
 			->once()
 			->andReturn( $height );
-		WP_Mock::userFunction( 'plugin_dir_path' )->
-		once();
-		WP_Mock::userFunction( 'wc_get_product' )->
-		with( $post->ID )->
-		once()->
-		andReturn( $product );
-		WP_Mock::userFunction( 'wp_nonce_field' )->
-		with( Product_Metabox::NONCE, Product_Metabox::NONCE_FIELD, false )->
-		once();
-		WP_Mock::userFunction( 'woocommerce_wp_text_input' )->
-		with(
-			[
-				'id'          => 'weight_formula',
-				'label'       => 'Formula for weight calculate',
-				'placeholder' => '',
-				'desc_tip'    => 'true',
-				'description' => 'Formula cost calculation. The numbers are indicated in kilograms. You can use the [qty] shortcode to indicate the number of products.',
-				'value'       => $weight,
-			]
-		)->
-		once();
-		WP_Mock::userFunction( 'woocommerce_wp_text_input' )->
-		with(
-			[
-				'id'          => 'width_formula',
-				'label'       => 'Formula for width calculate',
-				'placeholder' => '',
-				'desc_tip'    => 'true',
-				'description' => 'Formula cost calculation. The numbers are indicated in meters. You can use the [qty] shortcode to indicate the number of products.',
-				'value'       => $width,
-			]
-		)->
-		once();
-		WP_Mock::userFunction( 'woocommerce_wp_text_input' )->
-		with(
-			[
-				'id'          => 'length_formula',
-				'label'       => 'Formula for length calculate',
-				'placeholder' => '',
-				'desc_tip'    => 'true',
-				'description' => 'Formula cost calculation. The numbers are indicated in meters. You can use the [qty] shortcode to indicate the number of products.',
-				'value'       => $length,
-			]
-		)->
-		once();
-		WP_Mock::userFunction( 'woocommerce_wp_text_input' )->
-		with(
-			[
-				'id'          => 'height_formula',
-				'label'       => 'Formula for height calculate',
-				'placeholder' => '',
-				'desc_tip'    => 'true',
-				'description' => 'Formula cost calculation. The numbers are indicated in meters. You can use the [qty] shortcode to indicate the number of products.',
-				'value'       => $height,
-			]
-		)->
-		once();
+		when( '__' )->returnArg();
+		expect( 'plugin_dir_path' )
+			->withAnyArgs()
+			->once();
+		expect( 'wc_get_product' )
+			->with( $post->ID )
+			->once()
+			->andReturn( $product );
+		expect( 'wp_nonce_field' )
+			->with( Product_Metabox::NONCE, Product_Metabox::NONCE_FIELD, false )
+			->once();
+		expect( 'woocommerce_wp_text_input' )
+			->with(
+				[
+					'id'          => 'weight_formula',
+					'label'       => 'Formula for weight calculate',
+					'placeholder' => '',
+					'desc_tip'    => 'true',
+					'description' => 'Formula cost calculation. The numbers are indicated in kilograms. You can use the [qty] shortcode to indicate the number of products.',
+					'value'       => $weight,
+				]
+			)
+			->once();
+		expect( 'woocommerce_wp_text_input' )
+			->with(
+				[
+					'id'          => 'width_formula',
+					'label'       => 'Formula for width calculate',
+					'placeholder' => '',
+					'desc_tip'    => 'true',
+					'description' => 'Formula cost calculation. The numbers are indicated in meters. You can use the [qty] shortcode to indicate the number of products.',
+					'value'       => $width,
+				]
+			)
+			->once();
+		expect( 'woocommerce_wp_text_input' )
+			->with(
+				[
+					'id'          => 'length_formula',
+					'label'       => 'Formula for length calculate',
+					'placeholder' => '',
+					'desc_tip'    => 'true',
+					'description' => 'Formula cost calculation. The numbers are indicated in meters. You can use the [qty] shortcode to indicate the number of products.',
+					'value'       => $length,
+				]
+			)
+			->once();
+		expect( 'woocommerce_wp_text_input' )
+			->with(
+				[
+					'id'          => 'height_formula',
+					'label'       => 'Formula for height calculate',
+					'placeholder' => '',
+					'desc_tip'    => 'true',
+					'description' => 'Formula cost calculation. The numbers are indicated in meters. You can use the [qty] shortcode to indicate the number of products.',
+					'value'       => $height,
+				]
+			)
+			->once();
 		$product_metabox = new Product_Metabox();
 		ob_start();
 
@@ -130,13 +137,15 @@ class Test_Product_Metabox extends Test_Case {
 
 	/**
 	 * Test don't save metabox with invalid nonce
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_NOT_save_with_invalid_nonce() {
 		$post_id = 10;
-		WP_Mock::userFunction( 'wp_verify_nonce' )->
-		with( null, Product_Metabox::NONCE )->
-		once()->
-		andReturn( false );
+		expect( 'wp_verify_nonce' )
+			->with( null, Product_Metabox::NONCE )
+			->once()
+			->andReturn( false );
 		$product_metabox = new Product_Metabox();
 
 		$product_metabox->save( $post_id );
@@ -144,6 +153,8 @@ class Test_Product_Metabox extends Test_Case {
 
 	/**
 	 * Test save metabox
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_save() {
 		$post_id = 10;
@@ -162,10 +173,10 @@ class Test_Product_Metabox extends Test_Case {
 				return $answers[ $i ++ ];
 			}
 		);
-		WP_Mock::userFunction( 'wp_verify_nonce' )->
-		with( $nonce, Product_Metabox::NONCE )->
-		once()->
-		andReturn( true );
+		expect( 'wp_verify_nonce' )
+			->with( $nonce, Product_Metabox::NONCE )
+			->once()
+			->andReturn( true );
 		$product = Mockery::mock( 'WC_Product' );
 		$product
 			->shouldReceive( 'update_meta_data' )
@@ -186,10 +197,10 @@ class Test_Product_Metabox extends Test_Case {
 		$product
 			->shouldReceive( 'save' )
 			->once();
-		WP_Mock::userFunction( 'wc_get_product' )->
-		with( $post_id )->
-		once()->
-		andReturn( $product );
+		expect( 'wc_get_product' )
+			->with( $post_id )
+			->once()
+			->andReturn( $product );
 		$product_metabox = new Product_Metabox();
 
 		$product_metabox->save( $post_id );

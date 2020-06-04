@@ -25,9 +25,9 @@ class Test_Thank_You extends Test_Case {
 		$api       = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$thank_you = new Thank_You( $api );
 
-		WP_Mock::expectFilterAdded( 'woocommerce_get_order_item_totals', [ $thank_you, 'shipping' ], 10, 2 );
-
 		$thank_you->hooks();
+
+		$this->assertTrue( has_filter( 'woocommerce_get_order_item_totals', [ $thank_you, 'shipping' ] ) );
 	}
 
 	/**
