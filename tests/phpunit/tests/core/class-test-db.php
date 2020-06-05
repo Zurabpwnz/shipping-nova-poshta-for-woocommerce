@@ -9,8 +9,7 @@ namespace Nova_Poshta\Core;
 
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
-use WP_Mock;
-use WP_Mock\Functions;
+use function Brain\Monkey\Functions\expect;
 
 /**
  * Class Test_Notice
@@ -46,15 +45,19 @@ class Test_DB extends Test_Case {
 	 * Test including hooks
 	 */
 	public function test_hooks() {
-		WP_Mock::userFunction( 'plugin_dir_path' )->
-		twice();
-		WP_Mock::userFunction( 'plugin_basename' )->
-		twice()->
-		andReturn( 'path/to/main-file' );
-		WP_Mock::userFunction( 'register_activation_hook' )->
-		once();
-		WP_Mock::userFunction( 'register_deactivation_hook' )->
-		once();
+		expect( 'plugin_dir_path' )
+			->withAnyArgs()
+			->twice();
+		expect( 'plugin_basename' )
+			->withAnyArgs()
+			->twice()
+			->andReturn( 'path/to/main-file' );
+		expect( 'register_activation_hook' )
+			->with( 'path/to/main-file' )
+			->once();
+		expect( 'register_deactivation_hook' )
+			->with( 'path/to/main-file' )
+			->once();
 		global $wpdb;
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wpdb         = Mockery::mock( 'wpdb' );
@@ -77,11 +80,11 @@ class Test_DB extends Test_Case {
 		$wpdb
 			->shouldReceive( 'get_charset_collate' )
 			->twice();
-		WP_Mock::userFunction( 'maybe_create_table' )->
-		withArgs( [ $wpdb->prefix . 'np_cities', Functions::type( 'string' ) ] )->
+		expect( 'maybe_create_table' )->
+		withArgs( [ $wpdb->prefix . 'np_cities', Mockery::type( 'string' ) ] )->
 		once();
-		WP_Mock::userFunction( 'maybe_create_table' )->
-		withArgs( [ $wpdb->prefix . 'np_warehouses', Functions::type( 'string' ) ] )->
+		expect( 'maybe_create_table' )->
+		withArgs( [ $wpdb->prefix . 'np_warehouses', Mockery::type( 'string' ) ] )->
 		once();
 
 		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
@@ -108,7 +111,11 @@ class Test_DB extends Test_Case {
 			->andReturn( $esc_search );
 		$wpdb
 			->shouldReceive( 'prepare' )
-			->withArgs( [ ' WHERE description_ru LIKE %s OR description_ua LIKE %s', '%' . $esc_search . '%', '%' . $esc_search . '%' ] )
+			->with(
+				' WHERE description_ru LIKE %s OR description_ua LIKE %s',
+				'%' . $esc_search . '%',
+				'%' . $esc_search . '%'
+			)
 			->once()
 			->andReturn( ' WHERE description_ru LIKE "%' . $esc_search . '%" OR description_ua LIKE "%' . $esc_search . '%"' );
 		$wpdb
@@ -134,7 +141,7 @@ class Test_DB extends Test_Case {
 			)
 			->once()
 			->andReturn( $cities );
-		WP_Mock::userFunction( 'wp_list_pluck' )->
+		expect( 'wp_list_pluck' )->
 		withArgs( [ $cities, 'description_ru', 'city_id' ] )->
 		once()->
 		andReturn( $cities );
@@ -322,7 +329,7 @@ class Test_DB extends Test_Case {
 			)
 			->once()
 			->andReturn( $warehouses );
-		WP_Mock::userFunction( 'wp_list_pluck' )->
+		expect( 'wp_list_pluck' )->
 		withArgs( [ $warehouses, 'description_ru', 'warehouse_id' ] )->
 		once()->
 		andReturn( $warehouses );

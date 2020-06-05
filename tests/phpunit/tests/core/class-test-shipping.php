@@ -7,10 +7,12 @@
 
 namespace Nova_Poshta\Core;
 
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
 use tad\FunctionMocker\FunctionMocker;
-use WP_Mock;
+use function Brain\Monkey\Functions\expect;
+use function Brain\Monkey\Functions\when;
 
 /**
  * Class Test_Shipping
@@ -30,13 +32,22 @@ class Test_Shipping extends Test_Case {
 			->with( Shipping::METHOD_NAME . '_active' )
 			->once()
 			->andReturn( true );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
+		$factory_cache
+			->shouldReceive( 'object' )
+			->once()
+			->andReturn( $object_cache );
 
-		$shipping = new Shipping( $notice, $object_cache );
-
-		WP_Mock::expectActionAdded( 'woocommerce_shipping_init', [ $shipping, 'require_methods' ] );
-		WP_Mock::expectFilterAdded( 'woocommerce_shipping_methods', [ $shipping, 'register_methods' ] );
+		$shipping = new Shipping( $notice, $factory_cache );
 
 		$shipping->hooks();
+
+		$this->assertTrue(
+			has_action( 'woocommerce_shipping_init', [ $shipping, 'require_methods' ] )
+		);
+		$this->assertTrue(
+			has_filter( 'woocommerce_shipping_methods', [ $shipping, 'register_methods' ] )
+		);
 	}
 
 	/**
@@ -50,8 +61,13 @@ class Test_Shipping extends Test_Case {
 			->with( Shipping::METHOD_NAME . '_active' )
 			->once()
 			->andReturn( true );
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
+		$factory_cache
+			->shouldReceive( 'object' )
+			->once()
+			->andReturn( $object_cache );
 
-		$shipping = new Shipping( $notice, $object_cache );
+		$shipping = new Shipping( $notice, $factory_cache );
 
 		$this->assertSame(
 			[
@@ -63,8 +79,15 @@ class Test_Shipping extends Test_Case {
 
 	/**
 	 * Check active nova poshta shipping method
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_notices() {
+		when( '__' )->returnArg();
+		expect( 'get_admin_url' )
+			->with( null, 'admin.php?page=wc-settings&tab=shipping' )
+			->once()
+			->andReturn( 'url' );
 		global $wpdb;
 		$request = false;
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -90,16 +113,12 @@ class Test_Shipping extends Test_Case {
 			->withArgs( [ $sql ] )
 			->once()
 			->andReturn( $request );
-		WP_Mock::userFunction( 'get_admin_url' )->
-		with( null, 'admin.php?page=wc-settings&tab=shipping' )->
-		once()->
-		andReturn( 'url' );
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
 		$notice
 			->shouldReceive( 'add' )
 			->with(
 				'error',
-				'You must add the "New Delivery Method" delivery method <a href="url">in the WooCommerce settings</a>'
+				'You must add the "Nova Poshta" shipping method <a href="url">in the WooCommerce settings</a>'
 			)
 			->once();
 		$object_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
@@ -112,8 +131,13 @@ class Test_Shipping extends Test_Case {
 			->shouldReceive( 'set' )
 			->with( Shipping::METHOD_NAME . '_active', $request, $day_in_seconds )
 			->once();
+		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
+		$factory_cache
+			->shouldReceive( 'object' )
+			->once()
+			->andReturn( $object_cache );
 
-		new Shipping( $notice, $object_cache );
+		new Shipping( $notice, $factory_cache );
 
 		$constant->wasCalledWithOnce( [ 'DAY_IN_SECONDS' ] );
 	}

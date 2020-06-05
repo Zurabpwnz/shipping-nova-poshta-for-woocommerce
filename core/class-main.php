@@ -18,6 +18,7 @@ use Nova_Poshta\Admin\Product_Category_Metabox;
 use Nova_Poshta\Admin\Product_Metabox;
 use Nova_Poshta\Admin\User;
 use Nova_Poshta\Core\Cache\Cache;
+use Nova_Poshta\Core\Cache\Factory_Cache;
 use Nova_Poshta\Core\Cache\Object_Cache;
 use Nova_Poshta\Core\Cache\Transient_Cache;
 use Nova_Poshta\Front\Front;
@@ -96,7 +97,15 @@ class Main {
 	 * Define hooks without API key
 	 */
 	private function define_hooks_without_api_key() {
-		$this->notice = new Notice();
+		$object_cache = new Object_Cache();
+		$object_cache->hooks();
+
+		$transient_cache = new Transient_Cache();
+		$transient_cache->hooks();
+
+		$cache = new Factory_Cache( $transient_cache, $object_cache );
+
+		$this->notice = new Notice( $transient_cache );
 		$this->notice->hooks();
 		if ( ! $this->is_woocommerce_active() ) {
 			$this->notice->add(
@@ -112,14 +121,8 @@ class Main {
 			);
 		}
 
-		$object_cache = new Object_Cache();
-		$object_cache->hooks();
-
-		$transient_cache = new Transient_Cache();
-		$transient_cache->hooks();
-
 		$this->settings = new Settings( $this->notice );
-		$shipping       = new Shipping( $this->notice, $object_cache );
+		$shipping       = new Shipping( $this->notice, $cache );
 		$shipping->hooks();
 
 		$this->language = new Language();
@@ -128,7 +131,7 @@ class Main {
 		$db = new DB( $this->language );
 		$db->hooks();
 
-		$this->api = new API( $db, $object_cache, $transient_cache, $this->settings );
+		$this->api = new API( $db, $cache, $this->settings );
 		$this->api->hooks();
 
 		$admin = new Admin( $this->api, $this->settings, $this->language );
@@ -151,7 +154,7 @@ class Main {
 		$front = new Front( $this->language );
 		$front->hooks();
 
-		$order = new Order( $this->api, $shipping_cost );
+		$order = new Order( $this->api, $shipping_cost, $this->notice );
 		$order->hooks();
 
 		$thank_you = new Thank_You( $this->api );

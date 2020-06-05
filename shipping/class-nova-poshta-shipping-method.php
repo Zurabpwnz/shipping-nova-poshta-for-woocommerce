@@ -12,6 +12,7 @@
 
 use Nova_Poshta\Admin\Notice;
 use Nova_Poshta\Core\API;
+use Nova_Poshta\Core\Cache\Factory_Cache;
 use Nova_Poshta\Core\Cache\Object_Cache;
 use Nova_Poshta\Core\Cache\Transient_Cache;
 use Nova_Poshta\Core\Calculator;
@@ -21,7 +22,7 @@ use Nova_Poshta\Core\Main;
 use Nova_Poshta\Core\Settings;
 use Nova_Poshta\Core\Shipping_Cost;
 
-if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
+if ( ! class_exists( 'Nova_Poshta_Shipping_Method' ) ) {
 	/**
 	 * Class Nova_Poshta_Shipping_Method
 	 */
@@ -118,13 +119,14 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 		 * @throws Exception Invalid DateTime.
 		 */
 		public function calculate_shipping( $package = [] ) {
-			$notice          = new Notice();
+			$transient_cache = new Transient_Cache();
+			$object_cache    = new Object_Cache();
+			$factory_cache   = new Factory_Cache( $transient_cache, $object_cache );
+			$notice          = new Notice( $transient_cache );
 			$language        = new Language();
 			$db              = new DB( $language );
-			$object_cache    = new Object_Cache();
-			$transient_cache = new Transient_Cache();
 			$settings        = new Settings( $notice );
-			$api             = new API( $db, $object_cache, $transient_cache, $settings );
+			$api             = new API( $db, $factory_cache, $settings );
 			$user_id         = get_current_user_id();
 			$city_id         = apply_filters( 'shipping_nova_poshta_for_woocommerce_default_city_id', '', $user_id );
 			if ( ! $city_id ) {
@@ -146,11 +148,11 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 			}
 			$cost = 0;
 			global $woocommerce;
-			$cart = $woocommerce->cart;
-			if ( $city_id && $cart ) {
+			$products = $woocommerce->cart->get_cart_contents();
+			if ( $city_id && ! empty( $products ) ) {
 				$calculator    = new Calculator();
 				$shipping_cost = new Shipping_Cost( $api, $settings, $calculator );
-				$cost          = $shipping_cost->calculate( $city_id, $cart );
+				$cost          = $shipping_cost->calculate( $city_id, $products );
 			}
 			$rate = [
 				'id'       => $this->id,
@@ -162,6 +164,19 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 			// Register the rate.
 			$this->add_rate( $rate );
 		}
+
+		/**
+		 * Processes and saves global shipping method options in the admin area.
+		 *
+		 * This method is usually attached to woocommerce_update_options_x hooks.
+		 *
+		 * @return bool
+		 * phpcs:disable Generic.CodeAnalysis.UselessOverridingMethod.Found
+		 */
+		public function process_admin_options() {
+			return parent::process_admin_options();
+		}
+		//phpcs:enable Generic.CodeAnalysis.UselessOverridingMethod.Found
 
 	}
 }

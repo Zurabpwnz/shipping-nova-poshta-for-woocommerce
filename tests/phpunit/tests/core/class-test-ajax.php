@@ -7,11 +7,12 @@
 
 namespace Nova_Poshta\Core;
 
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
 use stdClass;
 use tad\FunctionMocker\FunctionMocker;
-use WP_Mock;
+use function Brain\Monkey\Functions\expect;
 
 /**
  * Class Test_Ajax
@@ -28,18 +29,38 @@ class Test_Ajax extends Test_Case {
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
 		$ajax          = new AJAX( $api, $shipping_cost );
 
-		WP_Mock::expectActionAdded( 'wp_ajax_shipping_nova_poshta_for_woocommerce_city', [ $ajax, 'cities' ] );
-		WP_Mock::expectActionAdded( 'wp_ajax_nopriv_shipping_nova_poshta_for_woocommerce_city', [ $ajax, 'cities' ] );
-		WP_Mock::expectActionAdded( 'wp_ajax_shipping_nova_poshta_for_woocommerce_warehouse', [ $ajax, 'warehouses' ] );
-		WP_Mock::expectActionAdded(
-			'wp_ajax_nopriv_shipping_nova_poshta_for_woocommerce_warehouse',
-			[
-				$ajax,
-				'warehouses',
-			]
-		);
-
 		$ajax->hooks();
+
+		$this->assertTrue(
+			has_action( 'wp_ajax_shipping_nova_poshta_for_woocommerce_city', [ $ajax, 'cities' ] )
+		);
+		$this->assertTrue(
+			has_action(
+				'wp_ajax_nopriv_shipping_nova_poshta_for_woocommerce_city',
+				[
+					$ajax,
+					'cities',
+				]
+			)
+		);
+		$this->assertTrue(
+			has_action(
+				'wp_ajax_shipping_nova_poshta_for_woocommerce_warehouse',
+				[
+					$ajax,
+					'warehouses',
+				]
+			)
+		);
+		$this->assertTrue(
+			has_action(
+				'wp_ajax_nopriv_shipping_nova_poshta_for_woocommerce_warehouse',
+				[
+					$ajax,
+					'warehouses',
+				]
+			)
+		);
 	}
 
 	/**
@@ -48,21 +69,19 @@ class Test_Ajax extends Test_Case {
 	public function test_cities() {
 		$city_id   = 'city_id';
 		$city_name = 'City Name';
-		WP_Mock::userFunction( 'check_ajax_referer' )->
-		withArgs( [ Main::PLUGIN_SLUG, 'nonce' ] )->
-		once();
-		WP_Mock::userFunction( 'wp_send_json' )->
-		withArgs(
-			[
+		expect( 'check_ajax_referer' )
+			->with( Main::PLUGIN_SLUG, 'nonce' )
+			->once();
+		expect( 'wp_send_json' )
+			->with(
 				[
 					[
 						'id'   => $city_id,
 						'text' => $city_name,
 					],
-				],
-			]
-		)->
-		once();
+				]
+			)
+			->once();
 		$filter_input = FunctionMocker::replace( 'filter_input', $city_name );
 		$api          = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
@@ -79,26 +98,26 @@ class Test_Ajax extends Test_Case {
 
 	/**
 	 * Test search city warehouses
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_warehouses() {
 		$city_id        = 'city_id';
 		$warehouse_id   = 'warehouse_id';
 		$warehouse_name = 'City Name';
-		WP_Mock::userFunction( 'check_ajax_referer' )->
-		withArgs( [ Main::PLUGIN_SLUG, 'nonce' ] )->
-		once();
-		WP_Mock::userFunction( 'wp_send_json' )->
-		withArgs(
-			[
+		expect( 'check_ajax_referer' )
+			->with( Main::PLUGIN_SLUG, 'nonce' )
+			->once();
+		expect( 'wp_send_json' )
+			->with(
 				[
 					[
 						'id'   => $warehouse_id,
 						'text' => $warehouse_name,
 					],
-				],
-			]
-		)->
-		once();
+				]
+			)
+			->once();
 		$filter_input = FunctionMocker::replace( 'filter_input', $city_id );
 		$api          = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
@@ -115,12 +134,14 @@ class Test_Ajax extends Test_Case {
 
 	/**
 	 * Shipping cost without city_id
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_shipping_cost_without_city_id() {
-		WP_Mock::userFunction( 'check_ajax_referer' )->
-		withArgs( [ Main::PLUGIN_SLUG, 'nonce' ] )->
-		once();
-		WP_Mock::userFunction( 'wp_send_json_error' )->
+		expect( 'check_ajax_referer' )
+			->with( Main::PLUGIN_SLUG, 'nonce' )
+			->once();
+		expect( 'wp_send_json_error' )->
 		once();
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
@@ -131,6 +152,8 @@ class Test_Ajax extends Test_Case {
 
 	/**
 	 * Shipping cost without cart
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_shipping_cost_without_cart() {
 		$city_id = 'city_id';
@@ -138,11 +161,12 @@ class Test_Ajax extends Test_Case {
 		global $woocommerce;
 		$woocommerce       = new stdClass();
 		$woocommerce->cart = null;
-		WP_Mock::userFunction( 'check_ajax_referer' )->
-		withArgs( [ Main::PLUGIN_SLUG, 'nonce' ] )->
-		once();
-		WP_Mock::userFunction( 'wp_send_json_error' )->
-		once();
+		expect( 'check_ajax_referer' )
+			->with( Main::PLUGIN_SLUG, 'nonce' )->
+			once();
+		expect( 'wp_send_json_error' )
+			->withNoArgs()
+			->once();
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
 		$ajax          = new AJAX( $api, $shipping_cost );
@@ -151,24 +175,72 @@ class Test_Ajax extends Test_Case {
 	}
 
 	/**
+	 * Test shipping cost without contents
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
+	 */
+	public function test_shipping_without_contents() {
+		$city_id = 'city_id';
+		$price   = 48;
+		expect( 'check_ajax_referer' )
+			->with( Main::PLUGIN_SLUG, 'nonce' )
+			->once();
+		$filter_input = FunctionMocker::replace( 'filter_input', $city_id );
+		$cart         = Mockery::mock( 'WC_Cart' );
+		$cart
+			->shouldReceive( 'get_cart_contents' )
+			->once()
+			->andReturn( [] );
+		global $woocommerce;
+		$woocommerce       = new stdClass();
+		$woocommerce->cart = $cart;
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		expect( 'wp_send_json_error' )
+			->withNoArgs()
+			->once();
+
+		$ajax = new AJAX( $api, $shipping_cost );
+
+		$ajax->shipping_cost();
+		$filter_input->wasCalledWithOnce( [ INPUT_POST, 'city', FILTER_SANITIZE_STRING ] );
+	}
+
+	/**
 	 * Test shipping cost
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_shipping_cost() {
 		$city_id    = 'city_id';
 		$price      = 48;
 		$price_html = '<span>' . $price . '</span>';
-		WP_Mock::userFunction( 'check_ajax_referer' )->
-		withArgs( [ Main::PLUGIN_SLUG, 'nonce' ] )->
-		once();
-		WP_Mock::userFunction( 'wp_send_json' )->
-		with( $price_html )->
-		once();
-		WP_Mock::userFunction( 'wc_price' )->
-		with( $price )->
-		once()->
-		andReturn( $price_html );
+		expect( 'check_ajax_referer' )
+			->with( Main::PLUGIN_SLUG, 'nonce' )
+			->once();
+		expect( 'wp_send_json' )
+			->with( $price_html )
+			->once();
+		expect( 'wc_price' )
+			->with( $price )
+			->once()
+			->andReturn( $price_html );
 		$filter_input = FunctionMocker::replace( 'filter_input', $city_id );
+		$contents     = [
+			[
+				'quantity' => 1,
+				'data'     => 'item1',
+			],
+			[
+				'quantity' => 3,
+				'data'     => 'item2',
+			],
+		];
 		$cart         = Mockery::mock( 'WC_Cart' );
+		$cart
+			->shouldReceive( 'get_cart_contents' )
+			->once()
+			->andReturn( $contents );
 		global $woocommerce;
 		$woocommerce       = new stdClass();
 		$woocommerce->cart = $cart;
@@ -176,7 +248,7 @@ class Test_Ajax extends Test_Case {
 		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
 		$shipping_cost
 			->shouldReceive( 'calculate' )
-			->with( $city_id, $cart )
+			->with( $city_id, $contents )
 			->once()
 			->andReturn( $price );
 		$ajax = new AJAX( $api, $shipping_cost );

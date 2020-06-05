@@ -7,9 +7,10 @@
 
 namespace Nova_Poshta\Core\Cache;
 
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Nova_Poshta\Core\Main;
 use Nova_Poshta\Tests\Test_Case;
-use WP_Mock;
+use function Brain\Monkey\Functions\expect;
 
 /**
  * Class Object_Cache
@@ -20,20 +21,22 @@ class Test_Object_Cache extends Test_Case {
 
 	/**
 	 * Test set new object cache
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_set() {
 		$key    = 'some-key';
 		$value  = 'value';
 		$expire = 100;
-		WP_Mock::userFunction( 'wp_cache_get' )->
-		with( 'Nova_Poshta\Core\Cache\Object_Cache-keys', Main::PLUGIN_SLUG )->
-		once();
-		WP_Mock::userFunction( 'wp_cache_set' )->
-		with( 'Nova_Poshta\Core\Cache\Object_Cache-keys', [ $key ], Main::PLUGIN_SLUG )->
-		once();
-		WP_Mock::userFunction( 'wp_cache_set' )->
-		with( $key, $value, Main::PLUGIN_SLUG, $expire )->
-		once();
+		expect( 'get_transient' )
+			->with( 'Nova_Poshta\Core\Cache\Object_Cache-keys' )
+			->once();
+		expect( 'set_transient' )
+			->with( 'Nova_Poshta\Core\Cache\Object_Cache-keys', [ $key ] )
+			->once();
+		expect( 'wp_cache_set' )
+			->with( $key, $value, Main::PLUGIN_SLUG, $expire )
+			->once();
 		$object_cache = new Object_Cache();
 
 		$object_cache->set( $key, $value, $expire );
@@ -41,15 +44,17 @@ class Test_Object_Cache extends Test_Case {
 
 	/**
 	 * Get cache object by key
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_get() {
 		$key = 'some-key';
-		WP_Mock::userFunction( 'wp_cache_get' )->
-		with( 'Nova_Poshta\Core\Cache\Object_Cache-keys', Main::PLUGIN_SLUG )->
-		once();
-		WP_Mock::userFunction( 'wp_cache_get' )->
-		with( $key, Main::PLUGIN_SLUG )->
-		once();
+		expect( 'get_transient' )
+			->with( 'Nova_Poshta\Core\Cache\Object_Cache-keys' )
+			->once();
+		expect( 'wp_cache_get' )
+			->with( $key, Main::PLUGIN_SLUG )
+			->once();
 		$object_cache = new Object_Cache();
 
 		$object_cache->get( $key );
@@ -57,15 +62,21 @@ class Test_Object_Cache extends Test_Case {
 
 	/**
 	 * Delete object cache by key
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_delete() {
 		$key = 'some-key';
-		WP_Mock::userFunction( 'wp_cache_get' )->
-		with( 'Nova_Poshta\Core\Cache\Object_Cache-keys', Main::PLUGIN_SLUG )->
-		once();
-		WP_Mock::userFunction( 'wp_cache_delete' )->
-		with( $key, Main::PLUGIN_SLUG )->
-		once();
+		expect( 'get_transient' )
+			->with( 'Nova_Poshta\Core\Cache\Object_Cache-keys' )
+			->once();
+		expect( 'wp_cache_delete' )
+			->with( $key, Main::PLUGIN_SLUG )
+			->once();
+		expect( 'set_transient' )
+			->with( $key, Main::PLUGIN_SLUG )
+			->once();
+
 		$object_cache = new Object_Cache();
 
 		$object_cache->delete( $key );

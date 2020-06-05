@@ -13,7 +13,7 @@
 namespace Nova_Poshta\Core;
 
 use Nova_Poshta\Admin\Notice;
-use Nova_Poshta\Core\Cache\Object_Cache;
+use Nova_Poshta\Core\Cache\Factory_Cache;
 
 /**
  * Class Shipping
@@ -35,21 +35,21 @@ class Shipping {
 	 */
 	private $notice;
 	/**
-	 * Object cache
+	 * Cache
 	 *
-	 * @var Object_Cache
+	 * @var Factory_Cache
 	 */
-	private $object_cache;
+	private $factory_cache;
 
 	/**
 	 * Shipping constructor.
 	 *
-	 * @param Notice       $notice       Plugin notices.
-	 * @param Object_Cache $object_cache Object cache.
+	 * @param Notice        $notice        Plugin notices.
+	 * @param Factory_Cache $factory_cache Cache.
 	 */
-	public function __construct( Notice $notice, Object_Cache $object_cache ) {
-		$this->notice       = $notice;
-		$this->object_cache = $object_cache;
+	public function __construct( Notice $notice, Factory_Cache $factory_cache ) {
+		$this->notice        = $notice;
+		$this->factory_cache = $factory_cache;
 		$this->notices();
 	}
 
@@ -63,7 +63,7 @@ class Shipping {
 				sprintf(
 				/* translators: 1: link on WooCommerce settings */
 					__(
-						'You must add the "New Delivery Method" delivery method <a href="%s">in the WooCommerce settings</a>',
+						'You must add the "Nova Poshta" shipping method <a href="%s">in the WooCommerce settings</a>',
 						'shipping-nova-poshta-for-woocommerce'
 					),
 					get_admin_url( null, 'admin.php?page=wc-settings&tab=shipping' )
@@ -110,8 +110,9 @@ class Shipping {
 	 */
 	private function is_active(): bool {
 		global $wpdb;
+		$cache = $this->factory_cache->object();
 		//phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
-		$is_active = $this->object_cache->get( self::METHOD_NAME . '_active' );
+		$is_active = $cache->get( self::METHOD_NAME . '_active' );
 		if ( ! $is_active ) {
 			//phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$is_active = (bool) $wpdb->get_var(
@@ -121,7 +122,7 @@ class Shipping {
 					self::METHOD_NAME
 				)
 			);
-			$this->object_cache->set( self::METHOD_NAME . '_active', $is_active, constant( 'DAY_IN_SECONDS' ) );
+			$cache->set( self::METHOD_NAME . '_active', $is_active, constant( 'DAY_IN_SECONDS' ) );
 		}
 
 		//phpcs:enable WordPress.DB.DirectDatabaseQuery.NoCaching

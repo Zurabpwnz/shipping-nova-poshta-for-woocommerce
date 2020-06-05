@@ -75,7 +75,7 @@ class Admin {
 		if ( ! $this->is_plugin_page() ) {
 			return;
 		}
-		wp_enqueue_style( 'np-select2', plugin_dir_url( __DIR__ ) . 'front/assets/css/select2.min.css', [], Main::VERSION, 'all' );
+		wp_enqueue_style( 'np-select2', plugin_dir_url( __DIR__ ) . '/front/assets/css/select2.min.css', [], Main::VERSION, 'all' );
 		wp_enqueue_style( 'np-tip-tip', plugin_dir_url( __FILE__ ) . '/assets/css/tip-tip.css', [], Main::VERSION, 'all' );
 		wp_enqueue_style( Main::PLUGIN_SLUG, plugin_dir_url( __FILE__ ) . '/assets/css/main.css', [ 'np-select2' ], Main::VERSION, 'all' );
 		wp_enqueue_style( Main::PLUGIN_SLUG . '-front', plugin_dir_url( __DIR__ ) . '/front/assets/css/main.css', [ 'np-select2' ], Main::VERSION, 'all' );
@@ -90,8 +90,15 @@ class Admin {
 		}
 		wp_enqueue_script(
 			'np-select2',
-			plugin_dir_url( __DIR__ ) . 'front/assets/js/select2.min.js',
+			plugin_dir_url( __DIR__ ) . '/front/assets/js/select2.min.js',
 			[ 'jquery' ],
+			Main::VERSION,
+			true
+		);
+		wp_enqueue_script(
+			'select2-i18n-' . $this->language->get_current_language(),
+			plugin_dir_url( __DIR__ ) . '/front/assets/js/i18n/' . $this->language->get_current_language() . '.js',
+			[ 'jquery', 'np-select2' ],
 			Main::VERSION,
 			true
 		);
@@ -99,13 +106,6 @@ class Admin {
 			'np-tip-tip',
 			plugin_dir_url( __FILE__ ) . '/assets/js/jquery.tip-tip.min.js',
 			[ 'jquery' ],
-			Main::VERSION,
-			true
-		);
-		wp_enqueue_script(
-			'select2-i18n-' . $this->language->get_current_language(),
-			plugin_dir_url( __DIR__ ) . 'front/assets/js/i18n/' . $this->language->get_current_language() . '.js',
-			[ 'jquery', 'np-select2' ],
 			Main::VERSION,
 			true
 		);
@@ -207,10 +207,7 @@ class Admin {
 	 * @return array
 	 */
 	public function validate( array $value ): array {
-		if (
-			! isset( $value['api_key'] )
-			|| ( isset( $value['api_key'] ) && ! $this->api->validate( $value['api_key'] ) )
-		) {
+		if ( ! empty( $value['api_key'] ) && ! $this->api->validate( $value['api_key'] ) ) {
 			add_settings_error( Main::PLUGIN_SLUG, 403, __( 'Invalid api key', 'shipping-nova-poshta-for-woocommerce' ) );
 			unset( $value['api_key'] );
 		}

@@ -1,0 +1,15 @@
+{
+  "redefinable-internals": [
+    "filter_input",
+    "filter_var",
+    "class_exists",
+    "is_a",
+    "constant"
+  ],
+  "whitelist": [
+    "../../../admin/",
+    "../../../core/",
+    "../../../front",
+    "../../../shipping"
+  ]
+}

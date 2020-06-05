@@ -7,10 +7,12 @@
 
 namespace Nova_Poshta\Admin;
 
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
 use tad\FunctionMocker\FunctionMocker;
-use WP_Mock;
+use function Brain\Monkey\Functions\expect;
+use function Brain\Monkey\Functions\stubs;
 
 /**
  * Class Test_Product_Category_Metabox
@@ -24,23 +26,31 @@ class Test_Product_Category_Metabox extends Test_Case {
 	 */
 	public function test_hooks() {
 		$product_category_metabox = new Product_Category_Metabox();
-		WP_Mock::expectActionAdded( 'product_cat_add_form_fields', [ $product_category_metabox, 'add' ] );
-		WP_Mock::expectActionAdded( 'product_cat_edit_form_fields', [ $product_category_metabox, 'edit' ] );
-		WP_Mock::expectActionAdded( 'edited_product_cat', [ $product_category_metabox, 'save' ] );
-		WP_Mock::expectActionAdded( 'create_product_cat', [ $product_category_metabox, 'save' ] );
 
 		$product_category_metabox->hooks();
+
+		$this->assertTrue( has_action( 'product_cat_add_form_fields', [ $product_category_metabox, 'add' ] ) );
+		$this->assertTrue( has_action( 'product_cat_edit_form_fields', [ $product_category_metabox, 'edit' ] ) );
+		$this->assertTrue( has_action( 'edited_product_cat', [ $product_category_metabox, 'save' ] ) );
+		$this->assertTrue( has_action( 'create_product_cat', [ $product_category_metabox, 'save' ] ) );
 	}
 
 	/**
 	 * Test add metabox
 	 */
 	public function test_add() {
-		WP_Mock::userFunction( 'plugin_dir_path' )->
-		once();
-		WP_Mock::userFunction( 'wp_nonce_field' )->
-		with( Product_Category_Metabox::NONCE, Product_Category_Metabox::NONCE_FIELD, false )->
-		once();
+		stubs(
+			[
+				'esc_attr_e',
+			]
+		);
+		expect( 'plugin_dir_path' )
+			->withAnyArgs()
+			->once()
+			->andReturn();
+		expect( 'wp_nonce_field' )
+			->with( Product_Category_Metabox::NONCE, Product_Category_Metabox::NONCE_FIELD, false )
+			->once();
 		$product_category_metabox = new Product_Category_Metabox();
 		ob_start();
 
@@ -50,6 +60,8 @@ class Test_Product_Category_Metabox extends Test_Case {
 
 	/**
 	 * Test edit metabox
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_edit() {
 		$weight        = 10;
@@ -58,27 +70,35 @@ class Test_Product_Category_Metabox extends Test_Case {
 		$height        = 40;
 		$term          = Mockery::mock( 'WP_Term' );
 		$term->term_id = 100;
-		WP_Mock::userFunction( 'get_term_meta' )->
-		with( $term->term_id, 'weight_formula', true )->
-		once()->
-		andReturn( $weight );
-		WP_Mock::userFunction( 'get_term_meta' )->
-		with( $term->term_id, 'width_formula', true )->
-		once()->
-		andReturn( $width );
-		WP_Mock::userFunction( 'get_term_meta' )->
-		with( $term->term_id, 'length_formula', true )->
-		once()->
-		andReturn( $length );
-		WP_Mock::userFunction( 'get_term_meta' )->
-		with( $term->term_id, 'height_formula', true )->
-		once()->
-		andReturn( $height );
-		WP_Mock::userFunction( 'plugin_dir_path' )->
-		once();
-		WP_Mock::userFunction( 'wp_nonce_field' )->
-		with( Product_Category_Metabox::NONCE, Product_Category_Metabox::NONCE_FIELD, false )->
-		once();
+		stubs(
+			[
+				'esc_attr',
+				'esc_attr_e',
+			]
+		);
+		expect( 'get_term_meta' )
+			->with( $term->term_id, 'weight_formula', true )
+			->once()
+			->andReturn( $weight );
+		expect( 'get_term_meta' )
+			->with( $term->term_id, 'width_formula', true )
+			->once()
+			->andReturn( $width );
+		expect( 'get_term_meta' )
+			->with( $term->term_id, 'length_formula', true )
+			->once()
+			->andReturn( $length );
+		expect( 'get_term_meta' )
+			->with( $term->term_id, 'height_formula', true )
+			->once()
+			->andReturn( $height );
+		expect( 'plugin_dir_path' )
+			->withAnyArgs()
+			->once()
+			->andReturn();
+		expect( 'wp_nonce_field' )
+			->with( Product_Category_Metabox::NONCE, Product_Category_Metabox::NONCE_FIELD, false )
+			->once();
 		$product_category_metabox = new Product_Category_Metabox();
 		ob_start();
 
@@ -91,10 +111,10 @@ class Test_Product_Category_Metabox extends Test_Case {
 	 */
 	public function test_NOT_save_with_invalid_nonce() {
 		$term_id = 10;
-		WP_Mock::userFunction( 'wp_verify_nonce' )->
-		with( null, Product_Category_Metabox::NONCE )->
-		once()->
-		andReturn( false );
+		expect( 'wp_verify_nonce' )
+			->with( null, Product_Category_Metabox::NONCE )
+			->once()
+			->andReturn( false );
 		$product_category_metabox = new Product_Category_Metabox();
 
 		$product_category_metabox->save( $term_id );
@@ -102,6 +122,8 @@ class Test_Product_Category_Metabox extends Test_Case {
 
 	/**
 	 * Test save metabox
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_save() {
 		$term_id = 10;
@@ -120,22 +142,22 @@ class Test_Product_Category_Metabox extends Test_Case {
 				return $answers[ $i ++ ];
 			}
 		);
-		WP_Mock::userFunction( 'wp_verify_nonce' )->
-		with( $nonce, Product_Category_Metabox::NONCE )->
-		once()->
-		andReturn( true );
-		WP_Mock::userFunction( 'update_term_meta' )->
-		with( $term_id, 'weight_formula', (string) $weight )->
-		once();
-		WP_Mock::userFunction( 'update_term_meta' )->
-		with( $term_id, 'width_formula', (string) $width )->
-		once();
-		WP_Mock::userFunction( 'update_term_meta' )->
-		with( $term_id, 'height_formula', (string) $height )->
-		once();
-		WP_Mock::userFunction( 'update_term_meta' )->
-		with( $term_id, 'length_formula', (string) $length )->
-		once();
+		expect( 'wp_verify_nonce' )
+			->with( $nonce, Product_Category_Metabox::NONCE )
+			->once()
+			->andReturn( true );
+		expect( 'update_term_meta' )
+			->with( $term_id, 'weight_formula', (string) $weight )
+			->once();
+		expect( 'update_term_meta' )
+			->with( $term_id, 'width_formula', (string) $width )
+			->once();
+		expect( 'update_term_meta' )
+			->with( $term_id, 'height_formula', (string) $height )
+			->once();
+		expect( 'update_term_meta' )
+			->with( $term_id, 'length_formula', (string) $length )
+			->once();
 		$product_category_metabox = new Product_Category_Metabox();
 
 		$product_category_metabox->save( $term_id );
