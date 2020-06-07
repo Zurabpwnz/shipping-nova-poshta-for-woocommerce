@@ -63,6 +63,10 @@ class Test_Main extends Test_Case {
 		$shipping
 			->shouldReceive( 'hooks' )
 			->once();
+		$payment = Mockery::mock( 'overload:Nova_Poshta\Core\Payment' );
+		$payment
+			->shouldReceive( 'hooks' )
+			->once();
 		$language = Mockery::mock( 'overload:Nova_Poshta\Core\Language' );
 		$language
 			->shouldReceive( 'hooks' )

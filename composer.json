@@ -20,7 +20,9 @@
     "classmap": [
       "core",
       "admin",
-      "front"
+      "front",
+      "shipping",
+      "payment"
     ]
   },
   "autoload-dev": {
@@ -29,6 +31,7 @@
       "admin",
       "front",
       "shipping",
+      "payment",
       "tests/phpunit/classes"
     ]
   }

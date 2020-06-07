@@ -166,36 +166,11 @@ class Admin {
 	}
 
 	/**
-	 * Controller for creating invoices
-	 *
-	 * @throws Exception Invalid DateTime.
-	 */
-	private function controller() {
-		if ( ! isset( $_POST[ Main::PLUGIN_SLUG ] ) ) {
-			return;
-		}
-		check_admin_referer( Main::PLUGIN_SLUG . '-invoice', Main::PLUGIN_SLUG . '_nonce' );
-		$fields = filter_input( INPUT_POST, Main::PLUGIN_SLUG, FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
-		$this->api->internet_document(
-			$fields['first_name'],
-			$fields['last_name'],
-			$fields['phone'],
-			$fields['city_id'],
-			$fields['warehouse_id'],
-			$fields['price'],
-			1,
-			isset( $fields['backward'] ) && ! empty( $fields['redelivery'] ) ? $fields['redelivery'] : 0
-		);
-	}
-
-	/**
 	 * View for page options
 	 *
 	 * @throws Exception Invalid DateTime.
 	 */
 	public function page_options() {
-		$this->controller();
-
 		require plugin_dir_path( __FILE__ ) . 'partials/page-options.php';
 	}
 

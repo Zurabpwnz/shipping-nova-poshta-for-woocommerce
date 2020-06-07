@@ -97,7 +97,7 @@ class Test_API extends Test_Case {
 			->once();
 		$db
 			->shouldReceive( 'cities' )
-			->withArgs( [ $search, $limit ] )
+			->with( $search, $limit )
 			->once()
 			->andReturn( $cities );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
@@ -171,7 +171,7 @@ class Test_API extends Test_Case {
 		$db        = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'city' )
-			->withArgs( [ $city_id ] )
+			->with( $city_id )
 			->once()
 			->andReturn( $city_name );
 		$settings      = Mockery::mock( 'Nova_Poshta\Core\Settings' );
@@ -191,7 +191,7 @@ class Test_API extends Test_Case {
 		$db        = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'area' )
-			->withArgs( [ $city_id ] )
+			->with( $city_id )
 			->once()
 			->andReturn( $area_name );
 		$settings      = Mockery::mock( 'Nova_Poshta\Core\Settings' );
@@ -211,7 +211,7 @@ class Test_API extends Test_Case {
 		$db             = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'warehouse' )
-			->withArgs( [ $warehouse_id ] )
+			->with( $warehouse_id )
 			->once()
 			->andReturn( $warehouse_name );
 		$settings      = Mockery::mock( 'Nova_Poshta\Core\Settings' );
@@ -779,6 +779,8 @@ class Test_API extends Test_Case {
 		$area_id            = 'area-id';
 		$price              = '100.5';
 		$count              = '10';
+		$weight             = 11;
+		$volume             = 22;
 		$admin_phone        = '987654321';
 		$description        = 'Product';
 		$admin_city_id      = 'admin-city-id';
@@ -1047,7 +1049,7 @@ class Test_API extends Test_Case {
 
 		$this->assertSame(
 			$internet_document,
-			$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count )
+			$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $weight, $volume )
 		);
 	}
 
@@ -1061,14 +1063,16 @@ class Test_API extends Test_Case {
 		$first_name         = 'First Name';
 		$last_name          = 'Last Name';
 		$phone              = '123456789';
-		$description        = 'Product';
 		$city_id            = 'city-id';
 		$warehouse_id       = 'warehouse-id';
 		$area_id            = 'area-id';
-		$price              = 100.5;
-		$count              = 10;
-		$redelivery         = 50;
+		$price              = '100.5';
+		$count              = '10';
 		$admin_phone        = '987654321';
+		$description        = 'Product';
+		$weight             = 11;
+		$volume             = 22;
+		$redelivery         = 100;
 		$admin_city_id      = 'admin-city-id';
 		$admin_warehouse_id = 'admin-warehouse-id';
 		$sender             = 'sender';
@@ -1115,8 +1119,7 @@ class Test_API extends Test_Case {
 					'apiKey'           => $api_key,
 				]
 			)
-			->
-			once()
+			->once()
 			->andReturn( 'json' );
 		expect( 'wp_remote_post' )
 			->with(
@@ -1172,8 +1175,8 @@ class Test_API extends Test_Case {
 			->once()
 			->andReturn( 'response' );
 		expect( 'wp_remote_retrieve_body' )
-			->with( 'response' )
 			->once()
+			->with( 'response' )
 			->andReturn(
 			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
 				json_encode(
@@ -1255,27 +1258,27 @@ class Test_API extends Test_Case {
 					'modelName'        => 'InternetDocument',
 					'calledMethod'     => 'save',
 					'methodProperties' => (object) [
-						'ContactSender'        => $contact_sender,
-						'CitySender'           => $admin_city_id,
-						'SenderAddress'        => $admin_warehouse_id,
-						'SendersPhone'         => '380' . $admin_phone,
-						'Sender'               => $sender,
-						'FirstName'            => $first_name,
-						'LastName'             => $last_name,
-						'Phone'                => '380' . $phone,
-						'RecipientsPhone'      => '380' . $phone,
-						'Region'               => $area_id,
-						'City'                 => $city_id,
-						'CityRecipient'        => $city_id,
-						'RecipientAddress'     => $warehouse_id,
-						'Recipient'            => $recipient,
-						'ContactRecipient'     => $contact_recipient,
-						'ServiceType'          => 'WarehouseWarehouse',
-						'PaymentMethod'        => 'Cash',
-						'PayerType'            => 'Recipient',
-						'Cost'                 => $price,
-						'SeatsAmount'          => 1,
-						'OptionsSeat'          => [
+						'ContactSender'    => $contact_sender,
+						'CitySender'       => $admin_city_id,
+						'SenderAddress'    => $admin_warehouse_id,
+						'SendersPhone'     => '380' . $admin_phone,
+						'Sender'           => $sender,
+						'FirstName'        => $first_name,
+						'LastName'         => $last_name,
+						'Phone'            => '380' . $phone,
+						'RecipientsPhone'  => '380' . $phone,
+						'Region'           => $area_id,
+						'City'             => $city_id,
+						'CityRecipient'    => $city_id,
+						'RecipientAddress' => $warehouse_id,
+						'Recipient'        => $recipient,
+						'ContactRecipient' => $contact_recipient,
+						'ServiceType'      => 'WarehouseWarehouse',
+						'PaymentMethod'    => 'Cash',
+						'PayerType'        => 'Recipient',
+						'Cost'             => $price,
+						'SeatsAmount'      => 1,
+						'OptionsSeat'      => [
 							[
 								'volumetricVolume' => 1,
 								'volumetricWidth'  => $count * 26,
@@ -1284,17 +1287,10 @@ class Test_API extends Test_Case {
 								'weight'           => ( $count * .5 ) - .01,
 							],
 						],
-						'Description'          => $description,
-						'Weight'               => ( $count * .5 ) - .01,
-						'CargoType'            => 'Parcel',
-						'DateTime'             => $date->format( 'd.m.Y' ),
-						'BackwardDeliveryData' => [
-							[
-								'PayerType'        => 'Recipient',
-								'CargoType'        => 'Money',
-								'RedeliveryString' => $redelivery,
-							],
-						],
+						'Description'      => $description,
+						'Weight'           => ( $count * .5 ) - .01,
+						'CargoType'        => 'Parcel',
+						'DateTime'         => $date->format( 'd.m.Y' ),
 					],
 					'apiKey'           => $api_key,
 				]
@@ -1343,7 +1339,7 @@ class Test_API extends Test_Case {
 
 		$this->assertSame(
 			$internet_document,
-			$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count, $redelivery )
+			$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $weight, $volume, $redelivery )
 		);
 	}
 
@@ -1515,7 +1511,7 @@ class Test_API extends Test_Case {
 		$db             = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'cities' )
-			->withArgs( [ $search, $limit ] )
+			->with( $search, $limit )
 			->once()
 			->andReturn( $cities );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );

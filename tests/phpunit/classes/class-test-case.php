@@ -7,6 +7,7 @@
 
 namespace Nova_Poshta\Tests;
 
+use Mockery;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use ReflectionProperty;
