@@ -118,13 +118,7 @@ class Nova_Poshta_Gateway_COD extends WC_Gateway_COD {
 		if ( ! $this->instructions ) {
 			return;
 		}
-		echo wp_kses_post(
-			wpautop(
-				wptexturize(
-					$this->prepare_text( $this->instructions )
-				)
-			)
-		);
+		echo wp_kses_post( wpautop( wptexturize( $this->prepare_text( $this->instructions ) ) ) );
 	}
 
 	/**
@@ -136,15 +130,7 @@ class Nova_Poshta_Gateway_COD extends WC_Gateway_COD {
 	 */
 	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
 		if ( $this->instructions && ! $sent_to_admin && $this->id === $order->get_payment_method() ) {
-			echo wp_kses_post(
-				wpautop(
-					wptexturize(
-						$this->prepare_text(
-							$this->instructions
-						)
-					)
-				) . PHP_EOL
-			);
+			echo wp_kses_post( wpautop( wptexturize( $this->prepare_text( $this->instructions ) ) ) . PHP_EOL );
 		}
 	}
 
@@ -155,13 +141,7 @@ class Nova_Poshta_Gateway_COD extends WC_Gateway_COD {
 		if ( ! $this->description ) {
 			return;
 		}
-		echo wp_kses_post(
-			wpautop(
-				wptexturize(
-					'<p>' . $this->prepare_text( $this->description ) . '</p>'
-				)
-			)
-		);
+		echo wp_kses_post( wpautop( wptexturize( '<p>' . $this->prepare_text( $this->description ) . '</p>' ) ) );
 	}
 
 	/**
