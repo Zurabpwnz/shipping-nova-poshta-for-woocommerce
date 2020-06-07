@@ -68,14 +68,42 @@ class Shipping_Cost {
 		if ( ! $this->settings->is_shipping_cost_enable() ) {
 			return 0;
 		}
+		$weight = $this->get_products_weight( $products );
+		$volume = $this->get_products_volume( $products );
+
+		return $this->api->shipping_cost( $recipient_city_id, $weight, $volume );
+	}
+
+	/**
+	 * Calculate weight for list of products.
+	 *
+	 * @param array $products List of products. Each product will be array with 'data' => WC_Product and quantity.
+	 *
+	 * @return float
+	 */
+	public function get_products_weight( array $products ): float {
 		$weight = 0;
-		$volume = 0;
 		foreach ( $products as $item ) {
 			$weight += $this->get_weight( $item['data'], $item['quantity'] );
+		}
+
+		return $weight;
+	}
+
+	/**
+	 * Calculate volume for list of products.
+	 *
+	 * @param array $products List of products. Each product will be array with 'data' => WC_Product and quantity.
+	 *
+	 * @return float
+	 */
+	public function get_products_volume( array $products ): float {
+		$volume = 0;
+		foreach ( $products as $item ) {
 			$volume += $this->get_volume( $item['data'], $item['quantity'] );
 		}
 
-		return $this->api->shipping_cost( $recipient_city_id, $weight, $volume );
+		return $volume;
 	}
 
 	/**

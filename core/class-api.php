@@ -226,7 +226,8 @@ class API {
 	 * @param string $city_id      Customer city ID.
 	 * @param string $warehouse_id Customer warehouse ID.
 	 * @param float  $price        Order price.
-	 * @param int    $count        Order items count.
+	 * @param float  $weight       Weight of all products in order.
+	 * @param float  $volume       Volume of all products in order.
 	 * @param float  $redelivery   Cash on delivery price.
 	 *
 	 * @return string
@@ -235,7 +236,7 @@ class API {
 	public function internet_document(
 		string $first_name, string $last_name, string $phone,
 		string $city_id, string $warehouse_id, float $price,
-		int $count, float $redelivery = 0
+		float $weight = 0, float $volume = 0, float $redelivery = 0
 	): string {
 		$sender = $this->sender();
 		if ( empty( $sender ) ) {
@@ -251,17 +252,9 @@ class API {
 			'PayerType'     => 'Recipient',
 			'Cost'          => $price,
 			'SeatsAmount'   => 1,
-			'OptionsSeat'   => [
-				[
-					'volumetricVolume' => 1,
-					'volumetricWidth'  => $count * 26, // TODO: Calculate width.
-					'volumetricLength' => $count * 14.5, // TODO: Calculate length.
-					'volumetricHeight' => $count * 10, // TODO: Calculate height.
-					'weight'           => ( $count * .5 ) - .01, // TODO: Calculate weight.
-				],
-			],
 			'Description'   => apply_filters( 'shipping_nova_poshta_for_woocommerce_document_description', $this->settings->description() ),
-			'Weight'        => ( $count * .5 ) - .01, // TODO: Calculate weight.
+			'VolumeGeneral' => max( 0.0004, $volume ),
+			'Weight'        => max( 0.1, $weight ),
 			'CargoType'     => 'Parcel',
 			'DateTime'      => $this->get_current_date(),
 		];

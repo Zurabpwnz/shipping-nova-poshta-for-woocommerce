@@ -137,7 +137,7 @@ class Test_User extends Test_Case {
 		$api
 			->shouldReceive( 'warehouses' )
 			->once()
-			->withArgs( [ $city_id ] )
+			->with( $city_id )
 			->andReturn( $warehouses );
 		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
 		$language
@@ -190,7 +190,7 @@ class Test_User extends Test_Case {
 		$api
 			->shouldReceive( 'warehouses' )
 			->once()
-			->withArgs( [ $city_id ] )
+			->with( $city_id )
 			->andReturn( $warehouses );
 		when( '__' )->returnArg();
 		expect( 'get_current_user_id' )

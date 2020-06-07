@@ -99,18 +99,16 @@ class Test_Shipping extends Test_Case {
 			WHERE `method_id` = "shipping_nova_poshta_for_woocommerce" AND `is_enabled` = 1 LIMIT 1';
 		$wpdb
 			->shouldReceive( 'prepare' )
-			->withArgs(
-				[
-					'SELECT `instance_id` FROM ' . $wpdb->prefix . 'woocommerce_shipping_zone_methods
+			->with(
+				'SELECT `instance_id` FROM ' . $wpdb->prefix . 'woocommerce_shipping_zone_methods
 			WHERE `method_id` = %s AND `is_enabled` = 1 LIMIT 1',
-					'shipping_nova_poshta_for_woocommerce',
-				]
+				'shipping_nova_poshta_for_woocommerce'
 			)
 			->once()
 			->andReturn( $sql );
 		$wpdb
 			->shouldReceive( 'get_var' )
-			->withArgs( [ $sql ] )
+			->with( $sql )
 			->once()
 			->andReturn( $request );
 		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );

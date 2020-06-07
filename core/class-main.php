@@ -125,6 +125,9 @@ class Main {
 		$shipping       = new Shipping( $this->notice, $cache );
 		$shipping->hooks();
 
+		$payment = new Payment();
+		$payment->hooks();
+
 		$this->language = new Language();
 		$this->language->hooks();
 

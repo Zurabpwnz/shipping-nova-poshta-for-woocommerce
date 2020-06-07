@@ -76,11 +76,11 @@ class Test_Thank_You extends Test_Case {
 			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
 		$shipping_method
 			->shouldReceive( 'get_meta' )
-			->withArgs( [ 'city_id' ] )
+			->with( 'city_id' )
 			->once();
 		$shipping_method
 			->shouldReceive( 'get_meta' )
-			->withArgs( [ 'warehouse_id' ] )
+			->with( 'warehouse_id' )
 			->once();
 		$order = Mockery::mock( 'WC_Order' );
 		$order
@@ -103,12 +103,12 @@ class Test_Thank_You extends Test_Case {
 		$api            = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
 			->shouldReceive( 'city' )
-			->withArgs( [ $city_id ] )
+			->with( $city_id )
 			->once()
 			->andReturn( $city_name );
 		$api
 			->shouldReceive( 'warehouse' )
-			->withArgs( [ $warehouse_id ] )
+			->with( $warehouse_id )
 			->once()
 			->andReturn( $warehouse_name );
 		$shipping_method = Mockery::mock( 'WC_Shipping_Method' );
@@ -118,17 +118,17 @@ class Test_Thank_You extends Test_Case {
 			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
 		$shipping_method
 			->shouldReceive( 'get_meta' )
-			->withArgs( [ 'city_id' ] )
+			->with( 'city_id' )
 			->once()
 			->andReturn( $city_id );
 		$shipping_method
 			->shouldReceive( 'get_meta' )
-			->withArgs( [ 'warehouse_id' ] )
+			->with( 'warehouse_id' )
 			->once()
 			->andReturn( $warehouse_id );
 		$shipping_method
 			->shouldReceive( 'get_meta' )
-			->withArgs( [ 'internet_document' ] )
+			->with( 'internet_document' )
 			->once()
 			->andReturn( false );
 		$order = Mockery::mock( 'WC_Order' );
@@ -156,12 +156,12 @@ class Test_Thank_You extends Test_Case {
 		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
 			->shouldReceive( 'city' )
-			->withArgs( [ $city_id ] )
+			->with( $city_id )
 			->once()
 			->andReturn( $city_name );
 		$api
 			->shouldReceive( 'warehouse' )
-			->withArgs( [ $warehouse_id ] )
+			->with( $warehouse_id )
 			->once()
 			->andReturn( $warehouse_name );
 		$shipping_method = Mockery::mock( 'WC_Shipping_Method' );
@@ -171,17 +171,17 @@ class Test_Thank_You extends Test_Case {
 			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
 		$shipping_method
 			->shouldReceive( 'get_meta' )
-			->withArgs( [ 'city_id' ] )
+			->with( 'city_id' )
 			->once()
 			->andReturn( $city_id );
 		$shipping_method
 			->shouldReceive( 'get_meta' )
-			->withArgs( [ 'warehouse_id' ] )
+			->with( 'warehouse_id' )
 			->once()
 			->andReturn( $warehouse_id );
 		$shipping_method
 			->shouldReceive( 'get_meta' )
-			->withArgs( [ 'internet_document' ] )
+			->with( 'internet_document' )
 			->once()
 			->andReturn( $internet_document );
 		$order = Mockery::mock( 'WC_Order' );

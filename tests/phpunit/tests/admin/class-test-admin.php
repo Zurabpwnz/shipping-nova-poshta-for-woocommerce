@@ -327,12 +327,12 @@ class Test_Admin extends Test_Case {
 		$api          = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
 			->shouldReceive( 'city' )
-			->withArgs( [ $city_id ] )
+			->with( $city_id )
 			->once()
 			->andReturn( 'City name' );
 		$api
 			->shouldReceive( 'warehouses' )
-			->withArgs( [ $city_id ] )
+			->with( $city_id )
 			->once()
 			->andReturn( [ 'Warehuse #1' ] );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
@@ -437,7 +437,7 @@ class Test_Admin extends Test_Case {
 			->andReturn( [ $city_id => $city_name ] );
 		$api
 			->shouldReceive( 'warehouses' )
-			->withArgs( [ $city_id ] )
+			->with( $city_id )
 			->once()
 			->andReturn( [ 'Warehuse #1' ] );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
@@ -480,127 +480,6 @@ class Test_Admin extends Test_Case {
 		$this->assertNotEmpty( ob_get_clean() );
 	}
 
-	/**
-	 * Test creating invoice
-	 *
-	 * @dataProvider dp_request
-	 *
-	 * @param array $request Request example.
-	 *
-	 * @throws Exception Invalid DateTime.
-	 */
-	public function test_page_create_invoice( array $request ) {
-		$_POST[ Main::PLUGIN_SLUG ] = $request;
-		stubs(
-			[
-				'esc_url',
-				'esc_attr_e',
-			]
-		);
-		expect( 'check_admin_referer' )
-			->with( Main::PLUGIN_SLUG . '-invoice', Main::PLUGIN_SLUG . '_nonce' )
-			->once()
-			->andReturn( false );
-		expect( 'plugin_dir_path' )
-			->withAnyArgs()
-			->once();
-		expect( 'get_admin_url' )
-			->with()
-			->once();
-		$request_to_api = array_values( $request );
-		array_push( $request_to_api, 1 );
-		array_push( $request_to_api, 0 );
-		FunctionMocker::replace( 'filter_input', $request );
-		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$api
-			->shouldReceive( 'internet_document' )
-			->between( 0, 1 )
-			->withArgs( $request_to_api );
-		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
-		$admin    = new Admin( $api, $settings, $language );
-		ob_start();
-
-		$admin->page_options();
-
-		$this->assertnotEmpty( ob_get_clean() );
-	}
-
-	/**
-	 * Create invoice request
-	 * Data provider for test_controller().
-	 *
-	 * @return array
-	 */
-	public function dp_request() {
-		return [
-			[
-				[
-					'first_name'   => 'First name',
-					'last_name'    => 'Last name',
-					'phone'        => '123456',
-					'city_id'      => 'city-id',
-					'warehouse_id' => 'warehouse-id',
-					'price'        => 777,
-				],
-			],
-		];
-	}
-
-	/**
-	 * Test page option tab create invoice
-	 */
-	public function test_page_options_create_invoice() {
-		$user_id = 10;
-		$locale  = 'uk';
-		stubs(
-			[
-				'esc_url',
-				'esc_attr',
-				'esc_attr_e',
-				'selected',
-			]
-		);
-		expect( 'plugin_dir_path' )
-			->withAnyArgs()
-			->twice();
-		expect( 'get_admin_url' )
-			->with( '', 'admin-ajax.php' )
-			->once();
-		expect( 'submit_button' )
-			->withNoArgs()
-			->once();
-		expect( 'get_current_user_id' )
-			->once()
-			->andReturn( $user_id );
-		expect( 'wp_nonce_field' )
-			->with( Main::PLUGIN_SLUG . '-invoice', Main::PLUGIN_SLUG . '_nonce', false )
-			->once();
-		expectApplied( 'shipping_nova_poshta_for_woocommerce_default_city' )
-			->with( '', $user_id, $locale )
-			->andReturn( 'city' );
-		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$api
-			->shouldReceive( 'cities' )
-			->once()
-			->andReturn( [ 'city-id' => 'city-info' ] );
-		$api
-			->shouldReceive( 'warehouses' )
-			->once()
-			->andReturn( [ 'warehouse-id' => 'warehouse-info' ] );
-		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
-		$language
-			->shouldReceive( 'get_current_language' )
-			->once()
-			->andReturn( $locale );
-		$admin = new Admin( $api, $settings, $language );
-		FunctionMocker::replace( 'filter_input', 'internet_document' );
-		ob_start();
-		$admin->page_options();
-
-		$this->assertNotEmpty( ob_get_clean() );
-	}
 
 	/**
 	 * Test validation API key and show notice
@@ -616,7 +495,7 @@ class Test_Admin extends Test_Case {
 		$api
 			->shouldReceive( 'validate' )
 			->once()
-			->withArgs( [ $key ] );
+			->with( $key );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
 		$admin    = new Admin( $api, $settings, $language );
@@ -633,7 +512,7 @@ class Test_Admin extends Test_Case {
 		$api
 			->shouldReceive( 'validate' )
 			->once()
-			->withArgs( [ $key ] )
+			->with( $key )
 			->andReturn( true );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );

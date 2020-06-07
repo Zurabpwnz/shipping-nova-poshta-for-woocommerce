@@ -87,7 +87,7 @@ class Test_Ajax extends Test_Case {
 		$api
 			->shouldReceive( 'cities' )
 			->once()
-			->withArgs( [ $city_name, 10 ] )
+			->with( $city_name, 10 )
 			->andReturn( [ $city_id => $city_name ] );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
 		$ajax          = new AJAX( $api, $shipping_cost );
@@ -123,7 +123,7 @@ class Test_Ajax extends Test_Case {
 		$api
 			->shouldReceive( 'warehouses' )
 			->once()
-			->withArgs( [ $city_id ] )
+			->with( $city_id )
 			->andReturn( [ $warehouse_id => $warehouse_name ] );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
 		$ajax          = new AJAX( $api, $shipping_cost );
