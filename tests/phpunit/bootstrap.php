@@ -6,7 +6,6 @@
  */
 
 use Composer\Autoload\ClassMapGenerator;
-use tad\FunctionMocker\FunctionMocker;
 
 $plugin_path = __DIR__ . '/../../';
 
@@ -48,19 +47,7 @@ function autoload_tests_classes( string $class ) {
 	}
 }
 
-FunctionMocker::init(
-	[
-		'whitelist'             => [
-			realpath( $plugin_path . 'admin/' ),
-			realpath( $plugin_path . 'core/' ),
-			realpath( $plugin_path . 'front/' ),
-			realpath( $plugin_path . 'shipping/' ),
-		],
-		'blacklist'             => [
-			realpath( $plugin_path ),
-		],
-		'redefinable-internals' => [ 'class_exists', 'filter_input', 'filter_var', 'is_a', 'constant' ],
-	]
-);
+define( 'PLUGIN_FILE', __DIR__ . '/../../shipping-nova-poshta-for-woocommerce.php' );
+define( 'PLUGIN_DIR', dirname( PLUGIN_FILE ) );
 
-WP_Mock::bootstrap();
+define( 'ARRAY_A', 'ARRAY_A' );

@@ -12,9 +12,9 @@
 
 use Nova_Poshta\Admin\Notice;
 use Nova_Poshta\Core\API;
+use Nova_Poshta\Core\Cache\Factory_Cache;
 use Nova_Poshta\Core\Cache\Object_Cache;
 use Nova_Poshta\Core\Cache\Transient_Cache;
-use Nova_Poshta\Core\Cache\Factory_Cache;
 use Nova_Poshta\Core\Calculator;
 use Nova_Poshta\Core\DB;
 use Nova_Poshta\Core\Language;
@@ -22,7 +22,7 @@ use Nova_Poshta\Core\Main;
 use Nova_Poshta\Core\Settings;
 use Nova_Poshta\Core\Shipping_Cost;
 
-if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
+if ( ! class_exists( 'Nova_Poshta_Shipping_Method' ) ) {
 	/**
 	 * Class Nova_Poshta_Shipping_Method
 	 */
@@ -164,6 +164,19 @@ if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
 			// Register the rate.
 			$this->add_rate( $rate );
 		}
+
+		/**
+		 * Processes and saves global shipping method options in the admin area.
+		 *
+		 * This method is usually attached to woocommerce_update_options_x hooks.
+		 *
+		 * @return bool
+		 * phpcs:disable Generic.CodeAnalysis.UselessOverridingMethod.Found
+		 */
+		public function process_admin_options() {
+			return parent::process_admin_options();
+		}
+		//phpcs:enable Generic.CodeAnalysis.UselessOverridingMethod.Found
 
 	}
 }

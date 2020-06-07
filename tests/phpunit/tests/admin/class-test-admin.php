@@ -7,14 +7,17 @@
 
 namespace Nova_Poshta\Admin;
 
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Exception;
 use Mockery;
 use Nova_Poshta\Core\Main;
 use Nova_Poshta\Tests\Test_Case;
 use stdClass;
 use tad\FunctionMocker\FunctionMocker;
-use WP_Mock;
-use WP_Mock\Functions;
+use function Brain\Monkey\Filters\expectApplied;
+use function Brain\Monkey\Functions\expect;
+use function Brain\Monkey\Functions\stubs;
+use function Brain\Monkey\Functions\when;
 
 /**
  * Class Test_Admin
@@ -40,21 +43,32 @@ class Test_Admin extends Test_Case {
 	 */
 	public function test_hooks() {
 		$admin = $this->instance();
-		WP_Mock::expectActionAdded( 'admin_enqueue_scripts', [ $admin, 'enqueue_styles' ] );
-		WP_Mock::expectActionAdded( 'admin_enqueue_scripts', [ $admin, 'enqueue_scripts' ] );
-		WP_Mock::expectActionAdded( 'admin_menu', [ $admin, 'add_menu' ] );
-		WP_Mock::expectActionAdded( 'admin_init', [ $admin, 'register_setting' ] );
-		WP_Mock::expectFilterAdded(
-			'pre_update_option_shipping-nova-poshta-for-woocommerce',
-			[
-				$admin,
-				'validate',
-			],
-			10,
-			2
-		);
 
 		$admin->hooks();
+
+		$this->assertTrue( has_action( 'admin_enqueue_scripts', [ $admin, 'enqueue_styles' ] ) );
+		$this->assertTrue( has_action( 'admin_enqueue_scripts', [ $admin, 'enqueue_scripts' ] ) );
+		$this->assertTrue( has_action( 'admin_menu', [ $admin, 'add_menu' ] ) );
+		$this->assertTrue( has_action( 'admin_init', [ $admin, 'register_setting' ] ) );
+		$this->assertTrue(
+			has_filter(
+				'pre_update_option_shipping-nova-poshta-for-woocommerce',
+				[ $admin, 'validate' ]
+			)
+		);
+	}
+
+	/**
+	 * Get testing object
+	 *
+	 * @return Admin
+	 */
+	private function instance(): Admin {
+		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+
+		return new Admin( $api, $settings, $language );
 	}
 
 	/**
@@ -75,6 +89,8 @@ class Test_Admin extends Test_Case {
 
 	/**
 	 * Test styles
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_enqueue_styles() {
 		global $current_screen;
@@ -82,20 +98,47 @@ class Test_Admin extends Test_Case {
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen       = new stdClass();
 		$current_screen->base = 'toplevel_page_' . Main::PLUGIN_SLUG;
-		WP_Mock::userFunction( 'plugin_dir_url' )->
-		times( 4 );
-		WP_Mock::userFunction( 'wp_enqueue_style' )->
-		with( 'np-select2', Functions::type( 'string' ), [], Main::VERSION, 'all' )->
-		once();
-		WP_Mock::userFunction( 'wp_enqueue_style' )->
-		with( 'np-tip-tip', Functions::type( 'string' ), [], Main::VERSION, 'all' )->
-		once();
-		WP_Mock::userFunction( 'wp_enqueue_style' )->
-		with( Main::PLUGIN_SLUG, Functions::type( 'string' ), [ 'np-select2' ], Main::VERSION, 'all' )->
-		once();
-		WP_Mock::userFunction( 'wp_enqueue_style' )->
-		with( Main::PLUGIN_SLUG . '-front', Functions::type( 'string' ), [ 'np-select2' ], Main::VERSION, 'all' )->
-		once();
+		expect( 'plugin_dir_url' )
+			->with(
+				Mockery::anyOf(
+					__DIR__ . '/../../../../admin/class-admin.php',
+					__DIR__ . '/../../../../admin'
+				)
+			)
+			->times( 4 )
+			->andReturn( '/some/path' );
+		expect( 'wp_enqueue_style' )
+			->with(
+				'np-select2',
+				'/some/path/front/assets/css/select2.min.css',
+				[],
+				Main::VERSION,
+				'all'
+			);
+		expect( 'wp_enqueue_style' )
+			->with(
+				'np-tip-tip',
+				'/some/path/assets/css/tip-tip.css',
+				[],
+				Main::VERSION,
+				'all'
+			);
+		expect( 'wp_enqueue_style' )
+			->with(
+				Main::PLUGIN_SLUG,
+				'/some/path/assets/css/main.css',
+				[ 'np-select2' ],
+				Main::VERSION,
+				'all'
+			);
+		expect( 'wp_enqueue_style' )
+			->with(
+				Main::PLUGIN_SLUG . '-front',
+				'/some/path/front/assets/css/main.css',
+				[ 'np-select2' ],
+				Main::VERSION,
+				'all'
+			);
 
 		$admin = $this->instance();
 
@@ -120,6 +163,8 @@ class Test_Admin extends Test_Case {
 
 	/**
 	 * Test scripts
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_enqueue_scripts() {
 		global $current_screen;
@@ -129,40 +174,67 @@ class Test_Admin extends Test_Case {
 		$locale               = 'uk';
 		$admin_url            = '/admin-url/';
 		$nonce                = 'nonce123';
-		WP_Mock::userFunction( 'plugin_dir_url' )->
-		times( 4 );
-		WP_Mock::userFunction( 'admin_url' )->
-		once()->
-		andReturn( $admin_url );
-		WP_Mock::userFunction( 'wp_create_nonce' )->
-		once()->
-		andReturn( $nonce );
-		WP_Mock::userFunction( 'wp_enqueue_script' )->
-		with( 'np-select2', Functions::type( 'string' ), [ 'jquery' ], Main::VERSION, true )->
-		once();
-		WP_Mock::userFunction( 'wp_enqueue_script' )->
-		with( 'np-tip-tip', Functions::type( 'string' ), [ 'jquery' ], Main::VERSION, true )->
-		once();
-		WP_Mock::userFunction( 'wp_enqueue_script' )->
-		with( 'select2-i18n-uk', Functions::type( 'string' ), [ 'jquery', 'np-select2' ], Main::VERSION, true )->
-		once();
-		WP_Mock::userFunction( 'wp_enqueue_script' )->
-		with( Main::PLUGIN_SLUG, Functions::type( 'string' ), [ 'jquery', 'np-select2' ], Main::VERSION, true )->
-		once();
-		WP_Mock::userFunction(
-			'wp_localize_script',
-			[
-				'args' => [
-					Main::PLUGIN_SLUG,
-					'shipping_nova_poshta_for_woocommerce',
-					[
-						'url'      => $admin_url,
-						'nonce'    => $nonce,
-						'language' => $locale,
-					],
-				],
-			]
-		);
+		expect( 'plugin_dir_url' )
+			->with(
+				Mockery::anyOf(
+					__DIR__ . '/../../../../admin/class-admin.php',
+					__DIR__ . '/../../../../admin'
+				)
+			)
+			->times( 4 )
+			->andReturn( '/some/path' );
+		expect( 'wp_enqueue_script' )
+			->with(
+				'np-select2',
+				'/some/path/front/assets/js/select2.min.js',
+				[ 'jquery' ],
+				Main::VERSION,
+				true
+			);
+		expect( 'wp_enqueue_script' )
+			->with(
+				'select2-i18n-uk',
+				'/some/path/front/assets/js/i18n/uk.js',
+				[ 'jquery', 'np-select2' ],
+				Main::VERSION,
+				true
+			);
+		expect( 'wp_enqueue_script' )
+			->with(
+				'np-tip-tip',
+				'/some/path/assets/js/jquery.tip-tip.min.js',
+				[ 'jquery' ],
+				Main::VERSION,
+				true
+			);
+		expect( 'wp_enqueue_script' )
+			->with(
+				Main::PLUGIN_SLUG,
+				'/some/path/assets/js/main.js',
+				[ 'jquery', 'np-select2' ],
+				Main::VERSION,
+				true
+			);
+		expect( 'admin_url' )
+			->with( 'admin-ajax.php' )
+			->once()
+			->andReturn( $admin_url );
+		expect( 'wp_create_nonce' )
+			->with( Main::PLUGIN_SLUG )
+			->once()
+			->andReturn( $nonce );
+		expect( 'wp_localize_script' )
+			->with(
+				Main::PLUGIN_SLUG,
+				'shipping_nova_poshta_for_woocommerce',
+				[
+					'url'      => $admin_url,
+					'nonce'    => $nonce,
+					'language' => $locale,
+				]
+			)
+			->once();
+
 		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
@@ -180,9 +252,9 @@ class Test_Admin extends Test_Case {
 	 * Test register settings
 	 */
 	public function test_register_settings() {
-		WP_Mock::userFunction( 'register_setting' )->
-		with( Main::PLUGIN_SLUG, Main::PLUGIN_SLUG )->
-		once();
+		expect( 'register_setting' )
+			->with( Main::PLUGIN_SLUG, Main::PLUGIN_SLUG )
+			->once();
 
 		$admin = $this->instance();
 		$admin->register_setting();
@@ -190,59 +262,79 @@ class Test_Admin extends Test_Case {
 
 	/**
 	 * Test adding menu
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_add_menu() {
 		$admin = $this->instance();
-		WP_Mock::passthruFunction( 'plugin_dir_url' )->
-		once();
-		WP_Mock::userFunction( 'add_menu_page' )->
-		with(
-			Main::PLUGIN_NAME,
-			Main::PLUGIN_NAME,
-			'manage_options',
-			Main::PLUGIN_SLUG,
-			[
-				$admin,
-				'page_options',
-			],
-			Functions::type( 'string' )
-		)->
-		once();
+		expect( 'plugin_dir_url' )
+			->with( __DIR__ . '/../../../../admin' )
+			->once()
+			->andReturn( '/some/path/' );
+		expect( 'add_menu_page' )
+			->with(
+				Main::PLUGIN_NAME,
+				Main::PLUGIN_NAME,
+				'manage_options',
+				Main::PLUGIN_SLUG,
+				[
+					$admin,
+					'page_options',
+				],
+				'/some/path/assets/img/nova-poshta.svg'
+			)->
+			once();
 
 		$admin->add_menu();
 	}
 
 	/**
 	 * Test page option tab general
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_page_options_general() {
-		WP_Mock::userFunction( 'plugin_dir_path' )->
-		twice();
-		WP_Mock::userFunction( 'get_admin_url' )->
-		once();
-		WP_Mock::userFunction( 'checked' )->
-		once();
-		WP_Mock::userFunction( 'settings_errors' )->
-		with( Main::PLUGIN_SLUG )->
-		once();
-		WP_Mock::userFunction( 'settings_fields' )->
-		with( Main::PLUGIN_SLUG )->
-		once();
-		WP_Mock::userFunction( 'submit_button', [ 'times' => 1 ] );
+		expect( 'plugin_dir_path' )
+			->with()
+			->twice();
+		expect( 'get_admin_url' )
+			->with( null, 'admin.php?page=' . Main::PLUGIN_SLUG )
+			->once();
+		stubs(
+			[
+				'__',
+				'esc_url',
+				'esc_attr',
+				'esc_attr_e',
+				'selected',
+				'checked',
+			]
+		);
+		expect( 'settings_errors' )
+			->with( Main::PLUGIN_SLUG )
+			->once();
+		expect( 'settings_fields' )
+			->with( Main::PLUGIN_SLUG )
+			->once();
+		expect( 'submit_button' )
+			->withNoArgs()
+			->once();
+		expect( 'wp_kses_post' )
+			->with( 'If you do not have an API key, then you can get it in the <a href="https://new.novaposhta.ua/#/1/settings/developers" target="_blank">personal account of Nova Poshta</a>. Unfortunately, without the API key, the plugin will not work :(' )
+			->once();
 		$city_id      = 'city-id';
 		$warehouse_id = 'warehouse-id';
 		$api          = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
 			->shouldReceive( 'city' )
-			->withArgs( [ $city_id ] )
+			->with( $city_id )
 			->once()
 			->andReturn( 'City name' );
 		$api
 			->shouldReceive( 'warehouses' )
-			->withArgs( [ $city_id ] )
+			->with( $city_id )
 			->once()
 			->andReturn( [ 'Warehuse #1' ] );
-		WP_Mock::userFunction( 'selected' )->once();
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 		$settings
 			->shouldReceive( 'api_key' )
@@ -270,9 +362,6 @@ class Test_Admin extends Test_Case {
 				'default_length_formula'
 			)
 			->once();
-		WP_Mock::userFunction( 'wp_kses_post' )->
-		with( 'If you do not have an API key, then you can get it in the <a href="https://new.novaposhta.ua/#/1/settings/developers" target="_blank">personal account of Nova Poshta</a>. Unfortunately, without the API key, the plugin will not work :(' )->
-		once();
 		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
 		$admin    = new Admin( $api, $settings, $language );
 
@@ -284,6 +373,8 @@ class Test_Admin extends Test_Case {
 
 	/**
 	 * Test page option tab general first sign in
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_page_options_general_first_sign_in() {
 		$city_id      = 'city-id';
@@ -292,22 +383,42 @@ class Test_Admin extends Test_Case {
 		$warehouse_id = 'warehouse-id';
 		$user_id      = 10;
 		$locale       = 'uk';
-		WP_Mock::userFunction( 'plugin_dir_path' )->
-		twice();
-		WP_Mock::userFunction( 'get_admin_url' )->
-		once();
-		WP_Mock::userFunction( 'checked' )->
-		once();
-		WP_Mock::userFunction( 'settings_errors' )->
-		with( Main::PLUGIN_SLUG )->
-		once();
-		WP_Mock::userFunction( 'settings_fields' )->
-		with( Main::PLUGIN_SLUG )->
-		once();
-		WP_Mock::userFunction( 'get_current_user_id' )->
-		once()->
-		andReturn( $user_id );
-		WP_Mock::userFunction( 'submit_button', [ 'times' => 1 ] );
+		expect( 'plugin_dir_path' )
+			->with()
+			->twice();
+		expect( 'get_admin_url' )
+			->with( null, 'admin.php?page=' . Main::PLUGIN_SLUG )
+			->once();
+		stubs(
+			[
+				'__',
+				'esc_url',
+				'esc_attr',
+				'esc_attr_e',
+				'selected',
+				'checked',
+			]
+		);
+		expect( 'settings_errors' )
+			->with( Main::PLUGIN_SLUG )
+			->once();
+		expect( 'settings_fields' )
+			->with( Main::PLUGIN_SLUG )
+			->once();
+		expect( 'get_current_user_id' )
+			->withNoArgs()
+			->once()
+			->andReturn( $user_id );
+		expect( 'submit_button' )
+			->withNoArgs()
+			->once();
+		expect( 'wp_kses_post' )
+			->with( 'If you do not have an API key, then you can get it in the <a href="https://new.novaposhta.ua/#/1/settings/developers" target="_blank">personal account of Nova Poshta</a>. Unfortunately, without the API key, the plugin will not work :(' )
+			->once();
+		expectApplied( 'shipping_nova_poshta_for_woocommerce_default_city' )
+			->with( '', $user_id, $locale )
+			->once()
+			->andReturn( $default_city );
 		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
 			->shouldReceive( 'cities' )
@@ -326,13 +437,9 @@ class Test_Admin extends Test_Case {
 			->andReturn( [ $city_id => $city_name ] );
 		$api
 			->shouldReceive( 'warehouses' )
-			->withArgs( [ $city_id ] )
+			->with( $city_id )
 			->once()
 			->andReturn( [ 'Warehuse #1' ] );
-		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_default_city' )->
-		with( '', $user_id, $locale )->
-		reply( $default_city );
-		WP_Mock::userFunction( 'selected' )->once();
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 		$settings
 			->shouldReceive( 'api_key' )
@@ -360,9 +467,6 @@ class Test_Admin extends Test_Case {
 				'default_length_formula'
 			)
 			->once();
-		WP_Mock::userFunction( 'wp_kses_post' )->
-		with( 'If you do not have an API key, then you can get it in the <a href="https://new.novaposhta.ua/#/1/settings/developers" target="_blank">personal account of Nova Poshta</a>. Unfortunately, without the API key, the plugin will not work :(' )->
-		once();
 		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
 		$language
 			->shouldReceive( 'get_current_language' )
@@ -376,118 +480,23 @@ class Test_Admin extends Test_Case {
 		$this->assertNotEmpty( ob_get_clean() );
 	}
 
-	/**
-	 * Test creating invoice
-	 *
-	 * @dataProvider dp_request
-	 *
-	 * @param array $request Request example.
-	 *
-	 * @throws Exception Invalid DateTime.
-	 */
-	public function test_page_create_invoice( array $request ) {
-		$_POST[ Main::PLUGIN_SLUG ] = $request;
-		WP_Mock::userFunction( 'check_admin_referer' )->
-		with( Main::PLUGIN_SLUG . '-invoice', Main::PLUGIN_SLUG . '_nonce' )->
-		once()->
-		andReturn( false );
-		$request_to_api = array_values( $request );
-		array_push( $request_to_api, 1 );
-		array_push( $request_to_api, 0 );
-		FunctionMocker::replace( 'filter_input', $request );
-		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$api
-			->shouldReceive( 'internet_document' )
-			->between( 0, 1 )
-			->withArgs( $request_to_api );
-		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		WP_Mock::userFunction( 'plugin_dir_path' )->once();
-		WP_Mock::userFunction( 'get_admin_url' )->once();
-		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
-		$admin    = new Admin( $api, $settings, $language );
-		ob_start();
-
-		$admin->page_options();
-
-		$this->assertnotEmpty( ob_get_clean() );
-	}
-
-	/**
-	 * Create invoice request
-	 * Data provider for test_controller().
-	 *
-	 * @return array
-	 */
-	public function dp_request() {
-		return [
-			[
-				[
-					'first_name'   => 'First name',
-					'last_name'    => 'Last name',
-					'phone'        => '123456',
-					'city_id'      => 'city-id',
-					'warehouse_id' => 'warehouse-id',
-					'price'        => 777,
-				],
-			],
-		];
-	}
-
-	/**
-	 * Test page option tab create invoice
-	 */
-	public function test_page_options_create_invoice() {
-		$user_id = 10;
-		$locale  = 'uk';
-		WP_Mock::userFunction( 'plugin_dir_path' )->twice();
-		WP_Mock::userFunction( 'get_admin_url' )->once();
-		WP_Mock::userFunction( 'submit_button' )->once();
-		WP_Mock::userFunction( 'get_current_user_id' )->
-		once()->
-		andReturn( $user_id );
-		WP_Mock::userFunction( 'wp_nonce_field' )->
-		with( Main::PLUGIN_SLUG . '-invoice', Main::PLUGIN_SLUG . '_nonce', false )->
-		once();
-		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_default_city' )->
-		with( '', $user_id, $locale )->
-		reply( 'city' );
-		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$api
-			->shouldReceive( 'cities' )
-			->once()
-			->andReturn( [ 'city-id' => 'city-info' ] );
-		$api
-			->shouldReceive( 'warehouses' )
-			->once()
-			->andReturn( [ 'warehouse-id' => 'warehouse-info' ] );
-		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
-		$language
-			->shouldReceive( 'get_current_language' )
-			->once()
-			->andReturn( $locale );
-		$admin = new Admin( $api, $settings, $language );
-		FunctionMocker::replace( 'filter_input', 'internet_document' );
-		ob_start();
-		$admin->page_options();
-
-		$this->assertNotEmpty( ob_get_clean() );
-	}
 
 	/**
 	 * Test validation API key and show notice
 	 */
 	public function test_validate() {
+		expect( 'add_settings_error' )
+			->with( Main::PLUGIN_SLUG, 403, Mockery::type( 'string' ) )
+			->once();
+		when( '__' )
+			->returnArg();
 		$key = 'some-key';
 		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$api
 			->shouldReceive( 'validate' )
 			->once()
-			->withArgs( [ $key ] );
+			->with( $key );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		WP_Mock::userFunction( 'add_settings_error' )->
-		with( Main::PLUGIN_SLUG, 403, Functions::type( 'string' ) )->
-		once();
 		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
 		$admin    = new Admin( $api, $settings, $language );
 
@@ -503,26 +512,13 @@ class Test_Admin extends Test_Case {
 		$api
 			->shouldReceive( 'validate' )
 			->once()
-			->withArgs( [ $key ] )
+			->with( $key )
 			->andReturn( true );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
 		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
 		$admin    = new Admin( $api, $settings, $language );
 
 		$admin->validate( [ 'api_key' => $key ] );
-	}
-
-	/**
-	 * Get testing object
-	 *
-	 * @return Admin
-	 */
-	private function instance(): Admin {
-		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
-
-		return new Admin( $api, $settings, $language );
 	}
 
 }

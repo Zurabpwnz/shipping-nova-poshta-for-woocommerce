@@ -25,4 +25,13 @@ class WC_Shipping_Method {
 
 	}
 
+	/**
+	 * Save anything
+	 *
+	 * @return bool
+	 */
+	public function process_admin_options() {
+		return false;
+	}
+
 }

@@ -12,7 +12,8 @@ use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use ReflectionProperty;
 use tad\FunctionMocker\FunctionMocker;
-use WP_Mock;
+use function Brain\Monkey\setUp;
+use function Brain\Monkey\tearDown;
 
 /**
  * Class Test_Case
@@ -25,15 +26,14 @@ abstract class Test_Case extends TestCase {
 	public function setUp() {
 		FunctionMocker::setUp();
 		parent::setUp();
-		WP_Mock::setUp(); // Must be the last one.
+		setUp();
 	}
 
 	/**
 	 * End test
 	 */
 	public function tearDown() {
-		WP_Mock::tearDown();
-		Mockery::close();
+		tearDown();
 		parent::tearDown();
 		FunctionMocker::tearDown();
 	}

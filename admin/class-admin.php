@@ -75,7 +75,7 @@ class Admin {
 		if ( ! $this->is_plugin_page() ) {
 			return;
 		}
-		wp_enqueue_style( 'np-select2', plugin_dir_url( __DIR__ ) . 'front/assets/css/select2.min.css', [], Main::VERSION, 'all' );
+		wp_enqueue_style( 'np-select2', plugin_dir_url( __DIR__ ) . '/front/assets/css/select2.min.css', [], Main::VERSION, 'all' );
 		wp_enqueue_style( 'np-tip-tip', plugin_dir_url( __FILE__ ) . '/assets/css/tip-tip.css', [], Main::VERSION, 'all' );
 		wp_enqueue_style( Main::PLUGIN_SLUG, plugin_dir_url( __FILE__ ) . '/assets/css/main.css', [ 'np-select2' ], Main::VERSION, 'all' );
 		wp_enqueue_style( Main::PLUGIN_SLUG . '-front', plugin_dir_url( __DIR__ ) . '/front/assets/css/main.css', [ 'np-select2' ], Main::VERSION, 'all' );
@@ -90,8 +90,15 @@ class Admin {
 		}
 		wp_enqueue_script(
 			'np-select2',
-			plugin_dir_url( __DIR__ ) . 'front/assets/js/select2.min.js',
+			plugin_dir_url( __DIR__ ) . '/front/assets/js/select2.min.js',
 			[ 'jquery' ],
+			Main::VERSION,
+			true
+		);
+		wp_enqueue_script(
+			'select2-i18n-' . $this->language->get_current_language(),
+			plugin_dir_url( __DIR__ ) . '/front/assets/js/i18n/' . $this->language->get_current_language() . '.js',
+			[ 'jquery', 'np-select2' ],
 			Main::VERSION,
 			true
 		);
@@ -99,13 +106,6 @@ class Admin {
 			'np-tip-tip',
 			plugin_dir_url( __FILE__ ) . '/assets/js/jquery.tip-tip.min.js',
 			[ 'jquery' ],
-			Main::VERSION,
-			true
-		);
-		wp_enqueue_script(
-			'select2-i18n-' . $this->language->get_current_language(),
-			plugin_dir_url( __DIR__ ) . 'front/assets/js/i18n/' . $this->language->get_current_language() . '.js',
-			[ 'jquery', 'np-select2' ],
 			Main::VERSION,
 			true
 		);
@@ -166,36 +166,11 @@ class Admin {
 	}
 
 	/**
-	 * Controller for creating invoices
-	 *
-	 * @throws Exception Invalid DateTime.
-	 */
-	private function controller() {
-		if ( ! isset( $_POST[ Main::PLUGIN_SLUG ] ) ) {
-			return;
-		}
-		check_admin_referer( Main::PLUGIN_SLUG . '-invoice', Main::PLUGIN_SLUG . '_nonce' );
-		$fields = filter_input( INPUT_POST, Main::PLUGIN_SLUG, FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
-		$this->api->internet_document(
-			$fields['first_name'],
-			$fields['last_name'],
-			$fields['phone'],
-			$fields['city_id'],
-			$fields['warehouse_id'],
-			$fields['price'],
-			1,
-			isset( $fields['backward'] ) && ! empty( $fields['redelivery'] ) ? $fields['redelivery'] : 0
-		);
-	}
-
-	/**
 	 * View for page options
 	 *
 	 * @throws Exception Invalid DateTime.
 	 */
 	public function page_options() {
-		$this->controller();
-
 		require plugin_dir_path( __FILE__ ) . 'partials/page-options.php';
 	}
 

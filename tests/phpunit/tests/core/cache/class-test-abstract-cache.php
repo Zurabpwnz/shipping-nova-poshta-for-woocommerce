@@ -7,10 +7,10 @@
 
 namespace Nova_Poshta\Core\Cache;
 
-use Nova_Poshta\Core\Main;
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Nova_Poshta\Tests\Test_Case;
 use ReflectionException;
-use WP_Mock;
+use function Brain\Monkey\Functions\expect;
 
 /**
  * Class Test_Abstract_Cache
@@ -23,11 +23,12 @@ class Test_Abstract_Cache extends Test_Case {
 	 * Test flush cache
 	 *
 	 * @throws ReflectionException Invalid property.
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_flush() {
-		WP_Mock::userFunction( 'get_transient' )->
-		with( 'prefix-keys' )->
-		once();
+		expect( 'get_transient' )
+			->with( 'prefix-keys' )
+			->once();
 		global $times;
 		$times = 0;
 		$stub  = new class( 'prefix' ) extends Abstract_Cache {
@@ -66,9 +67,9 @@ class Test_Abstract_Cache extends Test_Case {
 
 		};
 		$this->update_inaccessible_property( $stub, 'keys', [ 'key-1', 'key-2' ] );
-		WP_Mock::userFunction( 'delete_transient' )->
-		with( 'prefix-keys' )->
-		once();
+		expect( 'delete_transient' )
+			->with( 'prefix-keys' )
+			->once();
 
 		$stub->flush();
 
@@ -78,11 +79,13 @@ class Test_Abstract_Cache extends Test_Case {
 
 	/**
 	 * Test hooks
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_hooks() {
-		WP_Mock::userFunction( 'get_transient' )->
-		with( 'prefix-keys' )->
-		once();
+		expect( 'get_transient' )
+			->with( 'prefix-keys' )
+			->once();
 		$stub = new class( 'prefix' ) extends Abstract_Cache {
 
 			/**
@@ -117,13 +120,19 @@ class Test_Abstract_Cache extends Test_Case {
 			}
 
 		};
-		WP_Mock::userFunction( 'plugin_dir_path' )->
-		once();
-		WP_Mock::userFunction( 'plugin_basename' )->
-		once()->
-		andReturn( 'path/to/main-file' );
-		WP_Mock::userFunction( 'register_deactivation_hook' )->
-		once();
+		expect( 'plugin_dir_path' )
+			->withAnyArgs()
+			->once();
+		expect( 'plugin_basename' )
+			->withAnyArgs()
+			->once()
+			->andReturn( 'path/to/main-file' );
+		expect( 'register_deactivation_hook' )
+			->with(
+				'path/to/main-file.php',
+				[ $stub, 'flush' ]
+			)
+			->once();
 
 		$stub->hooks();
 	}

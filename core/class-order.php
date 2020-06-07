@@ -14,6 +14,7 @@ namespace Nova_Poshta\Core;
 
 use Exception;
 use Nova_Poshta\Admin\Notice;
+use Nova_Poshta_Gateway_COD;
 use WC_Data_Exception;
 use WC_Meta_Data;
 use WC_Order;
@@ -74,7 +75,6 @@ class Order {
 				'create_internet_document',
 			]
 		);
-		add_action( 'woocommerce_order_status_processing', [ $this, 'processing_status' ], 10, 2 );
 		add_action( 'woocommerce_before_order_itemmeta', [ $this, 'default_fields_for_shipping_item' ], 10, 2 );
 
 		add_filter( 'woocommerce_order_item_display_meta_key', [ $this, 'labels' ], 10, 2 );
@@ -99,7 +99,6 @@ class Order {
 	 * @param array                  $package     Package.
 	 * @param WC_Order               $order       Current order.
 	 *
-	 * @throws WC_Data_Exception Invalid total shipping cost.
 	 * @throws Exception Invalid DateTime.
 	 */
 	public function create( WC_Order_Item_Shipping $item, int $package_key, array $package, WC_Order $order ) {
@@ -237,25 +236,14 @@ class Order {
 	 * @return array
 	 */
 	public function register_order_actions( array $actions ): array {
+		global $post;
+		$order = wc_get_order( $post->ID );
+		if ( Nova_Poshta_Gateway_COD::ID === $order->get_payment_method() && 'pending' === $order->get_status() ) {
+			return $actions;
+		}
 		$actions['nova_poshta_create_internet_document'] = __( 'Create Nova Poshta Internet Document', 'shipping-nova-poshta-for-woocommerce' );
 
 		return $actions;
-	}
-
-	/**
-	 * Change status to processing
-	 *
-	 * @param int      $order_id Current order ID.
-	 * @param WC_Order $order    Current order.
-	 *
-	 * @throws Exception Invalid DateTime.
-	 */
-	public function processing_status( int $order_id, WC_Order $order ) {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-
-		$this->create_internet_document( $order );
 	}
 
 	/**
@@ -275,14 +263,41 @@ class Order {
 
 			return;
 		}
+
+		$items = $order->get_items();
+		if ( empty( $items ) ) {
+			$this->notice->add( 'error', __( 'The order doesn\'t have a products', 'shipping-nova-poshta-for-woocommerce' ) );
+
+			return;
+		}
+		$products = [];
+		foreach ( $items as $item ) {
+			$products[] = [
+				'quantity' => $item->get_quantity(),
+				'data'     => $item->get_product(),
+			];
+		}
+		$weight = $this->shipping_cost->get_products_weight( $products );
+		$volume = $this->shipping_cost->get_products_volume( $products );
+
+		$prepayment = 0;
+		if ( Nova_Poshta_Gateway_COD::ID === $order->get_payment_method() ) {
+			$options    = get_option( Nova_Poshta_Gateway_COD::ID . '_settings' );
+			$prepayment = $options['prepayment'] ? $options['prepayment'] : 0;
+		}
+
+		$total = $order->get_total() - $order->get_shipping_total();
+
 		$internet_document = $this->api->internet_document(
 			$order->get_billing_first_name(),
 			$order->get_billing_last_name(),
 			$order->get_billing_phone(),
 			$shipping_item->get_meta( 'city_id' ),
 			$shipping_item->get_meta( 'warehouse_id' ),
-			$order->get_total(),
-			$this->order_items_quantity( $order )
+			$total,
+			$weight,
+			$volume,
+			$prepayment ? $total - $prepayment : 0
 		);
 		if ( $internet_document ) {
 			$shipping_item->add_meta_data( 'internet_document', $internet_document, true );
@@ -298,23 +313,6 @@ class Order {
 				$this->notice->add( 'error', $error );
 			}
 		}
-	}
-
-	/**
-	 * Order items quantity
-	 *
-	 * @param WC_Order $order Current order.
-	 *
-	 * @return int
-	 */
-	private function order_items_quantity( WC_Order $order ): int {
-		$items = $order->get_items();
-		$count = 0;
-		foreach ( $items as $item ) {
-			$count += $item->get_quantity();
-		}
-
-		return $count;
 	}
 
 	/**

@@ -7,6 +7,7 @@
 
 namespace Nova_Poshta\Core;
 
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use DateTime;
 use DateTimeZone;
 use Exception;
@@ -14,7 +15,9 @@ use Mockery;
 use Nova_Poshta\Tests\Test_Case;
 use stdClass;
 use tad\FunctionMocker\FunctionMocker;
-use WP_Mock;
+use function Brain\Monkey\Filters\expectApplied;
+use function Brain\Monkey\Functions\expect;
+use function Brain\Monkey\Functions\when;
 
 /**
  * Class Test_API
@@ -25,20 +28,30 @@ class Test_API extends Test_Case {
 
 	/**
 	 * Test hooks
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_hooks() {
-		WP_Mock::userFunction( 'plugin_dir_path' )->
-		once();
-		WP_Mock::userFunction( 'plugin_basename' )->
-		once()->
-		andReturn( 'path/to/main-file' );
-		WP_Mock::userFunction( 'register_activation_hook' )->
-		once();
 		$db            = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 		$settings      = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-
-		$api = new API( $db, $factory_cache, $settings );
+		$api           = new API( $db, $factory_cache, $settings );
+		expect( 'plugin_dir_path' )
+			->withAnyArgs()
+			->once();
+		expect( 'plugin_basename' )
+			->withAnyArgs()
+			->once()
+			->andReturn( 'path/to/main-file' );
+		expect( 'register_activation_hook' )
+			->with(
+				'path/to/main-file.php',
+				[
+					$api,
+					'activate',
+				]
+			)
+			->once();
 		$api->hooks();
 	}
 
@@ -63,6 +76,8 @@ class Test_API extends Test_Case {
 
 	/**
 	 * Test search cities
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_cities() {
 		$api_key        = 'api-key';
@@ -82,7 +97,7 @@ class Test_API extends Test_Case {
 			->once();
 		$db
 			->shouldReceive( 'cities' )
-			->withArgs( [ $search, $limit ] )
+			->with( $search, $limit )
 			->once()
 			->andReturn( $cities );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
@@ -90,40 +105,42 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'api_key' )
 			->twice()
 			->andReturn( $api_key );
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'Address',
-				'calledMethod'     => 'getCities',
-				'methodProperties' => new stdClass(),
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( 'response' );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		once()->
-		with( 'response' )->
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-		andReturn( json_encode( $request ) );
-		WP_Mock::userFunction( 'is_wp_error' )->
-		once()->
-		andReturn( false );
-		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
-		with( 'json' )->
-		reply( 'json' );
+		expect( 'wp_json_encode' )
+			->with(
+				[
+					'modelName'        => 'Address',
+					'calledMethod'     => 'getCities',
+					'methodProperties' => new stdClass(),
+					'apiKey'           => $api_key,
+				]
+			)
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
+				[
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
+				]
+			)
+			->once()
+			->andReturn( 'response' );
+		expect( 'wp_remote_retrieve_body' )
+			->with( 'response' )
+			->once()
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+			->andReturn( json_encode( $request ) );
+		expect( 'is_wp_error' )
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+			->with( json_encode( $request ) )
+			->once()
+			->andReturn( false );
+		expectApplied( 'shipping_nova_poshta_for_woocommerce_request_body' )
+			->with( 'json' )
+			->andReturn( 'json' );
 		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 		$transient_cache
 			->shouldReceive( 'get' )
@@ -154,7 +171,7 @@ class Test_API extends Test_Case {
 		$db        = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'city' )
-			->withArgs( [ $city_id ] )
+			->with( $city_id )
 			->once()
 			->andReturn( $city_name );
 		$settings      = Mockery::mock( 'Nova_Poshta\Core\Settings' );
@@ -174,7 +191,7 @@ class Test_API extends Test_Case {
 		$db        = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'area' )
-			->withArgs( [ $city_id ] )
+			->with( $city_id )
 			->once()
 			->andReturn( $area_name );
 		$settings      = Mockery::mock( 'Nova_Poshta\Core\Settings' );
@@ -194,7 +211,7 @@ class Test_API extends Test_Case {
 		$db             = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'warehouse' )
-			->withArgs( [ $warehouse_id ] )
+			->with( $warehouse_id )
 			->once()
 			->andReturn( $warehouse_name );
 		$settings      = Mockery::mock( 'Nova_Poshta\Core\Settings' );
@@ -207,6 +224,8 @@ class Test_API extends Test_Case {
 
 	/**
 	 * Test warehouse by city_id
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_warehouses() {
 		$api_key        = 'api-key';
@@ -232,42 +251,44 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'api_key' )
 			->twice()
 			->andReturn( $api_key );
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'AddressGeneral',
-				'calledMethod'     => 'getWarehouses',
-				'methodProperties' => (object) [
-					'CityRef' => $city_id,
-				],
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( 'response' );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		once()->
-		with( 'response' )->
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-		andReturn( json_encode( $request ) );
-		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
-		with( 'json' )->
-		reply( 'json' );
-		WP_Mock::userFunction( 'is_wp_error' )->
-		once()->
-		andReturn( false );
+		expect( 'wp_json_encode' )
+			->with(
+				[
+					'modelName'        => 'AddressGeneral',
+					'calledMethod'     => 'getWarehouses',
+					'methodProperties' => (object) [
+						'CityRef' => $city_id,
+					],
+					'apiKey'           => $api_key,
+				]
+			)
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
+				[
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
+				]
+			)
+			->once()
+			->andReturn( 'response' );
+		expect( 'wp_remote_retrieve_body' )
+			->with( 'response' )
+			->once()
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+			->andReturn( json_encode( $request ) );
+		expectApplied( 'shipping_nova_poshta_for_woocommerce_request_body' )
+			->with( 'json' )
+			->andReturn( 'json' );
+		expect( 'is_wp_error' )
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+			->with( json_encode( $request ) )
+			->once()
+			->andReturn( false );
 		$object_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
 		$object_cache
 			->shouldReceive( 'get' )
@@ -311,45 +332,41 @@ class Test_API extends Test_Case {
 				],
 			],
 		];
-		WP_Mock::userFunction( 'is_wp_error' )->
-		once()->
-		andReturn( false );
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'InternetDocument',
-				'calledMethod'     => 'getDocumentPrice',
-				'methodProperties' => (object) [
-					'CitySender'    => $admin_city_id,
-					'CityRecipient' => $city_id,
-					'CargoType'     => 'Parcel',
-					'DateTime'      => $date->format( 'd.m.Y' ),
-					'VolumeGeneral' => $volume,
-					'Weight'        => $weight,
-				],
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( 'response' );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		once()->
-		with( 'response' )->
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-		andReturn( json_encode( $response ) );
-		WP_Mock::userFunction( 'wp_remote_post' );
+		expect( 'wp_json_encode' )
+			->with(
+				[
+					'modelName'        => 'InternetDocument',
+					'calledMethod'     => 'getDocumentPrice',
+					'methodProperties' => (object) [
+						'CitySender'    => $admin_city_id,
+						'CityRecipient' => $city_id,
+						'CargoType'     => 'Parcel',
+						'DateTime'      => $date->format( 'd.m.Y' ),
+						'VolumeGeneral' => $volume,
+						'Weight'        => $weight,
+					],
+					'apiKey'           => $api_key,
+				]
+			)
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
+				[
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
+				]
+			)
+			->once()
+			->andReturn( 'response' );
+		expect( 'wp_remote_retrieve_body' )
+			->with( 'response' )
+			->once()
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+			->andReturn( json_encode( $response ) );
 		$db           = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$object_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
 		$object_cache
@@ -411,6 +428,8 @@ class Test_API extends Test_Case {
 
 	/**
 	 * Test create internet document with bad sender
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_internet_document_with_bad_sender() {
 		$first_name         = 'First Name';
@@ -441,9 +460,7 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'api_key' )
 			->once()
 			->andReturn( false );
-		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
-		with( 'json' )->
-		reply( 'json' );
+		when( '__' )->returnArg();
 		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
 		$api = new API( $db, $factory_cache, $settings );
@@ -453,6 +470,8 @@ class Test_API extends Test_Case {
 
 	/**
 	 * Test create internet document with bad sender
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_internet_document_with_bad_sender_2() {
 		$first_name         = 'First Name';
@@ -485,82 +504,83 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'api_key' )
 			->times( 4 )
 			->andReturn( $api_key );
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'Counterparty',
-				'calledMethod'     => 'getCounterparties',
-				'methodProperties' => (object) [
-					'City'                 => $admin_city_id,
-					'CounterpartyProperty' => 'Sender',
-					'Page'                 => 1,
-				],
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( 'response' );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		once()->
-		with( 'response' )->
-		andReturn(
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-			json_encode(
+		expect( 'wp_json_encode' )
+			->with(
 				[
-					'success' => true,
-					'data'    => [
-						[
-							'Ref' => $sender,
-						],
+					'modelName'        => 'Counterparty',
+					'calledMethod'     => 'getCounterparties',
+					'methodProperties' => (object) [
+						'City'                 => $admin_city_id,
+						'CounterpartyProperty' => 'Sender',
+						'Page'                 => 1,
 					],
+					'apiKey'           => $api_key,
 				]
 			)
-		);
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'Counterparty',
-				'calledMethod'     => 'getCounterpartyContactPersons',
-				'methodProperties' => (object) [
-					'Ref' => $sender,
-				],
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( 'response' );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		once()->
-		with( 'response' )->
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-		andReturn( json_encode( [ 'success' => false ] ) );
-		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
-		with( 'json' )->
-		reply( 'json' );
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
+				[
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
+				]
+			)
+			->once()
+			->andReturn( 'response' );
+		expect( 'wp_remote_retrieve_body' )
+			->with( 'response' )
+			->once()
+			->andReturn(
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref' => $sender,
+							],
+						],
+					]
+				)
+			);
+		expect( 'wp_json_encode' )
+			->with(
+				[
+					'modelName'        => 'Counterparty',
+					'calledMethod'     => 'getCounterpartyContactPersons',
+					'methodProperties' => (object) [
+						'Ref' => $sender,
+					],
+					'apiKey'           => $api_key,
+				]
+			)
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
+				[
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
+				]
+			)
+			->once()
+			->andReturn( 'response' );
+		expect( 'wp_remote_retrieve_body' )
+			->with( 'response' )
+			->once()
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+			->andReturn( json_encode( [ 'success' => false ] ) );
+		expectApplied( 'shipping_nova_poshta_for_woocommerce_request_body' )
+			->with( 'json' )
+			->twice()
+			->andReturn( 'json' );
 		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
 		$api = new API( $db, $factory_cache, $settings );
@@ -570,6 +590,8 @@ class Test_API extends Test_Case {
 
 	/**
 	 * Test create internet document with bad recipient
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_internet_document_with_bad_recipient() {
 		$first_name         = 'First Name';
@@ -608,132 +630,133 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'api_key' )
 			->times( 6 )
 			->andReturn( $api_key );
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'Counterparty',
-				'calledMethod'     => 'getCounterparties',
-				'methodProperties' => (object) [
-					'City'                 => $admin_city_id,
-					'CounterpartyProperty' => 'Sender',
-					'Page'                 => 1,
-				],
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( 'response' );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		once()->
-		with( 'response' )->
-		andReturn(
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-			json_encode(
+		expect( 'wp_json_encode' )
+			->with(
 				[
-					'success' => true,
-					'data'    => [
-						[
-							'Ref' => $sender,
-						],
+					'modelName'        => 'Counterparty',
+					'calledMethod'     => 'getCounterparties',
+					'methodProperties' => (object) [
+						'City'                 => $admin_city_id,
+						'CounterpartyProperty' => 'Sender',
+						'Page'                 => 1,
 					],
+					'apiKey'           => $api_key,
 				]
 			)
-		);
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'Counterparty',
-				'calledMethod'     => 'getCounterpartyContactPersons',
-				'methodProperties' => (object) [
-					'Ref' => $sender,
-				],
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( 'response' );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		once()->
-		with( 'response' )->
-		andReturn(
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-			json_encode(
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
 				[
-					'success' => true,
-					'data'    => [
-						[
-							'Ref' => $contact_sender,
-						],
-					],
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
 				]
 			)
-		);
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'Counterparty',
-				'calledMethod'     => 'save',
-				'methodProperties' => (object) [
-					'CounterpartyProperty' => 'Recipient',
-					'CounterpartyType'     => 'PrivatePerson',
-					'FirstName'            => $first_name,
-					'LastName'             => $last_name,
-					'Phone'                => '380' . $phone,
-					'RecipientsPhone'      => '380' . $phone,
-					'Region'               => $area_id,
-					'City'                 => $city_id,
-					'CityRecipient'        => $city_id,
-					'RecipientAddress'     => $warehouse_id,
-				],
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( 'response' );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		once()->
-		with( 'response' )->
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-		andReturn( json_encode( [ 'success' => false ] ) );
-		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
-		with( 'json' )->
-		reply( 'json' );
+			->once()
+			->andReturn( 'response' );
+		expect( 'wp_remote_retrieve_body' )
+			->with( 'response' )
+			->once()
+			->andReturn(
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref' => $sender,
+							],
+						],
+					]
+				)
+			);
+		expect( 'wp_json_encode' )
+			->with(
+				[
+					'modelName'        => 'Counterparty',
+					'calledMethod'     => 'getCounterpartyContactPersons',
+					'methodProperties' => (object) [
+						'Ref' => $sender,
+					],
+					'apiKey'           => $api_key,
+				]
+			)
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
+				[
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
+				]
+			)
+			->once()
+			->andReturn( 'response' );
+		expect( 'wp_remote_retrieve_body' )
+			->with( 'response' )
+			->once()
+			->andReturn(
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref' => $contact_sender,
+							],
+						],
+					]
+				)
+			);
+		expect( 'wp_json_encode' )
+			->with(
+				[
+					'modelName'        => 'Counterparty',
+					'calledMethod'     => 'save',
+					'methodProperties' => (object) [
+						'CounterpartyProperty' => 'Recipient',
+						'CounterpartyType'     => 'PrivatePerson',
+						'FirstName'            => $first_name,
+						'LastName'             => $last_name,
+						'Phone'                => '380' . $phone,
+						'RecipientsPhone'      => '380' . $phone,
+						'Region'               => $area_id,
+						'City'                 => $city_id,
+						'CityRecipient'        => $city_id,
+						'RecipientAddress'     => $warehouse_id,
+					],
+					'apiKey'           => $api_key,
+				]
+			)
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
+				[
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
+				]
+			)
+			->once()
+			->andReturn( 'response' );
+		expect( 'wp_remote_retrieve_body' )
+			->with( 'response' )
+			->once()
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+			->andReturn( json_encode( [ 'success' => false ] ) );
+		expectApplied( 'shipping_nova_poshta_for_woocommerce_request_body' )
+			->with( 'json' )
+			->times( 3 )
+			->andReturn( 'json' );
 		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
 		$api = new API( $db, $factory_cache, $settings );
@@ -756,6 +779,8 @@ class Test_API extends Test_Case {
 		$area_id            = 'area-id';
 		$price              = '100.5';
 		$count              = '10';
+		$weight             = 11;
+		$volume             = 22;
 		$admin_phone        = '987654321';
 		$description        = 'Product';
 		$admin_city_id      = 'admin-city-id';
@@ -791,237 +816,240 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'api_key' )
 			->times( 8 )
 			->andReturn( $api_key );
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'Counterparty',
-				'calledMethod'     => 'getCounterparties',
-				'methodProperties' => (object) [
-					'City'                 => $admin_city_id,
-					'CounterpartyProperty' => 'Sender',
-					'Page'                 => 1,
-				],
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( 'response' );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		once()->
-		with( 'response' )->
-		andReturn(
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-			json_encode(
+		expect( 'wp_json_encode' )
+			->with(
 				[
-					'success' => true,
-					'data'    => [
-						[
-							'Ref' => $sender,
-						],
+					'modelName'        => 'Counterparty',
+					'calledMethod'     => 'getCounterparties',
+					'methodProperties' => (object) [
+						'City'                 => $admin_city_id,
+						'CounterpartyProperty' => 'Sender',
+						'Page'                 => 1,
 					],
+					'apiKey'           => $api_key,
 				]
 			)
-		);
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'Counterparty',
-				'calledMethod'     => 'getCounterpartyContactPersons',
-				'methodProperties' => (object) [
-					'Ref' => $sender,
-				],
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( 'response' );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		once()->
-		with( 'response' )->
-		andReturn(
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-			json_encode(
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
 				[
-					'success' => true,
-					'data'    => [
-						[
-							'Ref' => $contact_sender,
-						],
-					],
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
 				]
 			)
-		);
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'Counterparty',
-				'calledMethod'     => 'save',
-				'methodProperties' => (object) [
-					'CounterpartyProperty' => 'Recipient',
-					'CounterpartyType'     => 'PrivatePerson',
-					'FirstName'            => $first_name,
-					'LastName'             => $last_name,
-					'Phone'                => '380' . $phone,
-					'RecipientsPhone'      => '380' . $phone,
-					'Region'               => $area_id,
-					'City'                 => $city_id,
-					'CityRecipient'        => $city_id,
-					'RecipientAddress'     => $warehouse_id,
-				],
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( 'response' );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		once()->
-		with( 'response' )->
-		andReturn(
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-			json_encode(
+			->once()
+			->andReturn( 'response' );
+		expect( 'wp_remote_retrieve_body' )
+			->with( 'response' )
+			->once()
+			->andReturn(
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref' => $sender,
+							],
+						],
+					]
+				)
+			);
+		expect( 'wp_json_encode' )
+			->with(
 				[
-					'success' => true,
-					'data'    => [
-						[
-							'Ref'           => $recipient,
-							'ContactPerson' => [
-								'data' => [
-									[
-										'Ref' => $contact_recipient,
+					'modelName'        => 'Counterparty',
+					'calledMethod'     => 'getCounterpartyContactPersons',
+					'methodProperties' => (object) [
+						'Ref' => $sender,
+					],
+					'apiKey'           => $api_key,
+				]
+			)
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
+				[
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
+				]
+			)
+			->once()
+			->andReturn( 'response' );
+		expect( 'wp_remote_retrieve_body' )
+			->once()
+			->with( 'response' )
+			->andReturn(
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref' => $contact_sender,
+							],
+						],
+					]
+				)
+			);
+		expect( 'wp_json_encode' )
+			->with(
+				[
+					'modelName'        => 'Counterparty',
+					'calledMethod'     => 'save',
+					'methodProperties' => (object) [
+						'CounterpartyProperty' => 'Recipient',
+						'CounterpartyType'     => 'PrivatePerson',
+						'FirstName'            => $first_name,
+						'LastName'             => $last_name,
+						'Phone'                => '380' . $phone,
+						'RecipientsPhone'      => '380' . $phone,
+						'Region'               => $area_id,
+						'City'                 => $city_id,
+						'CityRecipient'        => $city_id,
+						'RecipientAddress'     => $warehouse_id,
+					],
+					'apiKey'           => $api_key,
+				]
+			)
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
+				[
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
+				]
+			)
+			->once()
+			->andReturn( 'response' );
+		expect( 'wp_remote_retrieve_body' )
+			->with( 'response' )
+			->once()
+			->andReturn(
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref'           => $recipient,
+								'ContactPerson' => [
+									'data' => [
+										[
+											'Ref' => $contact_recipient,
+										],
 									],
 								],
 							],
 						],
-					],
-				]
-			)
-		);
+					]
+				)
+			);
 		$date = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
-		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_document_description' )->
-		with( $description )->
-		reply( $description );
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'InternetDocument',
-				'calledMethod'     => 'save',
-				'methodProperties' => (object) [
-					'ContactSender'    => $contact_sender,
-					'CitySender'       => $admin_city_id,
-					'SenderAddress'    => $admin_warehouse_id,
-					'SendersPhone'     => '380' . $admin_phone,
-					'Sender'           => $sender,
-					'FirstName'        => $first_name,
-					'LastName'         => $last_name,
-					'Phone'            => '380' . $phone,
-					'RecipientsPhone'  => '380' . $phone,
-					'Region'           => $area_id,
-					'City'             => $city_id,
-					'CityRecipient'    => $city_id,
-					'RecipientAddress' => $warehouse_id,
-					'Recipient'        => $recipient,
-					'ContactRecipient' => $contact_recipient,
-					'ServiceType'      => 'WarehouseWarehouse',
-					'PaymentMethod'    => 'Cash',
-					'PayerType'        => 'Recipient',
-					'Cost'             => $price,
-					'SeatsAmount'      => 1,
-					'OptionsSeat'      => [
-						[
-							'volumetricVolume' => 1,
-							'volumetricWidth'  => $count * 26,
-							'volumetricLength' => $count * 14.5,
-							'volumetricHeight' => $count * 10,
-							'weight'           => ( $count * .5 ) - .01,
-						],
-					],
-					'Description'      => $description,
-					'Weight'           => ( $count * .5 ) - .01,
-					'CargoType'        => 'Parcel',
-					'DateTime'         => $date->format( 'd.m.Y' ),
-				],
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( 'response' );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		once()->
-		with( 'response' )->
-		andReturn(
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-			json_encode(
+		expectApplied( 'shipping_nova_poshta_for_woocommerce_document_description' )
+			->with( $description )
+			->once()
+			->andReturn( $description );
+		expect( 'wp_json_encode' )
+			->with(
 				[
-					'success' => true,
-					'data'    => [
-						[
-							'IntDocNumber' => $internet_document,
+					'modelName'        => 'InternetDocument',
+					'calledMethod'     => 'save',
+					'methodProperties' => (object) [
+						'ContactSender'    => $contact_sender,
+						'CitySender'       => $admin_city_id,
+						'SenderAddress'    => $admin_warehouse_id,
+						'SendersPhone'     => '380' . $admin_phone,
+						'Sender'           => $sender,
+						'FirstName'        => $first_name,
+						'LastName'         => $last_name,
+						'Phone'            => '380' . $phone,
+						'RecipientsPhone'  => '380' . $phone,
+						'Region'           => $area_id,
+						'City'             => $city_id,
+						'CityRecipient'    => $city_id,
+						'RecipientAddress' => $warehouse_id,
+						'Recipient'        => $recipient,
+						'ContactRecipient' => $contact_recipient,
+						'ServiceType'      => 'WarehouseWarehouse',
+						'PaymentMethod'    => 'Cash',
+						'PayerType'        => 'Recipient',
+						'Cost'             => $price,
+						'SeatsAmount'      => 1,
+						'OptionsSeat'      => [
+							[
+								'volumetricVolume' => 1,
+								'volumetricWidth'  => $count * 26,
+								'volumetricLength' => $count * 14.5,
+								'volumetricHeight' => $count * 10,
+								'weight'           => ( $count * .5 ) - .01,
+							],
 						],
+						'Description'      => $description,
+						'Weight'           => ( $count * .5 ) - .01,
+						'CargoType'        => 'Parcel',
+						'DateTime'         => $date->format( 'd.m.Y' ),
 					],
+					'apiKey'           => $api_key,
 				]
 			)
-		);
-		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
-		with( 'json' )->
-		reply( 'json' );
-		WP_Mock::userFunction( 'is_wp_error' )->
-		times( 4 )->
-		andReturn( false );
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
+				[
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
+				]
+			)
+			->once()
+			->andReturn( 'response' );
+		expect( 'wp_remote_retrieve_body' )
+			->with( 'response' )
+			->once()
+			->andReturn(
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'IntDocNumber' => $internet_document,
+							],
+						],
+					]
+				)
+			);
+		expectApplied( 'shipping_nova_poshta_for_woocommerce_request_body' )
+			->with( 'json' )
+			->times( 4 )
+			->andReturn( 'json' );
+		expect( 'is_wp_error' )
+			->withAnyArgs()
+			->times( 4 )
+			->andReturn( false );
 		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
 		$api = new API( $db, $factory_cache, $settings );
 
 		$this->assertSame(
 			$internet_document,
-			$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count )
+			$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $weight, $volume )
 		);
 	}
 
@@ -1035,14 +1063,16 @@ class Test_API extends Test_Case {
 		$first_name         = 'First Name';
 		$last_name          = 'Last Name';
 		$phone              = '123456789';
-		$description        = 'Product';
 		$city_id            = 'city-id';
 		$warehouse_id       = 'warehouse-id';
 		$area_id            = 'area-id';
-		$price              = 100.5;
-		$count              = 10;
-		$redelivery         = 50;
+		$price              = '100.5';
+		$count              = '10';
 		$admin_phone        = '987654321';
+		$description        = 'Product';
+		$weight             = 11;
+		$volume             = 22;
+		$redelivery         = 100;
 		$admin_city_id      = 'admin-city-id';
 		$admin_warehouse_id = 'admin-warehouse-id';
 		$sender             = 'sender';
@@ -1076,284 +1106,280 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'api_key' )
 			->times( 8 )
 			->andReturn( $api_key );
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'Counterparty',
-				'calledMethod'     => 'getCounterparties',
-				'methodProperties' => (object) [
-					'City'                 => $admin_city_id,
-					'CounterpartyProperty' => 'Sender',
-					'Page'                 => 1,
-				],
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( 'response' );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		once()->
-		with( 'response' )->
-		andReturn(
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-			json_encode(
+		expect( 'wp_json_encode' )
+			->with(
 				[
-					'success' => true,
-					'data'    => [
-						[
-							'Ref' => $sender,
-						],
+					'modelName'        => 'Counterparty',
+					'calledMethod'     => 'getCounterparties',
+					'methodProperties' => (object) [
+						'City'                 => $admin_city_id,
+						'CounterpartyProperty' => 'Sender',
+						'Page'                 => 1,
 					],
+					'apiKey'           => $api_key,
 				]
 			)
-		);
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'Counterparty',
-				'calledMethod'     => 'getCounterpartyContactPersons',
-				'methodProperties' => (object) [
-					'Ref' => $sender,
-				],
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( 'response' );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		once()->
-		with( 'response' )->
-		andReturn(
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-			json_encode(
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
 				[
-					'success' => true,
-					'data'    => [
-						[
-							'Ref' => $contact_sender,
-						],
-					],
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
 				]
 			)
-		);
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'Counterparty',
-				'calledMethod'     => 'save',
-				'methodProperties' => (object) [
-					'CounterpartyProperty' => 'Recipient',
-					'CounterpartyType'     => 'PrivatePerson',
-					'FirstName'            => $first_name,
-					'LastName'             => $last_name,
-					'Phone'                => '380' . $phone,
-					'RecipientsPhone'      => '380' . $phone,
-					'Region'               => $area_id,
-					'City'                 => $city_id,
-					'CityRecipient'        => $city_id,
-					'RecipientAddress'     => $warehouse_id,
-				],
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( 'response' );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		once()->
-		with( 'response' )->
-		andReturn(
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-			json_encode(
+			->once()
+			->andReturn( 'response' );
+		expect( 'wp_remote_retrieve_body' )
+			->with( 'response' )
+			->once()
+			->andReturn(
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref' => $sender,
+							],
+						],
+					]
+				)
+			);
+		expect( 'wp_json_encode' )
+			->with(
 				[
-					'success' => true,
-					'data'    => [
-						[
-							'Ref'           => $recipient,
-							'ContactPerson' => [
-								'data' => [
-									[
-										'Ref' => $contact_recipient,
+					'modelName'        => 'Counterparty',
+					'calledMethod'     => 'getCounterpartyContactPersons',
+					'methodProperties' => (object) [
+						'Ref' => $sender,
+					],
+					'apiKey'           => $api_key,
+				]
+			)
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
+				[
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
+				]
+			)
+			->once()
+			->andReturn( 'response' );
+		expect( 'wp_remote_retrieve_body' )
+			->once()
+			->with( 'response' )
+			->andReturn(
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref' => $contact_sender,
+							],
+						],
+					]
+				)
+			);
+		expect( 'wp_json_encode' )
+			->with(
+				[
+					'modelName'        => 'Counterparty',
+					'calledMethod'     => 'save',
+					'methodProperties' => (object) [
+						'CounterpartyProperty' => 'Recipient',
+						'CounterpartyType'     => 'PrivatePerson',
+						'FirstName'            => $first_name,
+						'LastName'             => $last_name,
+						'Phone'                => '380' . $phone,
+						'RecipientsPhone'      => '380' . $phone,
+						'Region'               => $area_id,
+						'City'                 => $city_id,
+						'CityRecipient'        => $city_id,
+						'RecipientAddress'     => $warehouse_id,
+					],
+					'apiKey'           => $api_key,
+				]
+			)
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
+				[
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
+				]
+			)
+			->once()
+			->andReturn( 'response' );
+		expect( 'wp_remote_retrieve_body' )
+			->with( 'response' )
+			->once()
+			->andReturn(
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'Ref'           => $recipient,
+								'ContactPerson' => [
+									'data' => [
+										[
+											'Ref' => $contact_recipient,
+										],
 									],
 								],
 							],
 						],
-					],
-				]
-			)
-		);
+					]
+				)
+			);
 		$date = new DateTime( '', new DateTimeZone( 'Europe/Kiev' ) );
-		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_document_description' )->
-		with( $description )->
-		reply( $description );
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'InternetDocument',
-				'calledMethod'     => 'save',
-				'methodProperties' => (object) [
-					'ContactSender'        => $contact_sender,
-					'CitySender'           => $admin_city_id,
-					'SenderAddress'        => $admin_warehouse_id,
-					'SendersPhone'         => '380' . $admin_phone,
-					'Sender'               => $sender,
-					'FirstName'            => $first_name,
-					'LastName'             => $last_name,
-					'Phone'                => '380' . $phone,
-					'RecipientsPhone'      => '380' . $phone,
-					'Region'               => $area_id,
-					'City'                 => $city_id,
-					'CityRecipient'        => $city_id,
-					'RecipientAddress'     => $warehouse_id,
-					'Recipient'            => $recipient,
-					'ContactRecipient'     => $contact_recipient,
-					'ServiceType'          => 'WarehouseWarehouse',
-					'PaymentMethod'        => 'Cash',
-					'PayerType'            => 'Recipient',
-					'Cost'                 => $price,
-					'SeatsAmount'          => 1,
-					'OptionsSeat'          => [
-						[
-							'volumetricVolume' => 1,
-							'volumetricWidth'  => $count * 26,
-							'volumetricLength' => $count * 14.5,
-							'volumetricHeight' => $count * 10,
-							'weight'           => ( $count * .5 ) - .01,
-						],
-					],
-					'Description'          => $description,
-					'Weight'               => ( $count * .5 ) - .01,
-					'CargoType'            => 'Parcel',
-					'DateTime'             => $date->format( 'd.m.Y' ),
-					'BackwardDeliveryData' => [
-						[
-							'PayerType'        => 'Recipient',
-							'CargoType'        => 'Money',
-							'RedeliveryString' => $redelivery,
-						],
-					],
-				],
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( 'response' );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		once()->
-		with( 'response' )->
-		andReturn(
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-			json_encode(
+		expectApplied( 'shipping_nova_poshta_for_woocommerce_document_description' )
+			->with( $description )
+			->once()
+			->andReturn( $description );
+		expect( 'wp_json_encode' )
+			->with(
 				[
-					'success' => true,
-					'data'    => [
-						[
-							'IntDocNumber' => $internet_document,
+					'modelName'        => 'InternetDocument',
+					'calledMethod'     => 'save',
+					'methodProperties' => (object) [
+						'ContactSender'    => $contact_sender,
+						'CitySender'       => $admin_city_id,
+						'SenderAddress'    => $admin_warehouse_id,
+						'SendersPhone'     => '380' . $admin_phone,
+						'Sender'           => $sender,
+						'FirstName'        => $first_name,
+						'LastName'         => $last_name,
+						'Phone'            => '380' . $phone,
+						'RecipientsPhone'  => '380' . $phone,
+						'Region'           => $area_id,
+						'City'             => $city_id,
+						'CityRecipient'    => $city_id,
+						'RecipientAddress' => $warehouse_id,
+						'Recipient'        => $recipient,
+						'ContactRecipient' => $contact_recipient,
+						'ServiceType'      => 'WarehouseWarehouse',
+						'PaymentMethod'    => 'Cash',
+						'PayerType'        => 'Recipient',
+						'Cost'             => $price,
+						'SeatsAmount'      => 1,
+						'OptionsSeat'      => [
+							[
+								'volumetricVolume' => 1,
+								'volumetricWidth'  => $count * 26,
+								'volumetricLength' => $count * 14.5,
+								'volumetricHeight' => $count * 10,
+								'weight'           => ( $count * .5 ) - .01,
+							],
 						],
+						'Description'      => $description,
+						'Weight'           => ( $count * .5 ) - .01,
+						'CargoType'        => 'Parcel',
+						'DateTime'         => $date->format( 'd.m.Y' ),
 					],
+					'apiKey'           => $api_key,
 				]
 			)
-		);
-		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
-		with( 'json' )->
-		reply( 'json' );
-		WP_Mock::userFunction( 'is_wp_error' )->
-		times( 4 )->
-		andReturn( false );
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
+				[
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
+				]
+			)
+			->once()
+			->andReturn( 'response' );
+		expect( 'wp_remote_retrieve_body' )
+			->with( 'response' )
+			->once()
+			->andReturn(
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				json_encode(
+					[
+						'success' => true,
+						'data'    => [
+							[
+								'IntDocNumber' => $internet_document,
+							],
+						],
+					]
+				)
+			);
+		expectApplied( 'shipping_nova_poshta_for_woocommerce_request_body' )
+			->with( 'json' )
+			->times( 4 )
+			->andReturn( 'json' );
+		expect( 'is_wp_error' )
+			->withAnyArgs()
+			->times( 4 )
+			->andReturn( false );
 		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
 		$api = new API( $db, $factory_cache, $settings );
 
 		$this->assertSame(
 			$internet_document,
-			$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $count, $redelivery )
+			$api->internet_document( $first_name, $last_name, $phone, $city_id, $warehouse_id, $price, $weight, $volume, $redelivery )
 		);
 	}
 
 	/**
 	 * Test validate bad request API key
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_validation_bad_request() {
 		$api_key  = 'api-key';
 		$db       = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'Address',
-				'calledMethod'     => 'getCities',
-				'apiKey'           => $api_key,
-				'methodProperties' => (object) [
-					'FindByString' => 'Киев',
-				],
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-			]
-		)->
-		once()->
-		andReturn( false );
-		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
-		with( 'json' )->
-		reply( 'json' );
-		WP_Mock::userFunction( 'is_wp_error' )->
-		once()->
-		andReturn( true );
+		expect( 'wp_json_encode' )
+			->with(
+				[
+					'modelName'        => 'Address',
+					'calledMethod'     => 'getCities',
+					'apiKey'           => $api_key,
+					'methodProperties' => (object) [
+						'FindByString' => 'Киев',
+					],
+				]
+			)
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
+				[
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+				]
+			)
+			->once()
+			->andReturn( false );
+		expect( 'is_wp_error' )
+			->withAnyArgs()
+			->once()
+			->andReturn( true );
 		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
 		$api = new API( $db, $factory_cache, $settings );
@@ -1363,50 +1389,50 @@ class Test_API extends Test_Case {
 
 	/**
 	 * Test fail validation API key.
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_fail_validation() {
 		$api_key  = 'api-key';
 		$db       = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'Address',
-				'calledMethod'     => 'getCities',
-				'apiKey'           => $api_key,
-				'methodProperties' => (object) [
-					'FindByString' => 'Киев',
-				],
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-			]
-		)->
-		once()->
-		andReturn(
-			[
-				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-				'body' => json_encode(
-					[
-						'success' => false,
-					]
-				),
-			]
-		);
-		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
-		with( 'json' )->
-		reply( 'json' );
-		WP_Mock::userFunction( 'is_wp_error' )->
-		once()->
-		andReturn( false );
+		expect( 'wp_json_encode' )
+			->with(
+				[
+					'modelName'        => 'Address',
+					'calledMethod'     => 'getCities',
+					'apiKey'           => $api_key,
+					'methodProperties' => (object) [
+						'FindByString' => 'Киев',
+					],
+				]
+			)
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
+				[
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+				]
+			)
+			->once()
+			->andReturn(
+				[
+					//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+					'body' => json_encode(
+						[
+							'success' => false,
+						]
+					),
+				]
+			);
+		expect( 'is_wp_error' )
+			->withAnyArgs()
+			->once()
+			->andReturn( false );
 		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
 		$api = new API( $db, $factory_cache, $settings );
@@ -1416,47 +1442,50 @@ class Test_API extends Test_Case {
 
 	/**
 	 * Test validation API key.
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_validation() {
 		$api_key  = 'api-key';
 		$db       = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'Address',
-				'calledMethod'     => 'getCities',
-				'apiKey'           => $api_key,
-				'methodProperties' => (object) [
-					'FindByString' => 'Киев',
-				],
-			]
-		)->
-		once()->
-		andReturn( 'json' );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-			]
-		)->
-		once()->
-		andReturn(
-			[
-				//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-				'body' => json_encode(
-					[
-						'success' => true,
-					]
-				),
-			]
-		);
-		WP_Mock::userFunction( 'is_wp_error' )->
-		once()->
-		andReturn( false );
+		expect( 'wp_json_encode' )
+			->with(
+				[
+					'modelName'        => 'Address',
+					'calledMethod'     => 'getCities',
+					'apiKey'           => $api_key,
+					'methodProperties' => (object) [
+						'FindByString' => 'Киев',
+					],
+				]
+			)
+			->once()
+			->andReturn( 'json' );
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
+				[
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+				]
+			)
+			->once()
+			->andReturn(
+				[
+					//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+					'body' => json_encode(
+						[
+							'success' => true,
+						]
+					),
+				]
+			);
+		expect( 'is_wp_error' )
+			->withNoArgs()
+			->once()
+			->andReturn( false );
 		$factory_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Factory_Cache' );
 
 		$api = new API( $db, $factory_cache, $settings );
@@ -1466,6 +1495,8 @@ class Test_API extends Test_Case {
 
 	/**
 	 * Test errors
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_errors_request() {
 		$api_key        = 'api-key';
@@ -1480,7 +1511,7 @@ class Test_API extends Test_Case {
 		$db             = Mockery::mock( 'Nova_Poshta\Core\DB' );
 		$db
 			->shouldReceive( 'cities' )
-			->withArgs( [ $search, $limit ] )
+			->with( $search, $limit )
 			->once()
 			->andReturn( $cities );
 		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
@@ -1488,52 +1519,54 @@ class Test_API extends Test_Case {
 			->shouldReceive( 'api_key' )
 			->twice()
 			->andReturn( $api_key );
-		WP_Mock::userFunction( 'wp_json_encode' )->
-		with(
-			[
-				'modelName'        => 'Address',
-				'calledMethod'     => 'getCities',
-				'methodProperties' => new stdClass(),
-				'apiKey'           => $api_key,
-			]
-		)->
-		once()->
-		andReturn( 'json' );
+		expect( 'wp_json_encode' )
+			->with(
+				[
+					'modelName'        => 'Address',
+					'calledMethod'     => 'getCities',
+					'methodProperties' => new stdClass(),
+					'apiKey'           => $api_key,
+				]
+			)
+			->once()
+			->andReturn( 'json' );
 		$wp_error = Mockery::mock( 'WP_Error' );
 		$wp_error
 			->shouldReceive( 'get_error_messages' )
 			->once()
 			->andReturn( [ 'error1', 'error2' ] );
-		WP_Mock::userFunction( 'wp_remote_post' )->
-		with(
-			API::ENDPOINT,
-			[
-				'headers'     => [ 'Content-Type' => 'application/json' ],
-				'body'        => 'json',
-				'data_format' => 'body',
-				'timeout'     => 30,
-			]
-		)->
-		once()->
-		andReturn( $wp_error );
-		WP_Mock::userFunction( 'wp_remote_retrieve_body' )->
-		with( $wp_error )->
-		once()->
-		andReturn(
-		//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
-			json_encode(
+		expect( 'wp_remote_post' )
+			->with(
+				API::ENDPOINT,
 				[
-					'success' => false,
-					'errors'  => [ 'error3', 'error4' ],
+					'headers'     => [ 'Content-Type' => 'application/json' ],
+					'body'        => 'json',
+					'data_format' => 'body',
+					'timeout'     => 30,
 				]
 			)
-		);
-		WP_Mock::userFunction( 'is_wp_error' )->
-		once()->
-		andReturn( $wp_error );
-		WP_Mock::onFilter( 'shipping_nova_poshta_for_woocommerce_request_body' )->
-		with( 'json' )->
-		reply( 'json' );
+			->once()
+			->andReturn( $wp_error );
+		expect( 'wp_remote_retrieve_body' )
+			->with( $wp_error )
+			->once()
+			->andReturn(
+			//phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode
+				json_encode(
+					[
+						'success' => false,
+						'errors'  => [ 'error3', 'error4' ],
+					]
+				)
+			);
+		expect( 'is_wp_error' )
+			->withAnyArgs()
+			->once()
+			->andReturn( $wp_error );
+		expectApplied( 'shipping_nova_poshta_for_woocommerce_request_body' )
+			->with( 'json' )
+			->once()
+			->andReturn( 'json' );
 		$transient_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Transient_Cache' );
 		$transient_cache
 			->shouldReceive( 'get' )

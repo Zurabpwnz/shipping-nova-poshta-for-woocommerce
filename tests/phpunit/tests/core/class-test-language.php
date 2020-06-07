@@ -9,6 +9,7 @@ namespace Nova_Poshta\Core;
 
 use Nova_Poshta\Tests\Test_Case;
 use WP_Mock;
+use function Brain\Monkey\Functions\expect;
 
 /**
  * Class Test_Language
@@ -26,9 +27,9 @@ class Test_Language extends Test_Case {
 	 * @param string $current_lang expected language.
 	 */
 	public function test_get_current_language( string $locale, string $current_lang ) {
-		WP_Mock::userFunction( 'get_locale' )->
-		once()->
-		andReturn( $locale );
+		expect( 'get_locale' )
+			->once()
+			->andReturn( $locale );
 		$language = new Language();
 
 		$this->assertSame( $current_lang, $language->get_current_language() );
@@ -55,15 +56,18 @@ class Test_Language extends Test_Case {
 	 */
 	public function test_hooks() {
 		$language = new Language();
-		WP_Mock::expectFilterAdded(
-			'shipping_nova_poshta_for_woocommerce_default_city',
-			[
-				$language,
-				'default_city',
-			]
-		);
 
 		$language->hooks();
+
+		$this->assertTrue(
+			has_filter(
+				'shipping_nova_poshta_for_woocommerce_default_city',
+				[
+					$language,
+					'default_city',
+				]
+			)
+		);
 	}
 
 	/**
@@ -75,7 +79,7 @@ class Test_Language extends Test_Case {
 	 * @param string $default_city expected default city.
 	 */
 	public function test_default_city( string $locale, string $default_city ) {
-		WP_Mock::userFunction( 'get_locale' )->
+		expect( 'get_locale' )->
 		once()->
 		andReturn( $locale );
 		$language = new Language();
