@@ -422,7 +422,7 @@ class API {
 					)
 				),
 				'data_format' => 'body',
-				'timeout'     => 30,
+				'timeout'     => 5,
 			]
 		);
 
@@ -435,7 +435,7 @@ class API {
 			$this->errors = array_merge( $this->errors, $body['errors'] );
 		}
 
-		return $body;
+		return $body ? $body : [];
 	}
 
 	/**

@@ -8,7 +8,7 @@
 use Nova_Poshta\Core\Main;
 
 ?>
-<h2><?php esc_attr_e( 'General', 'shipping-nova-poshta-for-woocommerce' ); ?></h2>
+<h1><?php esc_attr_e( 'General', 'shipping-nova-poshta-for-woocommerce' ); ?></h1>
 <form action="options.php" method="POST" class="shipping-nova-poshta-for-woocommerce-form">
 	<?php settings_errors( Main::PLUGIN_SLUG ); ?>
 	<?php settings_fields( Main::PLUGIN_SLUG ); ?>

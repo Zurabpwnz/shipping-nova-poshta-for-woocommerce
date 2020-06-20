@@ -10,7 +10,7 @@
  * @wordpress-plugin
  */
 
-use Nova_Poshta\Admin\Notice;
+use Nova_Poshta\Admin\Notice\Notice;
 use Nova_Poshta\Core\API;
 use Nova_Poshta\Core\Cache\Factory_Cache;
 use Nova_Poshta\Core\Cache\Object_Cache;

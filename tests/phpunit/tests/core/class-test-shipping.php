@@ -25,7 +25,7 @@ class Test_Shipping extends Test_Case {
 	 * Test adding hooks
 	 */
 	public function test_hooks() {
-		$notice       = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice       = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 		$object_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
 		$object_cache
 			->shouldReceive( 'get' )
@@ -54,7 +54,7 @@ class Test_Shipping extends Test_Case {
 	 * Test register_methods
 	 */
 	public function test_register_methods() {
-		$notice       = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice       = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 		$object_cache = Mockery::mock( 'Nova_Poshta\Core\Cache\Object_Cache' );
 		$object_cache
 			->shouldReceive( 'get' )
@@ -111,7 +111,7 @@ class Test_Shipping extends Test_Case {
 			->with( $sql )
 			->once()
 			->andReturn( $request );
-		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 		$notice
 			->shouldReceive( 'add' )
 			->with(

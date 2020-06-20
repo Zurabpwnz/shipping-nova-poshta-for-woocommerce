@@ -94,7 +94,7 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 			->withAnyArgs()
 			->once()
 			->andReturn( false );
-		Mockery::mock( 'overload:Nova_Poshta\Admin\Notice' );
+		Mockery::mock( 'overload:Nova_Poshta\Admin\Notice\Notice' );
 		$language = Mockery::mock( 'overload:Nova_Poshta\Core\Language' );
 		$language
 			->shouldReceive( 'get_current_language' )
@@ -176,7 +176,7 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 			->with( '', $user_id )
 			->once()
 			->andReturn( $city_id );
-		Mockery::mock( 'overload:Nova_Poshta\Admin\Notice' );
+		Mockery::mock( 'overload:Nova_Poshta\Admin\Notice\Notice' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\Language' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\DB' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\Cache\Object_Cache' );
@@ -262,7 +262,7 @@ class Test_Nova_Poshta_Shipping_Method extends Test_Case {
 				return $answers[ $i ++ ];
 			}
 		);
-		Mockery::mock( 'overload:Nova_Poshta\Admin\Notice' );
+		Mockery::mock( 'overload:Nova_Poshta\Admin\Notice\Notice' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\Language' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\DB' );
 		Mockery::mock( 'overload:Nova_Poshta\Core\Cache\Object_Cache' );

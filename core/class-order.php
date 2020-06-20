@@ -13,7 +13,7 @@
 namespace Nova_Poshta\Core;
 
 use Exception;
-use Nova_Poshta\Admin\Notice;
+use Nova_Poshta\Admin\Notice\Notice;
 use Nova_Poshta_Gateway_COD;
 use WC_Data_Exception;
 use WC_Meta_Data;

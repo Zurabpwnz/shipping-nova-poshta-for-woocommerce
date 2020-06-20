@@ -5,12 +5,13 @@
  * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
-namespace Nova_Poshta\Admin;
+namespace Nova_Poshta\Admin\Notice;
 
 use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
 use function Brain\Monkey\Functions\expect;
+use function Brain\Monkey\Functions\stubs;
 use function Brain\Monkey\Functions\when;
 
 /**
@@ -62,11 +63,16 @@ class Test_Notice extends Test_Case {
 	public function test_show_notice() {
 		$type    = 'type';
 		$message = 'message';
-		when( 'esc_attr' )
-			->returnArg();
+		stubs(
+			[
+				'esc_attr',
+				'esc_html',
+			]
+		);
 		expect( 'plugin_dir_path' )
 			->withAnyArgs()
-			->once();
+			->once()
+			->andReturn( PLUGIN_DIR . '/admin/' );
 		expect( 'wp_kses' )
 			->with(
 				$message,
