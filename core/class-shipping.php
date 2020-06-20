@@ -12,7 +12,7 @@
 
 namespace Nova_Poshta\Core;
 
-use Nova_Poshta\Admin\Notice;
+use Nova_Poshta\Admin\Notice\Notice;
 use Nova_Poshta\Core\Cache\Factory_Cache;
 
 /**

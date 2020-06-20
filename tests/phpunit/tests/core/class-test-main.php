@@ -33,7 +33,7 @@ class Test_Main extends Test_Case {
 			->once()
 			->andReturn( false );
 		when( '__' )->returnArg();
-		$notice = Mockery::mock( 'overload:Nova_Poshta\Admin\Notice' );
+		$notice = Mockery::mock( 'overload:Nova_Poshta\Admin\Notice\Notice' );
 		$notice
 			->shouldReceive( 'add' )
 			->with( 'error', '<strong>' . Main::PLUGIN_NAME . '</strong> extends WooCommerce functionality and does not work without it.' )
@@ -81,6 +81,11 @@ class Test_Main extends Test_Case {
 			->once();
 		$admin = Mockery::mock( 'overload:Nova_Poshta\Admin\Admin' );
 		$admin
+			->shouldReceive( 'hooks' )
+			->once();
+
+		$advertisement = Mockery::mock( 'overload:Nova_Poshta\Admin\Notice\Advertisement' );
+		$advertisement
 			->shouldReceive( 'hooks' )
 			->once();
 		Mockery::mock( 'overload:Nova_Poshta\Core\Calculator' );

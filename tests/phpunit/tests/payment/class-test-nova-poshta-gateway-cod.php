@@ -161,6 +161,46 @@ class Test_Nova_Poshta_Gateway_COD extends Test_Case {
 	}
 
 	/**
+	 * Test don't show empty description.
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
+	 * @throws ReflectionException Invalid property.
+	 */
+	public function test_DONT_prepare_payment_fields() {
+		when( '__' )->returnArg();
+		$description = 'Description with [prepayment] and [rest]';
+		$prepayment  = 100;
+
+		$cod = new Nova_Poshta_Gateway_COD();
+		$this->update_inaccessible_property( $cod, 'description', $description );
+		$this->update_inaccessible_property( $cod, 'prepayment', $prepayment );
+		$wc = (object) [
+			'cart' => null,
+		];
+		expect( 'WC' )
+			->withNoArgs()
+			->once()
+			->andReturn( $wc );
+		expect( 'wp_kses_post' )
+			->with( $description )
+			->once()
+			->andReturn( $description );
+		expect( 'wpautop' )
+			->with( $description )
+			->once()
+			->andReturn( $description );
+		expect( 'wptexturize' )
+			->with( $description )
+			->once()
+			->andReturn( $description );
+
+		ob_start();
+		$cod->payment_fields();
+
+		$this->assertSame( $description, ob_get_clean() );
+	}
+
+	/**
 	 * Test show empty description with replaced shortcodes.
 	 *
 	 * @runInSeparateProcess
@@ -202,7 +242,7 @@ class Test_Nova_Poshta_Gateway_COD extends Test_Case {
 		];
 		expect( 'WC' )
 			->withNoArgs()
-			->twice()
+			->times( 3 )
 			->andReturn( $wc );
 		expect( 'wp_kses_post' )
 			->with( $prepared_description )
@@ -270,7 +310,7 @@ class Test_Nova_Poshta_Gateway_COD extends Test_Case {
 		];
 		expect( 'WC' )
 			->withNoArgs()
-			->twice()
+			->times( 3 )
 			->andReturn( $wc );
 		expect( 'wp_kses_post' )
 			->with( $description )

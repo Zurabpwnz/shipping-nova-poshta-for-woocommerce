@@ -155,6 +155,9 @@ class Nova_Poshta_Gateway_COD extends WC_Gateway_COD {
 		if ( ! $this->prepayment ) {
 			return $text;
 		}
+		if ( ! WC()->cart ) {
+			return $text;
+		}
 		$quantity   = array_sum( WC()->cart->get_cart_item_quantities() );
 		$total      = WC()->cart->get_total( 'no-view' );
 		$prepayment = $this->calculator->result( $this->prepayment, $quantity );

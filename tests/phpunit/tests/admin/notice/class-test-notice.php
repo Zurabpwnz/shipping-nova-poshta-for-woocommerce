@@ -5,7 +5,7 @@
  * @package   Shipping-Nova-Poshta-For-Woocommerce
  */
 
-namespace Nova_Poshta\Admin;
+namespace Nova_Poshta\Admin\Notice;
 
 use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Mockery;
@@ -66,7 +66,8 @@ class Test_Notice extends Test_Case {
 			->returnArg();
 		expect( 'plugin_dir_path' )
 			->withAnyArgs()
-			->once();
+			->once()
+			->andReturn( PLUGIN_DIR . '/admin/' );
 		expect( 'wp_kses' )
 			->with(
 				$message,

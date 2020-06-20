@@ -38,7 +38,7 @@ class Test_Order extends Test_Case {
 	public function test_hooks() {
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 		$order         = new Order( $api, $shipping_cost, $notice );
 
 		$order->hooks();
@@ -108,7 +108,7 @@ class Test_Order extends Test_Case {
 			->andReturn( $new_nonce );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -134,7 +134,7 @@ class Test_Order extends Test_Case {
 		$package       = [];
 		$wc_order      = Mockery::mock( 'WC_Order' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 		$order         = new Order( $api, $shipping_cost, $notice );
 
 		$order->create( $item_shipping, $package_key, $package, $wc_order );
@@ -164,7 +164,7 @@ class Test_Order extends Test_Case {
 		$package       = [];
 		$wc_order      = Mockery::mock( 'WC_Order' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -199,7 +199,7 @@ class Test_Order extends Test_Case {
 		$package       = [];
 		$wc_order      = Mockery::mock( 'WC_Order' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -234,7 +234,7 @@ class Test_Order extends Test_Case {
 		$package       = [];
 		$wc_order      = Mockery::mock( 'WC_Order' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -291,7 +291,7 @@ class Test_Order extends Test_Case {
 		$package       = [];
 		$wc_order      = Mockery::mock( 'WC_Order' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -311,7 +311,7 @@ class Test_Order extends Test_Case {
 		$order_item    = Mockery::mock( 'WC_Order_Item' );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -331,7 +331,7 @@ class Test_Order extends Test_Case {
 		$order_item    = Mockery::mock( 'WC_Order_Item' );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -354,7 +354,7 @@ class Test_Order extends Test_Case {
 			->andReturn( 'other-shipping-method' );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -382,7 +382,7 @@ class Test_Order extends Test_Case {
 			->andReturn( false );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -420,7 +420,7 @@ class Test_Order extends Test_Case {
 			->andReturn( $order );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -501,7 +501,7 @@ class Test_Order extends Test_Case {
 			)
 			->once()
 			->andReturn( $cost );
-		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -552,7 +552,7 @@ class Test_Order extends Test_Case {
 			->between( 1, 3 )
 			->andReturn( $key );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -584,7 +584,7 @@ class Test_Order extends Test_Case {
 			->twice()
 			->andReturn( $value );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -616,7 +616,7 @@ class Test_Order extends Test_Case {
 			->twice()
 			->andReturn( $value );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -637,7 +637,7 @@ class Test_Order extends Test_Case {
 			->twice()
 			->andReturn( $key );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -651,7 +651,7 @@ class Test_Order extends Test_Case {
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$item          = Mockery::mock( '\WC_Order_Item' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -670,7 +670,7 @@ class Test_Order extends Test_Case {
 			->andReturn( 'other_shipping_nova_poshta_for_woocommerce' );
 		FunctionMocker::replace( 'is_a', true );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -726,7 +726,7 @@ class Test_Order extends Test_Case {
 			->once();
 		FunctionMocker::replace( 'is_a', true );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -761,7 +761,7 @@ class Test_Order extends Test_Case {
 			->andReturn( $wc_order );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -792,7 +792,7 @@ class Test_Order extends Test_Case {
 			->andReturn( $wc_order );
 		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 
 		$order = new Order( $api, $shipping_cost, $notice );
 
@@ -815,7 +815,7 @@ class Test_Order extends Test_Case {
 			->once()
 			->andReturn( [] );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 		$order         = new Order( $api, $shipping_cost, $notice );
 
 		$order->create_internet_document( $wc_order );
@@ -846,7 +846,7 @@ class Test_Order extends Test_Case {
 			->once()
 			->andReturn( [ $wc_order_item_shipping ] );
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 		$notice
 			->shouldReceive( 'add' )
 			->with( 'error', 'The invoice was created before' )
@@ -884,7 +884,7 @@ class Test_Order extends Test_Case {
 			->shouldReceive( 'get_items' )
 			->once();
 		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 		$notice
 			->shouldReceive( 'add' )
 			->with( 'error', 'The order doesn\'t have a products' )
@@ -1053,7 +1053,7 @@ class Test_Order extends Test_Case {
 			)
 			->once()
 			->andReturn( $volume );
-		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 		$notice
 			->shouldReceive( 'add' )
 			->with( 'success', 'The invoice will successfully create' )
@@ -1221,7 +1221,7 @@ class Test_Order extends Test_Case {
 			)
 			->once()
 			->andReturn( $volume );
-		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice' );
+		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
 		$notice
 			->shouldReceive( 'add' )
 			->with( 'error', 'The invoice wasn\'t created because:' )

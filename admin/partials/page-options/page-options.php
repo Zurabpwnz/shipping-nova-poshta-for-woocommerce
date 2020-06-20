@@ -17,10 +17,17 @@ $active_tab = filter_input( INPUT_GET, 'tab', FILTER_SANITIZE_STRING );
 				class="nav-tab<?php echo ! $active_tab ? ' nav-tab-active' : ''; ?>">
 			<?php esc_attr_e( 'General', 'shipping-nova-poshta-for-woocommerce' ); ?>
 		</a>
+		<a
+				href="<?php echo esc_url( $url ); ?>&tab=internet-document-list"
+				class="nav-tab<?php echo 'internet-document-list' === $active_tab ? ' nav-tab-active' : ''; ?>">
+			<?php esc_attr_e( 'Internet Document List', 'shipping-nova-poshta-for-woocommerce' ); ?>
+		</a>
 	</div>
 	<?php
-	if ( empty( $active_tab ) ) {
+	if ( ! $active_tab ) {
 		require plugin_dir_path( __FILE__ ) . 'general.php';
+	} elseif ( 'internet-document-list' === $active_tab ) {
+		require plugin_dir_path( __FILE__ ) . 'internet-document-list.php';
 	}
 	?>
 </div>

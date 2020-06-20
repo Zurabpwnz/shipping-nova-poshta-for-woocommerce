@@ -4,9 +4,8 @@
  *
  * Plugin Name: Shipping Nova Poshta for WooCommerce
  * Plugin URI:  https://github.com/wppunk/shipping-nova-poshta-for-woocommerce
- * Description: Select a branch on the checkout page, the creation of electronic invoices, calculating shipping costs,
- * COD payment, and much more ...
- * Version: 1.4.0
+ * Description: Select a branch on the checkout page, the creation of electronic invoices, calculating shipping costs, COD payment, and much more ...
+ * Version: 1.4.0.1
  * Author: WP Punk, Anton Serednii
  * Author URI: https://profiles.wordpress.org/wppunk/
  * License: GPLv2 or later

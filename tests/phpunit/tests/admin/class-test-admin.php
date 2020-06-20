@@ -8,12 +8,10 @@
 namespace Nova_Poshta\Admin;
 
 use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
-use Exception;
 use Mockery;
 use Nova_Poshta\Core\Main;
 use Nova_Poshta\Tests\Test_Case;
 use stdClass;
-use tad\FunctionMocker\FunctionMocker;
 use function Brain\Monkey\Filters\expectApplied;
 use function Brain\Monkey\Functions\expect;
 use function Brain\Monkey\Functions\stubs;
@@ -72,16 +70,53 @@ class Test_Admin extends Test_Case {
 	}
 
 	/**
-	 * Test styles
+	 * Test don't enqueue styles
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_do_NOT_enqueue_styles() {
-		global $current_screen;
+		expect( 'is_admin' )
+			->withNoArgs()
+			->once()
+			->andReturn( false );
+		$admin = $this->instance();
 
+		$admin->enqueue_styles();
+	}
+
+	/**
+	 * Test enqueue styles for admin
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
+	 */
+	public function test_enqueue_admin_styles() {
+		global $current_screen;
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen           = new stdClass();
 		$current_screen->base     = 'something';
 		$current_screen->taxonomy = 'something';
-
+		expect( 'is_admin' )
+			->withNoArgs()
+			->once()
+			->andReturn( true );
+		expect( 'plugin_dir_url' )
+			->with(
+				Mockery::anyOf(
+					__DIR__ . '/../../../../admin/class-admin.php',
+					__DIR__ . '/../../../../admin'
+				)
+			)
+			->once()
+			->andReturn( '/some/path' );
+		expect( 'wp_enqueue_style' )
+			->with(
+				'np-notice',
+				'/some/path/assets/css/notice.css',
+				[],
+				Main::VERSION,
+				'all'
+			)
+			->once();
 		$admin = $this->instance();
 
 		$admin->enqueue_styles();
@@ -94,10 +129,13 @@ class Test_Admin extends Test_Case {
 	 */
 	public function test_enqueue_styles() {
 		global $current_screen;
-
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen       = new stdClass();
 		$current_screen->base = 'toplevel_page_' . Main::PLUGIN_SLUG;
+		expect( 'is_admin' )
+			->withNoArgs()
+			->once()
+			->andReturn( true );
 		expect( 'plugin_dir_url' )
 			->with(
 				Mockery::anyOf(
@@ -105,8 +143,17 @@ class Test_Admin extends Test_Case {
 					__DIR__ . '/../../../../admin'
 				)
 			)
-			->times( 4 )
+			->times( 5 )
 			->andReturn( '/some/path' );
+		expect( 'wp_enqueue_style' )
+			->with(
+				'np-notice',
+				'/some/path/assets/css/notice.css',
+				[],
+				Main::VERSION,
+				'all'
+			)
+			->once();
 		expect( 'wp_enqueue_style' )
 			->with(
 				'np-select2',
@@ -114,7 +161,8 @@ class Test_Admin extends Test_Case {
 				[],
 				Main::VERSION,
 				'all'
-			);
+			)
+			->once();
 		expect( 'wp_enqueue_style' )
 			->with(
 				'np-tip-tip',
@@ -122,7 +170,8 @@ class Test_Admin extends Test_Case {
 				[],
 				Main::VERSION,
 				'all'
-			);
+			)
+			->once();
 		expect( 'wp_enqueue_style' )
 			->with(
 				Main::PLUGIN_SLUG,
@@ -130,7 +179,8 @@ class Test_Admin extends Test_Case {
 				[ 'np-select2' ],
 				Main::VERSION,
 				'all'
-			);
+			)
+			->once();
 		expect( 'wp_enqueue_style' )
 			->with(
 				Main::PLUGIN_SLUG . '-front',
@@ -138,7 +188,8 @@ class Test_Admin extends Test_Case {
 				[ 'np-select2' ],
 				Main::VERSION,
 				'all'
-			);
+			)
+			->once();
 
 		$admin = $this->instance();
 
@@ -146,16 +197,53 @@ class Test_Admin extends Test_Case {
 	}
 
 	/**
-	 * Test scripts
+	 * Test don't enqueue scripts
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_do_NOT_enqueue_scripts() {
-		global $current_screen;
+		expect( 'is_admin' )
+			->withNoArgs()
+			->once()
+			->andReturn( false );
+		$admin = $this->instance();
 
+		$admin->enqueue_scripts();
+	}
+
+	/**
+	 * Test enqueue styles for admin
+	 *
+	 * @throws ExpectationArgsRequired Invalid arguments.
+	 */
+	public function test_enqueue_admin_scripts() {
+		global $current_screen;
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen           = new stdClass();
 		$current_screen->base     = 'something';
 		$current_screen->taxonomy = 'something';
-
+		expect( 'is_admin' )
+			->withNoArgs()
+			->once()
+			->andReturn( true );
+		expect( 'plugin_dir_url' )
+			->with(
+				Mockery::anyOf(
+					__DIR__ . '/../../../../admin/class-admin.php',
+					__DIR__ . '/../../../../admin'
+				)
+			)
+			->once()
+			->andReturn( '/some/path' );
+		expect( 'wp_enqueue_script' )
+			->with(
+				'np-notice',
+				'/some/path/front/assets/js/np-notice.js',
+				[ 'jquery' ],
+				Main::VERSION,
+				true
+			)
+			->once();
 		$admin = $this->instance();
 
 		$admin->enqueue_scripts();
@@ -174,6 +262,10 @@ class Test_Admin extends Test_Case {
 		$locale               = 'uk';
 		$admin_url            = '/admin-url/';
 		$nonce                = 'nonce123';
+		expect( 'is_admin' )
+			->withNoArgs()
+			->once()
+			->andReturn( true );
 		expect( 'plugin_dir_url' )
 			->with(
 				Mockery::anyOf(
@@ -181,8 +273,17 @@ class Test_Admin extends Test_Case {
 					__DIR__ . '/../../../../admin'
 				)
 			)
-			->times( 4 )
+			->times( 5 )
 			->andReturn( '/some/path' );
+		expect( 'wp_enqueue_script' )
+			->with(
+				'np-notice',
+				'/some/path/front/assets/js/np-notice.js',
+				[ 'jquery' ],
+				Main::VERSION,
+				true
+			)
+			->once();
 		expect( 'wp_enqueue_script' )
 			->with(
 				'np-select2',
@@ -190,7 +291,8 @@ class Test_Admin extends Test_Case {
 				[ 'jquery' ],
 				Main::VERSION,
 				true
-			);
+			)
+			->once();
 		expect( 'wp_enqueue_script' )
 			->with(
 				'select2-i18n-uk',
@@ -198,7 +300,8 @@ class Test_Admin extends Test_Case {
 				[ 'jquery', 'np-select2' ],
 				Main::VERSION,
 				true
-			);
+			)
+			->once();
 		expect( 'wp_enqueue_script' )
 			->with(
 				'np-tip-tip',
@@ -206,7 +309,8 @@ class Test_Admin extends Test_Case {
 				[ 'jquery' ],
 				Main::VERSION,
 				true
-			);
+			)
+			->once();
 		expect( 'wp_enqueue_script' )
 			->with(
 				Main::PLUGIN_SLUG,
@@ -214,7 +318,8 @@ class Test_Admin extends Test_Case {
 				[ 'jquery', 'np-select2' ],
 				Main::VERSION,
 				true
-			);
+			)
+			->once();
 		expect( 'admin_url' )
 			->with( 'admin-ajax.php' )
 			->once()
@@ -479,7 +584,6 @@ class Test_Admin extends Test_Case {
 
 		$this->assertNotEmpty( ob_get_clean() );
 	}
-
 
 	/**
 	 * Test validation API key and show notice

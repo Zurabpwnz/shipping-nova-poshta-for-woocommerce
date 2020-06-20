@@ -1,0 +1,16 @@
+
+.shipping-nova-poshta-for-woocommerce-notice {
+    display: none;
+}
+
+.shipping-nova-poshta-for-woocommerce-notice .stars {
+    position: relative;
+    top: 5px;
+    margin-left: 5px;
+    margin-right: 5px;
+    color: gold;
+}
+
+.shipping-nova-poshta-for-woocommerce-notice .button {
+    margin-left: 15px;
+}

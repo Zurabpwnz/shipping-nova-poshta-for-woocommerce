@@ -123,7 +123,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
@@ -271,7 +271,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
@@ -357,7 +357,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
@@ -526,7 +526,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
@@ -567,7 +567,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
@@ -652,7 +652,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
@@ -693,7 +693,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
@@ -743,7 +743,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
@@ -838,7 +838,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
@@ -879,7 +879,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
@@ -929,7 +929,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
@@ -1014,7 +1014,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
@@ -1128,7 +1128,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
@@ -1169,7 +1169,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
@@ -1219,7 +1219,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
@@ -1304,7 +1304,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
@@ -1542,7 +1542,7 @@ class Test_API extends Test_Case {
 					'headers'     => [ 'Content-Type' => 'application/json' ],
 					'body'        => 'json',
 					'data_format' => 'body',
-					'timeout'     => 30,
+					'timeout'     => 5,
 				]
 			)
 			->once()
