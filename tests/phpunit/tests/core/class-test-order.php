@@ -7,14 +7,16 @@
 
 namespace Nova_Poshta\Core;
 
-use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
-use Exception;
 use Mockery;
-use Nova_Poshta\Tests\Test_Case;
+use Exception;
 use Nova_Poshta_Gateway_COD;
+use Nova_Poshta\Tests\Test_Case;
 use tad\FunctionMocker\FunctionMocker;
-use function Brain\Monkey\Functions\expect;
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
+
+use function mock;
 use function Brain\Monkey\Functions\when;
+use function Brain\Monkey\Functions\expect;
 
 /**
  * Class Test_Order
@@ -36,10 +38,10 @@ class Test_Order extends Test_Case {
 	 * Test adding hooks
 	 */
 	public function test_hooks() {
-		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-		$order         = new Order( $api, $shipping_cost, $notice );
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->hooks();
 
@@ -106,11 +108,10 @@ class Test_Order extends Test_Case {
 			->with( Main::PLUGIN_SLUG . '-shipping' )
 			->once()
 			->andReturn( $new_nonce );
-		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->update_nonce_for_new_users();
 		//phpcs:disable WordPress.Security.NonceVerification.Missing
@@ -128,14 +129,14 @@ class Test_Order extends Test_Case {
 	 * Test don't save with empty nonce
 	 */
 	public function test_do_NOT_save_with_empty_nonce() {
-		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
-		$package_key   = 10;
-		$package       = [];
-		$wc_order      = Mockery::mock( 'WC_Order' );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-		$order         = new Order( $api, $shipping_cost, $notice );
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$item_shipping     = Mockery::mock( 'WC_Order_Item_Shipping' );
+		$package_key       = 10;
+		$package           = [];
+		$wc_order          = Mockery::mock( 'WC_Order' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->create( $item_shipping, $package_key, $package, $wc_order );
 	}
@@ -158,15 +159,14 @@ class Test_Order extends Test_Case {
 			->once()
 			->andReturn( false );
 		FunctionMocker::replace( 'filter_var', $nonce );
-		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
-		$package_key   = 10;
-		$package       = [];
-		$wc_order      = Mockery::mock( 'WC_Order' );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$item_shipping     = Mockery::mock( 'WC_Order_Item_Shipping' );
+		$package_key       = 10;
+		$package           = [];
+		$wc_order          = Mockery::mock( 'WC_Order' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->create( $item_shipping, $package_key, $package, $wc_order );
 	}
@@ -195,13 +195,12 @@ class Test_Order extends Test_Case {
 			->shouldReceive( 'get_method_id' )
 			->once()
 			->andReturn( 'no_shipping_nova_poshta_for_woocommerce' );
-		$package_key   = 10;
-		$package       = [];
-		$wc_order      = Mockery::mock( 'WC_Order' );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$package_key       = 10;
+		$package           = [];
+		$wc_order          = Mockery::mock( 'WC_Order' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->create( $item_shipping, $package_key, $package, $wc_order );
 	}
@@ -230,13 +229,12 @@ class Test_Order extends Test_Case {
 			->shouldReceive( 'get_method_id' )
 			->once()
 			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
-		$package_key   = 10;
-		$package       = [];
-		$wc_order      = Mockery::mock( 'WC_Order' );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$package_key       = 10;
+		$package           = [];
+		$wc_order          = Mockery::mock( 'WC_Order' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->create( $item_shipping, $package_key, $package, $wc_order );
 	}
@@ -287,13 +285,12 @@ class Test_Order extends Test_Case {
 			->shouldReceive( 'add_meta_data' )
 			->with( 'warehouse_id', $warehouse_id, true )
 			->once();
-		$package_key   = 10;
-		$package       = [];
-		$wc_order      = Mockery::mock( 'WC_Order' );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$package_key       = 10;
+		$package           = [];
+		$wc_order          = Mockery::mock( 'WC_Order' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->create( $item_shipping, $package_key, $package, $wc_order );
 	}
@@ -308,12 +305,11 @@ class Test_Order extends Test_Case {
 			->withNoArgs()
 			->once()
 			->andReturn( false );
-		$order_item    = Mockery::mock( 'WC_Order_Item' );
-		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$order_item        = Mockery::mock( 'WC_Order_Item' );
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->save( $order_item );
 	}
@@ -328,12 +324,11 @@ class Test_Order extends Test_Case {
 			->withNoArgs()
 			->once()
 			->andReturn( true );
-		$order_item    = Mockery::mock( 'WC_Order_Item' );
-		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$order_item        = Mockery::mock( 'WC_Order_Item' );
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->save( $order_item );
 	}
@@ -352,11 +347,10 @@ class Test_Order extends Test_Case {
 			->shouldReceive( 'get_method_id' )
 			->once()
 			->andReturn( 'other-shipping-method' );
-		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->save( $order_item );
 	}
@@ -380,11 +374,10 @@ class Test_Order extends Test_Case {
 			->with( 'city_id', true )
 			->once()
 			->andReturn( false );
-		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->save( $order_item );
 	}
@@ -418,11 +411,10 @@ class Test_Order extends Test_Case {
 			->shouldReceive( 'get_order' )
 			->once()
 			->andReturn( $order );
-		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->save( $order_item );
 	}
@@ -501,9 +493,8 @@ class Test_Order extends Test_Case {
 			)
 			->once()
 			->andReturn( $cost );
-		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->save( $order_item );
 	}
@@ -551,10 +542,9 @@ class Test_Order extends Test_Case {
 			->with( 'key' )
 			->between( 1, 3 )
 			->andReturn( $key );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$this->assertSame( $result, $order->labels( $key, $wc_meta_data ) );
 	}
@@ -583,10 +573,9 @@ class Test_Order extends Test_Case {
 			->with( 'value' )
 			->twice()
 			->andReturn( $value );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$this->assertSame( $city_name, $order->values( $value, $wc_meta_data ) );
 	}
@@ -615,10 +604,9 @@ class Test_Order extends Test_Case {
 			->with( 'value' )
 			->twice()
 			->andReturn( $value );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$this->assertSame( $warehouse_name, $order->values( $value, $wc_meta_data ) );
 	}
@@ -636,10 +624,9 @@ class Test_Order extends Test_Case {
 			->with( 'key' )
 			->twice()
 			->andReturn( $key );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$this->assertSame( $value, $order->values( $value, $wc_meta_data ) );
 	}
@@ -648,12 +635,11 @@ class Test_Order extends Test_Case {
 	 * Test default fileds for not shipping order item
 	 */
 	public function test_default_fields_for_order_item() {
-		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$item          = Mockery::mock( '\WC_Order_Item' );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$item              = Mockery::mock( '\WC_Order_Item' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->default_fields_for_shipping_item( 10, $item );
 	}
@@ -669,10 +655,9 @@ class Test_Order extends Test_Case {
 			->once()
 			->andReturn( 'other_shipping_nova_poshta_for_woocommerce' );
 		FunctionMocker::replace( 'is_a', true );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->default_fields_for_shipping_item( 10, $item );
 	}
@@ -725,10 +710,9 @@ class Test_Order extends Test_Case {
 			->shouldReceive( 'save_meta_data' )
 			->once();
 		FunctionMocker::replace( 'is_a', true );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->default_fields_for_shipping_item( 10, $item );
 	}
@@ -759,11 +743,10 @@ class Test_Order extends Test_Case {
 			->with( $post_id )
 			->once()
 			->andReturn( $wc_order );
-		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$this->assertSame(
 			[ 'action 1' => 'Action 1' ],
@@ -790,11 +773,10 @@ class Test_Order extends Test_Case {
 			->with( $post_id )
 			->once()
 			->andReturn( $wc_order );
-		$api           = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$order             = new Order( $api, $shipping_cost, $internet_document );
 
 		$this->assertSame(
 			[ 'nova_poshta_create_internet_document' => 'Create Nova Poshta Internet Document' ],
@@ -803,439 +785,20 @@ class Test_Order extends Test_Case {
 	}
 
 	/**
-	 * Dont create internet document without shipping method
+	 * Test create internet document
 	 *
-	 * @throws Exception Invalid DateTime.
+	 * @throws Exception Invalid arguments or DateTime.
 	 */
-	public function test_do_NOT_create_invoice_without_shipping_method() {
-		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$wc_order = Mockery::mock( 'WC_Order' );
-		$wc_order
-			->shouldReceive( 'get_shipping_methods' )
-			->once()
-			->andReturn( [] );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-		$order         = new Order( $api, $shipping_cost, $notice );
-
-		$order->create_internet_document( $wc_order );
-	}
-
-	/**
-	 * Create internet document
-	 *
-	 * @throws Exception Invalid DateTime.
-	 */
-	public function test_NOT_create_invoice_repeatedly() {
-		$internet_document = '1234 5678 9012 3456';
-		when( '__' )->returnArg();
-		$api                    = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$wc_order_item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
-		$wc_order_item_shipping
-			->shouldReceive( 'get_meta' )
-			->with( 'internet_document' )
-			->once()
-			->andReturn( $internet_document );
-		$wc_order_item_shipping
-			->shouldReceive( 'get_method_id' )
-			->once()
-			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
-		$wc_order = Mockery::mock( 'WC_Order' );
-		$wc_order
-			->shouldReceive( 'get_shipping_methods' )
-			->once()
-			->andReturn( [ $wc_order_item_shipping ] );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-		$notice
-			->shouldReceive( 'add' )
-			->with( 'error', 'The invoice was created before' )
+	public function test_create_internet_document() {
+		$wc_order          = Mockery::mock( 'WC_Order' );
+		$api               = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$shipping_cost     = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
+		$internet_document = Mockery::mock( 'Nova_Poshta\Core\Internet_Document' );
+		$internet_document
+			->shouldReceive( 'create' )
+			->with( $wc_order )
 			->once();
-
-		$order = new Order( $api, $shipping_cost, $notice );
-
-		$order->create_internet_document( $wc_order );
-	}
-
-	/**
-	 * Create internet document
-	 *
-	 * @throws Exception Invalid DateTime.
-	 */
-	public function test_NOT_create_invoice_WITHOUT_items() {
-		$internet_document = '1234 5678 9012 3456';
-		when( '__' )->returnArg();
-		$api                    = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$wc_order_item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
-		$wc_order_item_shipping
-			->shouldReceive( 'get_meta' )
-			->with( 'internet_document' )
-			->once();
-		$wc_order_item_shipping
-			->shouldReceive( 'get_method_id' )
-			->once()
-			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
-		$wc_order = Mockery::mock( 'WC_Order' );
-		$wc_order
-			->shouldReceive( 'get_shipping_methods' )
-			->once()
-			->andReturn( [ $wc_order_item_shipping ] );
-		$wc_order
-			->shouldReceive( 'get_items' )
-			->once();
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$notice        = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-		$notice
-			->shouldReceive( 'add' )
-			->with( 'error', 'The order doesn\'t have a products' )
-			->once();
-
-		$order = new Order( $api, $shipping_cost, $notice );
-
-		$order->create_internet_document( $wc_order );
-	}
-
-	/**
-	 * Create internet document
-	 *
-	 * @throws Exception Invalid DateTime.
-	 */
-	public function test_create_invoice() {
-		when( '__' )->returnArg();
-		$first_name         = 'First name';
-		$last_name          = 'Last name';
-		$phone              = '+380123456789';
-		$city_id            = 'city-id';
-		$warehouse_id       = 'warehouse-id';
-		$internet_document  = '1234 5678 9012 3456';
-		$product_1          = 'product 1';
-		$product_1_quantity = 5;
-		$product_2          = 'product 2';
-		$product_2_quantity = 10;
-		$weight             = 11;
-		$volume             = 22;
-		$total              = 777;
-		$prepayment         = 111;
-		$shipping_total     = 31;
-		expect( 'get_option' )
-			->with( Nova_Poshta_Gateway_COD::ID . '_settings' )
-			->once()
-			->andReturn( [ 'prepayment' => $prepayment ] );
-		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$api
-			->shouldReceive( 'internet_document' )
-			->with(
-				$first_name,
-				$last_name,
-				$phone,
-				$city_id,
-				$warehouse_id,
-				$total - $shipping_total,
-				$weight,
-				$volume,
-				$total - $shipping_total - $prepayment
-			)
-			->once()
-			->andReturn( $internet_document );
-		$wc_order_item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
-		$wc_order_item_shipping
-			->shouldReceive( 'get_meta' )
-			->with( 'internet_document' )
-			->once()
-			->andReturn( false );
-		$wc_order_item_shipping
-			->shouldReceive( 'get_method_id' )
-			->once()
-			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
-		$wc_order_item_shipping
-			->shouldReceive( 'get_meta' )
-			->with( 'city_id' )
-			->once()
-			->andReturn( $city_id );
-		$wc_order_item_shipping
-			->shouldReceive( 'get_meta' )
-			->with( 'warehouse_id' )
-			->once()
-			->andReturn( $warehouse_id );
-		$wc_order_item_shipping
-			->shouldReceive( 'add_meta_data' )
-			->with( 'internet_document', $internet_document, true )
-			->once();
-		$wc_order_item_shipping
-			->shouldReceive( 'save_meta_data' )
-			->once();
-		$wc_order_item_1 = Mockery::mock( 'WC_Order_Item' );
-		$wc_order_item_1
-			->shouldReceive( 'get_quantity' )
-			->once()
-			->andReturn( $product_1_quantity );
-		$wc_order_item_1
-			->shouldReceive( 'get_product' )
-			->once()
-			->andReturn( $product_1 );
-		$wc_order_item_2 = Mockery::mock( 'WC_Order_Item' );
-		$wc_order_item_2
-			->shouldReceive( 'get_quantity' )
-			->once()
-			->andReturn( $product_2_quantity );
-		$wc_order_item_2
-			->shouldReceive( 'get_product' )
-			->once()
-			->andReturn( $product_2 );
-		$wc_order = Mockery::mock( 'WC_Order' );
-		$wc_order
-			->shouldReceive( 'get_shipping_methods' )
-			->once()
-			->andReturn( [ $wc_order_item_shipping ] );
-		$wc_order
-			->shouldReceive( 'get_billing_first_name' )
-			->once()
-			->andReturn( $first_name );
-		$wc_order
-			->shouldReceive( 'get_billing_last_name' )
-			->once()
-			->andReturn( $last_name );
-		$wc_order
-			->shouldReceive( 'get_billing_phone' )
-			->once()
-			->andReturn( $phone );
-		$wc_order
-			->shouldReceive( 'get_total' )
-			->once()
-			->andReturn( $total );
-		$wc_order
-			->shouldReceive( 'get_shipping_total' )
-			->once()
-			->andReturn( $shipping_total );
-		$wc_order
-			->shouldReceive( 'get_items' )
-			->once()
-			->andReturn( [ $wc_order_item_1, $wc_order_item_2 ] );
-		$wc_order
-			->shouldReceive( 'get_payment_method' )
-			->withNoArgs()
-			->once()
-			->andReturn( Nova_Poshta_Gateway_COD::ID );
-		$wc_order
-			->shouldReceive( 'add_order_note' )
-			->with( 'Created Internet document for Nova Poshta' )
-			->once();
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$shipping_cost
-			->shouldReceive( 'get_products_weight' )
-			->with(
-				[
-					[
-						'quantity' => $product_1_quantity,
-						'data'     => $product_1,
-					],
-					[
-						'quantity' => $product_2_quantity,
-						'data'     => $product_2,
-					],
-				]
-			)
-			->once()
-			->andReturn( $weight );
-		$shipping_cost
-			->shouldReceive( 'get_products_volume' )
-			->with(
-				[
-					[
-						'quantity' => $product_1_quantity,
-						'data'     => $product_1,
-					],
-					[
-						'quantity' => $product_2_quantity,
-						'data'     => $product_2,
-					],
-				]
-			)
-			->once()
-			->andReturn( $volume );
-		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-		$notice
-			->shouldReceive( 'add' )
-			->with( 'success', 'The invoice will successfully create' )
-			->once();
-
-		$order = new Order( $api, $shipping_cost, $notice );
-
-		$order->create_internet_document( $wc_order );
-	}
-
-	/**
-	 * Create internet document
-	 *
-	 * @throws Exception Invalid DateTime.
-	 */
-	public function test_create_invoice_with_api_error() {
-		when( '__' )->returnArg();
-		$first_name         = 'First name';
-		$last_name          = 'Last name';
-		$phone              = '+380123456789';
-		$city_id            = 'city-id';
-		$warehouse_id       = 'warehouse-id';
-		$internet_document  = '1234 5678 9012 3456';
-		$product_1          = 'product 1';
-		$product_1_quantity = 5;
-		$product_2          = 'product 2';
-		$product_2_quantity = 10;
-		$weight             = 11;
-		$volume             = 22;
-		$total              = 777;
-		$prepayment         = 111;
-		$shipping_total     = 31;
-		expect( 'get_option' )
-			->with( Nova_Poshta_Gateway_COD::ID . '_settings' )
-			->once()
-			->andReturn( [ 'prepayment' => $prepayment ] );
-		$api = Mockery::mock( 'Nova_Poshta\Core\API' );
-		$api
-			->shouldReceive( 'internet_document' )
-			->with(
-				$first_name,
-				$last_name,
-				$phone,
-				$city_id,
-				$warehouse_id,
-				$total - $shipping_total,
-				$weight,
-				$volume,
-				$total - $shipping_total - $prepayment
-			)
-			->once()
-			->andReturn( false );
-		$api
-			->shouldReceive( 'errors' )
-			->withNoArgs()
-			->once()
-			->andReturn(
-				[
-					'Error message 1',
-					'Error message 2',
-				]
-			);
-		$wc_order_item_shipping = Mockery::mock( 'WC_Order_Item_Shipping' );
-		$wc_order_item_shipping
-			->shouldReceive( 'get_meta' )
-			->with( 'internet_document' )
-			->once()
-			->andReturn( false );
-		$wc_order_item_shipping
-			->shouldReceive( 'get_method_id' )
-			->once()
-			->andReturn( 'shipping_nova_poshta_for_woocommerce' );
-		$wc_order_item_shipping
-			->shouldReceive( 'get_meta' )
-			->with( 'city_id' )
-			->once()
-			->andReturn( $city_id );
-		$wc_order_item_shipping
-			->shouldReceive( 'get_meta' )
-			->with( 'warehouse_id' )
-			->once()
-			->andReturn( $warehouse_id );
-		$wc_order_item_1 = Mockery::mock( 'WC_Order_Item' );
-		$wc_order_item_1
-			->shouldReceive( 'get_quantity' )
-			->once()
-			->andReturn( $product_1_quantity );
-		$wc_order_item_1
-			->shouldReceive( 'get_product' )
-			->once()
-			->andReturn( $product_1 );
-		$wc_order_item_2 = Mockery::mock( 'WC_Order_Item' );
-		$wc_order_item_2
-			->shouldReceive( 'get_quantity' )
-			->once()
-			->andReturn( $product_2_quantity );
-		$wc_order_item_2
-			->shouldReceive( 'get_product' )
-			->once()
-			->andReturn( $product_2 );
-		$wc_order = Mockery::mock( 'WC_Order' );
-		$wc_order
-			->shouldReceive( 'get_shipping_methods' )
-			->once()
-			->andReturn( [ $wc_order_item_shipping ] );
-		$wc_order
-			->shouldReceive( 'get_billing_first_name' )
-			->once()
-			->andReturn( $first_name );
-		$wc_order
-			->shouldReceive( 'get_billing_last_name' )
-			->once()
-			->andReturn( $last_name );
-		$wc_order
-			->shouldReceive( 'get_billing_phone' )
-			->once()
-			->andReturn( $phone );
-		$wc_order
-			->shouldReceive( 'get_total' )
-			->once()
-			->andReturn( $total );
-		$wc_order
-			->shouldReceive( 'get_shipping_total' )
-			->once()
-			->andReturn( $shipping_total );
-		$wc_order
-			->shouldReceive( 'get_items' )
-			->once()
-			->andReturn( [ $wc_order_item_1, $wc_order_item_2 ] );
-		$wc_order
-			->shouldReceive( 'get_payment_method' )
-			->withNoArgs()
-			->once()
-			->andReturn( Nova_Poshta_Gateway_COD::ID );
-		$shipping_cost = Mockery::mock( 'Nova_Poshta\Core\Shipping_Cost' );
-		$shipping_cost
-			->shouldReceive( 'get_products_weight' )
-			->with(
-				[
-					[
-						'quantity' => $product_1_quantity,
-						'data'     => $product_1,
-					],
-					[
-						'quantity' => $product_2_quantity,
-						'data'     => $product_2,
-					],
-				]
-			)
-			->once()
-			->andReturn( $weight );
-		$shipping_cost
-			->shouldReceive( 'get_products_volume' )
-			->with(
-				[
-					[
-						'quantity' => $product_1_quantity,
-						'data'     => $product_1,
-					],
-					[
-						'quantity' => $product_2_quantity,
-						'data'     => $product_2,
-					],
-				]
-			)
-			->once()
-			->andReturn( $volume );
-		$notice = Mockery::mock( 'Nova_Poshta\Admin\Notice\Notice' );
-		$notice
-			->shouldReceive( 'add' )
-			->with( 'error', 'The invoice wasn\'t created because:' )
-			->once();
-		$notice
-			->shouldReceive( 'add' )
-			->with( 'error', 'Error message 1' )
-			->once();
-		$notice
-			->shouldReceive( 'add' )
-			->with( 'error', 'Error message 2' )
-			->once();
-
-		$order = new Order( $api, $shipping_cost, $notice );
+		$order = new Order( $api, $shipping_cost, $internet_document );
 
 		$order->create_internet_document( $wc_order );
 	}

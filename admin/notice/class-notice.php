@@ -50,7 +50,7 @@ class Notice extends Abstract_Notice {
 	 * Add hooks
 	 */
 	public function hooks() {
-		parent::hooks();
+		add_action( 'admin_notices', [ $this, 'notices' ] );
 		add_action( 'shutdown', [ $this, 'save' ] );
 	}
 

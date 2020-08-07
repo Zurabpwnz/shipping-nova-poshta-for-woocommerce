@@ -7,11 +7,12 @@
 
 namespace Nova_Poshta\Core;
 
-use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Mockery;
 use Nova_Poshta\Tests\Test_Case;
-use function Brain\Monkey\Functions\expect;
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
+
 use function Brain\Monkey\Functions\when;
+use function Brain\Monkey\Functions\expect;
 
 /**
  * Class Test_Main
@@ -84,12 +85,17 @@ class Test_Main extends Test_Case {
 			->shouldReceive( 'hooks' )
 			->once();
 
+		Mockery::mock( 'overload:Nova_Poshta\Core\Calculator' );
+		Mockery::mock( 'overload:Nova_Poshta\Core\Shipping_Cost' );
+		Mockery::mock( 'overload:Nova_Poshta\Core\Internet_Document' );
+		$admin_manage_orders = Mockery::mock( 'overload:Nova_Poshta\Admin\Admin_Manage_Orders' );
+		$admin_manage_orders
+			->shouldReceive( 'hooks' )
+			->once();
 		$advertisement = Mockery::mock( 'overload:Nova_Poshta\Admin\Notice\Advertisement' );
 		$advertisement
 			->shouldReceive( 'hooks' )
 			->once();
-		Mockery::mock( 'overload:Nova_Poshta\Core\Calculator' );
-		Mockery::mock( 'overload:Nova_Poshta\Core\Shipping_Cost' );
 		$ajax = Mockery::mock( 'overload:Nova_Poshta\Core\AJAX' );
 		$ajax
 			->shouldReceive( 'hooks' )

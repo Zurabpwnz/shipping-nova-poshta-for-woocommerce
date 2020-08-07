@@ -7,14 +7,15 @@
 
 namespace Nova_Poshta\Admin\Notice;
 
-use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Mockery;
+use stdClass;
 use Nova_Poshta\Core\Main;
 use Nova_Poshta\Tests\Test_Case;
-use stdClass;
 use tad\FunctionMocker\FunctionMocker;
-use function Brain\Monkey\Functions\expect;
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
+
 use function Brain\Monkey\Functions\stubs;
+use function Brain\Monkey\Functions\expect;
 
 /**
  * Class Test_Advertisement
@@ -110,7 +111,9 @@ class Test_Advertisement extends Test_Case {
 			)
 			->once()
 			->andReturn( $message );
-		$advertisement = new Advertisement( $transient_cache );
+		global $current_screen;
+		$current_screen->base = 'toplevel_page_' . Main::PLUGIN_SLUG;
+		$advertisement        = new Advertisement( $transient_cache );
 		ob_start();
 
 		$advertisement->notices();

@@ -7,11 +7,12 @@
 
 namespace Nova_Poshta\Tests;
 
-use Mockery;
-use PHPUnit\Framework\TestCase;
-use ReflectionException;
+use ReflectionMethod;
 use ReflectionProperty;
+use ReflectionException;
+use PHPUnit\Framework\TestCase;
 use tad\FunctionMocker\FunctionMocker;
+
 use function Brain\Monkey\setUp;
 use function Brain\Monkey\tearDown;
 
@@ -70,6 +71,25 @@ abstract class Test_Case extends TestCase {
 		$property->setAccessible( true );
 		$property->setValue( $object, $value );
 		$property->setAccessible( false );
+	}
+
+	/**
+	 * Run a protected/private methods.
+	 *
+	 * @param object $object      Object.
+	 * @param string $method_name Method name.
+	 * @param array  $args        Method arguments.
+	 *
+	 * @return mixed
+	 * @throws ReflectionException Reflection exception.
+	 */
+	protected function run_inaccesible_method( $object, string $method_name, array $args = [] ) {
+		$method = new ReflectionMethod( $object, $method_name );
+		$method->setAccessible( true );
+		$result = $method->invokeArgs( $object, $args );
+		$method->setAccessible( false );
+
+		return $result;
 	}
 
 }

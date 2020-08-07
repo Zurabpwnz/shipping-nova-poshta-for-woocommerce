@@ -7,15 +7,16 @@
 
 namespace Nova_Poshta\Admin;
 
-use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
 use Mockery;
+use stdClass;
 use Nova_Poshta\Core\Main;
 use Nova_Poshta\Tests\Test_Case;
-use stdClass;
-use function Brain\Monkey\Filters\expectApplied;
-use function Brain\Monkey\Functions\expect;
-use function Brain\Monkey\Functions\stubs;
+use Brain\Monkey\Expectation\Exception\ExpectationArgsRequired;
+
 use function Brain\Monkey\Functions\when;
+use function Brain\Monkey\Functions\stubs;
+use function Brain\Monkey\Functions\expect;
+use function Brain\Monkey\Filters\expectApplied;
 
 /**
  * Class Test_Admin
@@ -217,6 +218,9 @@ class Test_Admin extends Test_Case {
 	 * @throws ExpectationArgsRequired Invalid arguments.
 	 */
 	public function test_enqueue_admin_scripts() {
+		$locale    = 'uk';
+		$admin_url = '/admin-url/';
+		$nonce     = 'nonce123';
 		global $current_screen;
 		//phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$current_screen           = new stdClass();
@@ -244,7 +248,34 @@ class Test_Admin extends Test_Case {
 				true
 			)
 			->once();
-		$admin = $this->instance();
+		expect( 'admin_url' )
+			->with( 'admin-ajax.php' )
+			->once()
+			->andReturn( $admin_url );
+		expect( 'wp_create_nonce' )
+			->with( Main::PLUGIN_SLUG )
+			->once()
+			->andReturn( $nonce );
+		expect( 'wp_localize_script' )
+			->with(
+				'np-notice',
+				'shipping_nova_poshta_for_woocommerce',
+				[
+					'url'      => $admin_url,
+					'nonce'    => $nonce,
+					'language' => $locale,
+				]
+			)
+			->once();
+		$api      = Mockery::mock( 'Nova_Poshta\Core\API' );
+		$settings = Mockery::mock( 'Nova_Poshta\Core\Settings' );
+		$language = Mockery::mock( 'Nova_Poshta\Core\Language' );
+		$language
+			->shouldReceive( 'get_current_language' )
+			->once()
+			->andReturn( $locale );
+
+		$admin = new Admin( $api, $settings, $language );
 
 		$admin->enqueue_scripts();
 	}
@@ -284,6 +315,25 @@ class Test_Admin extends Test_Case {
 				true
 			)
 			->once();
+		expect( 'admin_url' )
+			->with( 'admin-ajax.php' )
+			->once()
+			->andReturn( $admin_url );
+		expect( 'wp_create_nonce' )
+			->with( Main::PLUGIN_SLUG )
+			->once()
+			->andReturn( $nonce );
+		expect( 'wp_localize_script' )
+			->with(
+				'np-notice',
+				'shipping_nova_poshta_for_woocommerce',
+				[
+					'url'      => $admin_url,
+					'nonce'    => $nonce,
+					'language' => $locale,
+				]
+			)
+			->once();
 		expect( 'wp_enqueue_script' )
 			->with(
 				'np-select2',
@@ -318,25 +368,6 @@ class Test_Admin extends Test_Case {
 				[ 'jquery', 'np-select2' ],
 				Main::VERSION,
 				true
-			)
-			->once();
-		expect( 'admin_url' )
-			->with( 'admin-ajax.php' )
-			->once()
-			->andReturn( $admin_url );
-		expect( 'wp_create_nonce' )
-			->with( Main::PLUGIN_SLUG )
-			->once()
-			->andReturn( $nonce );
-		expect( 'wp_localize_script' )
-			->with(
-				Main::PLUGIN_SLUG,
-				'shipping_nova_poshta_for_woocommerce',
-				[
-					'url'      => $admin_url,
-					'nonce'    => $nonce,
-					'language' => $locale,
-				]
 			)
 			->once();
 

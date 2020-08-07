@@ -44,13 +44,6 @@ abstract class Abstract_Notice {
 	}
 
 	/**
-	 * Add hooks
-	 */
-	public function hooks() {
-		add_action( 'admin_notices', [ $this, 'notices' ] );
-	}
-
-	/**
 	 * Show notices
 	 */
 	abstract public function notices();

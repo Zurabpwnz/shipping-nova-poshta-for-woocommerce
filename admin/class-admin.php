@@ -14,8 +14,8 @@ namespace Nova_Poshta\Admin;
 
 use Exception;
 use Nova_Poshta\Core\API;
-use Nova_Poshta\Core\Language;
 use Nova_Poshta\Core\Main;
+use Nova_Poshta\Core\Language;
 use Nova_Poshta\Core\Settings;
 
 /**
@@ -99,6 +99,15 @@ class Admin {
 			Main::VERSION,
 			true
 		);
+		wp_localize_script(
+			'np-notice',
+			'shipping_nova_poshta_for_woocommerce',
+			[
+				'url'      => admin_url( 'admin-ajax.php' ),
+				'nonce'    => wp_create_nonce( Main::PLUGIN_SLUG ),
+				'language' => $this->language->get_current_language(),
+			]
+		);
 		if ( ! $this->is_plugin_page() ) {
 			return;
 		}
@@ -132,15 +141,6 @@ class Admin {
 			],
 			Main::VERSION,
 			true
-		);
-		wp_localize_script(
-			Main::PLUGIN_SLUG,
-			'shipping_nova_poshta_for_woocommerce',
-			[
-				'url'      => admin_url( 'admin-ajax.php' ),
-				'nonce'    => wp_create_nonce( Main::PLUGIN_SLUG ),
-				'language' => $this->language->get_current_language(),
-			]
 		);
 	}
 

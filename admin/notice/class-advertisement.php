@@ -42,7 +42,7 @@ class Advertisement extends Abstract_Notice {
 	 * Init hooks.
 	 */
 	public function hooks() {
-		parent::hooks();
+		add_action( 'admin_notices', [ $this, 'notices' ] );
 		add_action( 'wp_ajax_shipping_nova_poshta_for_woocommerce_notice', [ $this, 'close' ] );
 	}
 
@@ -51,7 +51,10 @@ class Advertisement extends Abstract_Notice {
 	 */
 	public function notices() {
 		global $current_screen;
-		if ( 0 !== strpos( $current_screen->base, 'toplevel_page_' . Main::PLUGIN_SLUG ) && false !== $this->transient_cache->get( 'advertisement' ) ) {
+		if ( 0 !== strpos( $current_screen->base, 'toplevel_page_' . Main::PLUGIN_SLUG ) ) {
+			return;
+		}
+		if ( $this->transient_cache->get( 'advertisement' ) ) {
 			return;
 		}
 		$advertisement = $this->get_advertisement();

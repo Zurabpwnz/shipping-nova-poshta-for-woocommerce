@@ -12,17 +12,18 @@
 
 namespace Nova_Poshta\Core;
 
-use Nova_Poshta\Admin\Admin;
-use Nova_Poshta\Admin\Notice\Advertisement;
-use Nova_Poshta\Admin\Notice\Notice;
-use Nova_Poshta\Admin\Product_Category_Metabox;
-use Nova_Poshta\Admin\Product_Metabox;
 use Nova_Poshta\Admin\User;
-use Nova_Poshta\Core\Cache\Cache;
-use Nova_Poshta\Core\Cache\Factory_Cache;
-use Nova_Poshta\Core\Cache\Object_Cache;
-use Nova_Poshta\Core\Cache\Transient_Cache;
+use Nova_Poshta\Admin\Admin;
 use Nova_Poshta\Front\Front;
+use Nova_Poshta\Core\Cache\Cache;
+use Nova_Poshta\Admin\Notice\Notice;
+use Nova_Poshta\Admin\Product_Metabox;
+use Nova_Poshta\Core\Cache\Object_Cache;
+use Nova_Poshta\Core\Cache\Factory_Cache;
+use Nova_Poshta\Admin\Admin_Manage_Orders;
+use Nova_Poshta\Admin\Notice\Advertisement;
+use Nova_Poshta\Core\Cache\Transient_Cache;
+use Nova_Poshta\Admin\Product_Category_Metabox;
 
 /**
  * Class Main
@@ -152,11 +153,13 @@ class Main {
 	 * Define hooks with API key
 	 */
 	private function define_hooks_with_api_key() {
+		$calculator        = new Calculator();
+		$shipping_cost     = new Shipping_Cost( $this->api, $this->settings, $calculator );
+		$internet_document = new Internet_Document( $this->api, $shipping_cost, $this->notice );
+		$admin             = new Admin_Manage_Orders( $internet_document );
+		$admin->hooks();
 		$advertisement = new Advertisement( $this->transient_cache );
 		$advertisement->hooks();
-
-		$calculator    = new Calculator();
-		$shipping_cost = new Shipping_Cost( $this->api, $this->settings, $calculator );
 
 		$ajax = new AJAX( $this->api, $shipping_cost );
 		$ajax->hooks();
@@ -167,7 +170,7 @@ class Main {
 		$front = new Front( $this->language );
 		$front->hooks();
 
-		$order = new Order( $this->api, $shipping_cost, $this->notice );
+		$order = new Order( $this->api, $shipping_cost, $internet_document );
 		$order->hooks();
 
 		$thank_you = new Thank_You( $this->api );

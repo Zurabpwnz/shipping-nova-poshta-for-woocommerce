@@ -10,8 +10,12 @@
  * @wordpress-plugin
  */
 
-use Nova_Poshta\Core\Calculator;
 use Nova_Poshta\Core\Shipping;
+use Nova_Poshta\Core\Calculator;
+
+if ( ! class_exists( 'WC_Gateway_COD' ) ) {
+	return;
+}
 
 /**
  * Class Nova_Poshta_Gateway_COD
